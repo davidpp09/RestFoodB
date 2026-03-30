@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import restaurante.api.orden.DatosAbrirOrden;
 import restaurante.api.orden.DatosListaOrden;
@@ -28,6 +29,12 @@ public class OrdenesController {
     @GetMapping
    public Page<DatosListaOrden> mostrarMesas(@PageableDefault(size = 10)  Pageable pagina){
        return service.listar(pagina);
+    }
+
+    @PutMapping("/{id}/cerrar")
+    public ResponseEntity darCuenta(@PathVariable Long id){
+        service.darCuenta(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

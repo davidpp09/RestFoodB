@@ -20,7 +20,6 @@ public class CategoriasController {
 
     @PostMapping
     public void registrar(@RequestBody @Valid DatosRegistroCategoria datosRegistroCategoria) {
-
         repository.save(new Categoria(datosRegistroCategoria));
 
     }
