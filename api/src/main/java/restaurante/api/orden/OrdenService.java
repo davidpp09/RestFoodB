@@ -10,6 +10,7 @@ import restaurante.api.mesa.MesaRepository;
 import restaurante.api.ordenDetalle.*;
 import restaurante.api.producto.ProductoRepository;
 import restaurante.api.usuario.UsuarioRepository;
+import java.util.List;
 
 @Service
 public class OrdenService {
@@ -71,7 +72,7 @@ public class OrdenService {
         orden.recalcularTotal(platosActualizados);
 
 
-        var platillosMapeados = platosActualizados.stream()
+        List<DatosDetalleRespuesta> platillosMapeados = platosActualizados.stream()
                 .map(DatosDetalleRespuesta::new)
                 .toList();
 

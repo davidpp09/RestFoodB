@@ -3,6 +3,7 @@ package restaurante.api.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,7 @@ public class CategoriasController {
     @Autowired
     CategoriaRepository repository;
 
+    @PostMapping
     public void registrar(@RequestBody @Valid DatosRegistroCategoria datosRegistroCategoria) {
 
         repository.save(new Categoria(datosRegistroCategoria));

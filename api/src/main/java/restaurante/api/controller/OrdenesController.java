@@ -8,9 +8,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import restaurante.api.orden.DatosAbrirOrden;
 import restaurante.api.orden.DatosListaOrden;
-import restaurante.api.orden.OrdenRepository;
 import restaurante.api.orden.OrdenService;
-import restaurante.api.usuario.DatosListaUsuario;
 
 
 @RequestMapping("/ordenes")
