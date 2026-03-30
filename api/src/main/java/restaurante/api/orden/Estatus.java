@@ -1,6 +1,6 @@
 package restaurante.api.orden;
 
 public enum Estatus {
-    PREPARANCDO,
+    PREPARANDO,
     SERVIDO
 }

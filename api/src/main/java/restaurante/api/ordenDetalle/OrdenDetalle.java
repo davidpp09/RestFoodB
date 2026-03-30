@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import restaurante.api.orden.DatosAgregarPlatillo;
 import restaurante.api.orden.Orden;
 import restaurante.api.producto.Producto;
 

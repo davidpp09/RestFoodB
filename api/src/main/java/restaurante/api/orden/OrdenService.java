@@ -3,15 +3,11 @@ package restaurante.api.orden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import restaurante.api.mesa.Estado;
 import restaurante.api.mesa.MesaRepository;
-import restaurante.api.ordenDetalle.DatosPlatilloLote;
-import restaurante.api.ordenDetalle.DatosSincronizarComanda;
-import restaurante.api.ordenDetalle.OrdenDetalle;
-import restaurante.api.ordenDetalle.OrdenDetalleRepository;
+import restaurante.api.ordenDetalle.*;
 import restaurante.api.producto.ProductoRepository;
 import restaurante.api.usuario.UsuarioRepository;
 
@@ -52,7 +48,7 @@ public class OrdenService {
     }
 
     @Transactional
-    public void enviarOrden(DatosSincronizarComanda datos){
+    public DatosRespuestaOrden enviarOrden(DatosSincronizarComanda datos){
         var orden = ordenRepository.findByIdConBloqueo(datos.id_orden()).orElseThrow();
         if (!orden.getUsuario().getId_usuarios().equals(datos.id_usuario())) {
             throw new RuntimeException("Solo un mesero puede tener la orden de la mesa");
@@ -63,12 +59,26 @@ public class OrdenService {
                 OrdenDetalle detalle = new OrdenDetalle(platillo, producto, orden);
                 ordenDetalleRepository.save(detalle);
             } else {
+                if(platillo.cantidad()==0){
+                    ordenDetalleRepository.deleteById(platillo.id_detalle());
+                }else{
                 var modificado = ordenDetalleRepository.getReferenceById(platillo.id_detalle());
                 modificado.actualizarPlatillo(platillo);
+                }
             }
         }
         var platosActualizados = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes());
         orden.recalcularTotal(platosActualizados);
+
+
+        var platillosMapeados = platosActualizados.stream()
+                .map(DatosDetalleRespuesta::new)
+                .toList();
+
+        return new DatosRespuestaOrden(orden.getId_ordenes(), orden.getTotal(), platillosMapeados);
     }
+
+
+
 
 }

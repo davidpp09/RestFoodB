@@ -32,22 +32,22 @@ public class UsuariosController {
     @PutMapping
     @Transactional
     public void actualizar(@RequestBody @Valid DatosActualizacionUsuario datos){
-     var medico = repository.getReferenceById(datos.id_usuarios());
-    medico.actualizarInformacion(datos);
+     var usuario = repository.getReferenceById(datos.id_usuarios());
+        usuario.actualizarInformacion(datos);
     }
 
     @Transactional
     @DeleteMapping("/{id}")
     public void eliminarLogico(@PathVariable Long id){
-        var medico = repository.getReferenceById(id);
-        medico.eliminarUsuario(id);
+        var usuario = repository.getReferenceById(id);
+        usuario.eliminarUsuario(id);
     }
 
     @Transactional
     @DeleteMapping("activar/{id}")
     public void activar(@PathVariable Long id){
-        var medico = repository.getReferenceById(id);
-        medico.activarUsuario(id);
+        var usuario = repository.getReferenceById(id);
+        usuario.activarUsuario(id);
     }
 
     @Transactional

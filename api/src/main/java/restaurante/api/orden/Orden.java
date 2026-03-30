@@ -13,7 +13,6 @@ import restaurante.api.usuario.Usuario;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Getter
 @NoArgsConstructor
@@ -47,8 +46,8 @@ public class Orden {
     public Orden(Mesa mesa, Usuario usuario, Tipo tipo) {
         this.id_ordenes = null;
         this.fecha_apertura = LocalDateTime.now();
-        this.estatus = Estatus.PREPARANCDO;
-        this.total = BigDecimal.valueOf(0);
+        this.estatus = Estatus.PREPARANDO;
+        this.total = BigDecimal.ZERO;
         this.usuario = usuario;
         this.mesa = mesa;
         this.tipo = tipo;

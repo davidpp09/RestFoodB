@@ -42,7 +42,7 @@ public class Usuario {
     if (datos.nombre() != null){
         this.nombre= datos.nombre();
     }
-    if (datos.nombre() != null){
+    if (datos.email() != null){
         this.email= datos.email();
     }
 

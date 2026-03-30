@@ -37,6 +37,4 @@ public class Producto {
         this.categoria = new Categoria(datosRegistroProducto.id_categoria());
     }
 
-    public Producto(Long aLong) {
-    }
 }
