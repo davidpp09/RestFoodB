@@ -33,4 +33,8 @@ public class Mesa {
     public void abrirMesa() {
         this.estado = Estado.OCUPADA;
     }
+
+    public void liberar(){
+        this.estado = Estado.LIBRE;
+    }
 }

@@ -43,7 +43,6 @@ public class OrdenService {
         ordenRepository.save(new Orden(mesa,usuario,datos.tipo()));
     }
 
-
     public Page<DatosListaOrden> listar(Pageable pagina){
         return ordenRepository.findAllByTipo(pagina,Tipo.LOZA).map(DatosListaOrden::new);
     }
@@ -79,7 +78,14 @@ public class OrdenService {
         return new DatosRespuestaOrden(orden.getId_ordenes(), orden.getTotal(), platillosMapeados);
     }
 
+    @Transactional
+    public void darCuenta(Long id){
+        var orden = ordenRepository.findById(id).orElseThrow();
 
+        orden.finalizar();
+        orden.getMesa().liberar();
+
+    }
 
 
 }

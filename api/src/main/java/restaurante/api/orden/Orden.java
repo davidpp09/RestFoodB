@@ -36,6 +36,7 @@ public class Orden {
     private Mesa mesa;
     @Enumerated(EnumType.STRING)
     private Tipo tipo;
+    private LocalDateTime fecha_cierre;
 
 
 
@@ -51,6 +52,7 @@ public class Orden {
         this.usuario = usuario;
         this.mesa = mesa;
         this.tipo = tipo;
+        this.fecha_cierre = null;
     }
 
     public void recalcularTotal(List<OrdenDetalle> detalles) {
@@ -59,6 +61,11 @@ public class Orden {
         for (OrdenDetalle platillo : detalles) {
             this.total = this.total.add(platillo.getSubtotal());
         }
+    }
+
+    public void finalizar(){
+        this.estatus = Estatus.PAGADA;
+        this.fecha_cierre = LocalDateTime.now();
     }
 
 
