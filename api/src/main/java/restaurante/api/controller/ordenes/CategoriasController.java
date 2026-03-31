@@ -1,4 +1,4 @@
-package restaurante.api.controller;
+package restaurante.api.controller.ordenes;
 
 
 import jakarta.validation.Valid;

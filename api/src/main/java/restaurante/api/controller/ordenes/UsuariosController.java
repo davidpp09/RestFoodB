@@ -1,4 +1,4 @@
-package restaurante.api.controller;
+package restaurante.api.controller.ordenes;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +8,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import restaurante.api.usuario.*;
-
-import java.util.List;
 
 @RequestMapping("/usuarios")
 @RestController

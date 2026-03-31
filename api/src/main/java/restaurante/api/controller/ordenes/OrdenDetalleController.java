@@ -1,4 +1,4 @@
-package restaurante.api.controller;
+package restaurante.api.controller.ordenes;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 import restaurante.api.orden.DatosRespuestaOrden;
 import restaurante.api.orden.OrdenService;
 import restaurante.api.ordenDetalle.DatosSincronizarComanda;
-
-import java.util.List;
 
 @RequestMapping("/ordendetalles")
 @RestController

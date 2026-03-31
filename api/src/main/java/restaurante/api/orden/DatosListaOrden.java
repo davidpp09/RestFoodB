@@ -9,7 +9,8 @@ public record DatosListaOrden(
         BigDecimal total,
         Long id_usuario,
         Long id_mesa,
-         Tipo tipo
+         Tipo tipo,
+        LocalDateTime fecha_cierre
 ) {
     public DatosListaOrden(Orden orden) {
         this(
@@ -18,6 +19,7 @@ public record DatosListaOrden(
                 orden.getTotal(),
                 orden.getUsuario().getId_usuarios(),
                 orden.getMesa().getId_mesas(),
-                orden.getTipo());
+                orden.getTipo(),
+                orden.getFecha_cierre());
     }
 }

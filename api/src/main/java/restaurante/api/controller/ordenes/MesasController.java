@@ -1,4 +1,5 @@
-package restaurante.api.controller;
+package restaurante.api.controller.ordenes;
+
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,19 +8,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import restaurante.api.mesa.DatosRegistroMesa;
-import restaurante.api.producto.DatosRegistroProducto;
-import restaurante.api.producto.Producto;
-import restaurante.api.producto.ProductoRepository;
+import restaurante.api.mesa.Mesa;
+import restaurante.api.mesa.MesaRepository;
 
-@RequestMapping("/productos")
+@RequestMapping("/mesas")
 @RestController
-public class ProductosController {
+public class MesasController {
 
     @Autowired
-    ProductoRepository repository;
+    MesaRepository repository;
 
     @PostMapping
-    public void registrar(@RequestBody @Valid DatosRegistroProducto datosRegistroProducto){
-        repository.save(new Producto(datosRegistroProducto));
+    public void registrar(@RequestBody @Valid DatosRegistroMesa datosRegistroMesa){
+        repository.save(new Mesa(datosRegistroMesa));
     }
+
+
+
 }
