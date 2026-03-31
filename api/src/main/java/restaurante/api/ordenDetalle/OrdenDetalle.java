@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import restaurante.api.orden.Orden;
+import restaurante.api.orden.Servicio;
 import restaurante.api.producto.Producto;
 
 import java.math.BigDecimal;
@@ -35,8 +36,10 @@ public class OrdenDetalle {
     public OrdenDetalle(DatosPlatilloLote datos,Producto producto, Orden orden) {
         this.id_detalle = null;
         this.cantidad = datos.cantidad();
-        this.precio_unitario = producto.getPrecio_comida();
-        this.subtotal = BigDecimal.valueOf(datos.cantidad()).multiply(producto.getPrecio_comida());
+        this.precio_unitario = (orden.getServicio().equals(Servicio.COMIDA))
+                ? producto.getPrecio_comida()
+                : producto.getPrecio_desayuno();
+        this.subtotal = BigDecimal.valueOf(datos.cantidad()).multiply(this.precio_unitario);
         this.comentarios = datos.comentarios();
         this.orden = orden;
         this.producto = producto;

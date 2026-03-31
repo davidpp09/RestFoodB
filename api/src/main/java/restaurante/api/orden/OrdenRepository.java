@@ -16,5 +16,5 @@ public interface OrdenRepository extends JpaRepository<Orden,Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT o FROM orden o WHERE o.id_ordenes = :id")
     Optional<Orden> findByIdConBloqueo(Long id);
-    List<DatosListaOrden>findByFechaCierreBetween(LocalDateTime inicio,LocalDateTime cierre);
+    List<Orden> findByFechaCierreBetweenAndEstatus(LocalDateTime inicio, LocalDateTime fin, Estatus estatus);
 }

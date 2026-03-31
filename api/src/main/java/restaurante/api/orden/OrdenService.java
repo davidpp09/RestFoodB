@@ -5,12 +5,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import restaurante.api.admin.DatosCorteDia;
+import restaurante.api.admin.DatosVentaEmpleado;
 import restaurante.api.mesa.Estado;
 import restaurante.api.mesa.MesaRepository;
 import restaurante.api.ordenDetalle.*;
 import restaurante.api.producto.ProductoRepository;
+import restaurante.api.usuario.Usuario;
 import restaurante.api.usuario.UsuarioRepository;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OrdenService {
@@ -88,4 +98,76 @@ public class OrdenService {
     }
 
 
+
+
+    @Transactional
+    public BigDecimal totalGeneral(List<Orden> ordenes){
+        return ordenes.stream().map(Orden::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+    @Transactional
+    public BigDecimal totalDesayuno(List<Orden> ordenes){
+        return ordenes.stream().filter(o -> o.getServicio().equals(Servicio.DESAYUNO)).map(Orden::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+    @Transactional
+    public BigDecimal totalComida(List<Orden> ordenes){
+        return ordenes.stream().filter(o -> o.getServicio().equals(Servicio.COMIDA)).map(Orden::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+    @Transactional
+    public Long pedidosParaLlevar(List<Orden> ordenes){
+        return ordenes.stream().filter(o -> o.getTipo().equals(Tipo.LLEVAR)).count();
+    }
+    @Transactional
+    public Long pedidosLoza(List<Orden> ordenes){
+        return ordenes.stream().filter(o -> o.getTipo().equals(Tipo.LOZA)).count();
+    }
+    @Transactional
+    public List<DatosVentaEmpleado> ventaEmpleados(Map<String, List<Orden>> ventasPorNombre) {
+        return ventasPorNombre.entrySet().stream()
+                .map(entry -> new DatosVentaEmpleado(
+                        entry.getKey(),
+                        entry.getValue().size(),
+                        entry.getValue().stream()
+                                .map(Orden::getTotal)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                )).toList();
+    }
+
+    @Transactional
+    public DatosCorteDia corteDia(List<DatosVentaEmpleado> datosVentaEmpleados, BigDecimal totalDesayuno, BigDecimal totalComida, Long totalMesas, Long totalParaLlevar, BigDecimal totalGeneral){
+        return new DatosCorteDia(
+                datosVentaEmpleados,
+                totalDesayuno,
+                totalComida,
+                totalMesas,
+                totalParaLlevar,
+                totalGeneral
+        );
+    }
+
+    @Transactional
+    public DatosCorteDia obtenerCorteDelDia() {
+        // 1. Definimos el rango de hoy sin pedirlos por parámetro 🕒
+        var inicio = LocalDate.now().atStartOfDay();
+        var fin = LocalDate.now().atTime(LocalTime.MAX);
+
+        // 2. Traemos las entidades completas de la BD 🗄️
+        // Asegúrate de que el repo devuelva List<Orden> y no DatosListaOrden
+        List<Orden> ordenes = ordenRepository.findByFechaCierreBetweenAndEstatus(inicio, fin,Estatus.PAGADA);
+
+        // 3. Arreglamos la agrupación por empleado 👥
+        var ventasAgrupadas = ordenes.stream()
+                .collect(Collectors.groupingBy(o -> o.getUsuario().getNombre()));
+
+        // 4. Retornamos el record con el orden exacto de sus campos 📊
+        return new DatosCorteDia(
+                ventaEmpleados(ventasAgrupadas), // List<DatosVentaEmpleado>
+                totalDesayuno(ordenes),          // BigDecimal
+                totalComida(ordenes),            // BigDecimal
+                pedidosLoza(ordenes),            // Long (totalMesas)
+                pedidosParaLlevar(ordenes),      // Long (totalParaLlevar)
+                totalGeneral(ordenes)            // BigDecimal
+        );
+    }
 }
+
+
