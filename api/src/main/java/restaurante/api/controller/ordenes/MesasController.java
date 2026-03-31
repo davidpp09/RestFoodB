@@ -1,28 +1,38 @@
 package restaurante.api.controller.ordenes;
 
-
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 import restaurante.api.mesa.DatosRegistroMesa;
+import restaurante.api.mesa.DatosRespuestaMesa;
 import restaurante.api.mesa.Mesa;
 import restaurante.api.mesa.MesaRepository;
+
+import java.net.URI;
 
 @RequestMapping("/mesas")
 @RestController
 public class MesasController {
 
     @Autowired
-    MesaRepository repository;
+    private MesaRepository repository;
 
     @PostMapping
-    public void registrar(@RequestBody @Valid DatosRegistroMesa datosRegistroMesa){
-        repository.save(new Mesa(datosRegistroMesa));
+    @Transactional
+    public ResponseEntity<DatosRespuestaMesa> registrar(@RequestBody @Valid DatosRegistroMesa datosRegistroMesa, UriComponentsBuilder uriComponentsBuilder) {
+        Mesa mesa = repository.save(new Mesa(datosRegistroMesa));
+        DatosRespuestaMesa datosRespuesta = new DatosRespuestaMesa(
+                mesa.getId_mesas(),
+                mesa.getNumero(),
+                mesa.getEstado().toString()
+        );
+        URI url = uriComponentsBuilder.path("/mesas/{id}").buildAndExpand(mesa.getId_mesas()).toUri();
+        return ResponseEntity.created(url).body(datosRespuesta);
     }
-
-
-
 }

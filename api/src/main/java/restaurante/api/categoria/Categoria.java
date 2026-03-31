@@ -16,7 +16,9 @@ public class Categoria {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_categorias;
+    @Column(unique = true, nullable = false)
     private String nombre;
+    @Column(nullable = false)
     private String impresora;
 
 

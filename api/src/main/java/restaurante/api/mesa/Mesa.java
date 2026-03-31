@@ -16,8 +16,12 @@ public class Mesa {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_mesas;
+
+    @Column(unique = true, nullable = false)
     private String numero;
+
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Estado estado;
 
     public Mesa(Long id_mesas) {
@@ -34,7 +38,7 @@ public class Mesa {
         this.estado = Estado.OCUPADA;
     }
 
-    public void liberar(){
+    public void liberar() {
         this.estado = Estado.LIBRE;
     }
 }

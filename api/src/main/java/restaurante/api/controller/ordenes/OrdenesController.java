@@ -1,5 +1,6 @@
 package restaurante.api.controller.ordenes;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -7,34 +8,36 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 import restaurante.api.orden.DatosAbrirOrden;
 import restaurante.api.orden.DatosListaOrden;
 import restaurante.api.orden.OrdenService;
-
 
 @RequestMapping("/ordenes")
 @RestController
 public class OrdenesController {
 
     @Autowired
-    OrdenService service;
-
-
+    private OrdenService service;
 
     @PostMapping
-    public void abrirMesa(@RequestBody @Valid DatosAbrirOrden datos){
-        service.abrirCuenta(datos);
+    @Transactional
+    public ResponseEntity<Long> abrirMesa(@RequestBody @Valid DatosAbrirOrden datos, UriComponentsBuilder uriBuilder) {
+        Long id = service.abrirCuenta(datos);
+        var url = uriBuilder.path("/ordenes/{id}").buildAndExpand(id).toUri();
+        return ResponseEntity.created(url).body(id);
     }
 
     @GetMapping
-   public Page<DatosListaOrden> mostrarMesas(@PageableDefault(size = 10)  Pageable pagina){
-       return service.listar(pagina);
+    public ResponseEntity<Page<DatosListaOrden>> mostrarMesas(@PageableDefault(size = 10) Pageable pagina) {
+        var page = service.listar(pagina);
+        return ResponseEntity.ok(page);
     }
 
     @PutMapping("/{id}/cerrar")
-    public ResponseEntity darCuenta(@PathVariable Long id){
+    @Transactional
+    public ResponseEntity darCuenta(@PathVariable Long id) {
         service.darCuenta(id);
         return ResponseEntity.noContent().build();
     }
-
 }

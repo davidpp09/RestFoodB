@@ -2,12 +2,11 @@ package restaurante.api.controller.admin;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import restaurante.api.admin.DatosCorteDia;
-import restaurante.api.orden.DatosRespuestaOrden;
 import restaurante.api.orden.OrdenService;
 
 @RequestMapping("/admin")
@@ -18,7 +17,8 @@ public class AdminController {
     OrdenService ordenService;
 
     @GetMapping
-    public DatosCorteDia corteDia(){
-        return ordenService.master();
+    public ResponseEntity<DatosCorteDia> corteDia() {
+        var datos = ordenService.master();
+        return ResponseEntity.ok(datos);
     }
 }

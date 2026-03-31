@@ -21,19 +21,28 @@ public class OrdenDetalle {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_detalle;
+
+    @Column(nullable = false)
     private Integer cantidad;
+
+    @Column(name = "precio_unitario", nullable = false)
     private BigDecimal precio_unitario;
+
+    @Column(nullable = false)
     private BigDecimal subtotal;
+
     private String comentarios;
-    @ManyToOne
-    @JoinColumn(name = "id_orden")
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_orden", nullable = false)
     private Orden orden;
-    @ManyToOne
-    @JoinColumn(name = "id_producto")
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_producto", nullable = false)
     private Producto producto;
 
 
-    public OrdenDetalle(DatosPlatilloLote datos,Producto producto, Orden orden) {
+    public OrdenDetalle(DatosPlatilloLote datos, Producto producto, Orden orden) {
         this.id_detalle = null;
         this.cantidad = datos.cantidad();
         this.precio_unitario = (orden.getServicio().equals(Servicio.COMIDA))

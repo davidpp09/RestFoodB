@@ -1,28 +1,38 @@
 package restaurante.api.controller.ordenes;
 
-
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 import restaurante.api.categoria.Categoria;
-import restaurante.api.categoria.DatosRegistroCategoria;
 import restaurante.api.categoria.CategoriaRepository;
+import restaurante.api.categoria.DatosRegistroCategoria;
+import restaurante.api.categoria.DatosRespuestaCategoria;
+
+import java.net.URI;
 
 @RequestMapping("/categorias")
 @RestController
 public class CategoriasController {
 
     @Autowired
-    CategoriaRepository repository;
+    private CategoriaRepository repository;
 
     @PostMapping
-    public void registrar(@RequestBody @Valid DatosRegistroCategoria datosRegistroCategoria) {
-        repository.save(new Categoria(datosRegistroCategoria));
-
+    @Transactional
+    public ResponseEntity<DatosRespuestaCategoria> registrar(@RequestBody @Valid DatosRegistroCategoria datosRegistroCategoria, UriComponentsBuilder uriComponentsBuilder) {
+        Categoria categoria = repository.save(new Categoria(datosRegistroCategoria));
+        DatosRespuestaCategoria datosRespuesta = new DatosRespuestaCategoria(
+                categoria.getId_categorias(),
+                categoria.getNombre(),
+                categoria.getImpresora()
+        );
+        URI url = uriComponentsBuilder.path("/categorias/{id}").buildAndExpand(categoria.getId_categorias()).toUri();
+        return ResponseEntity.created(url).body(datosRespuesta);
     }
-
 }
-

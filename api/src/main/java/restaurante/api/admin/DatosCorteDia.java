@@ -7,9 +7,9 @@ public record DatosCorteDia(
         List<DatosVentaEmpleado> ventaEmpleados,
         BigDecimal totalDesayuno,
         BigDecimal totalComida,
-        Long totalMesas,
+        Long totalLoza,
         Long totalParaLlevar,
         BigDecimal totalGeneral
 
-        ) {
+) {
 }

@@ -1,24 +1,32 @@
 package restaurante.api.controller.ordenes;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 import restaurante.api.orden.DatosRespuestaOrden;
 import restaurante.api.orden.OrdenService;
 import restaurante.api.ordenDetalle.DatosSincronizarComanda;
+
+import java.net.URI;
 
 @RequestMapping("/ordendetalles")
 @RestController
 public class OrdenDetalleController {
 
     @Autowired
-    OrdenService ordenService;
+    private OrdenService ordenService;
 
     @PostMapping
-    public DatosRespuestaOrden registrar(@RequestBody @Valid DatosSincronizarComanda datos){
-       return ordenService.enviarOrden(datos);
+    @Transactional
+    public ResponseEntity<DatosRespuestaOrden> registrar(@RequestBody @Valid DatosSincronizarComanda datos, UriComponentsBuilder uriComponentsBuilder) {
+        DatosRespuestaOrden datosRespuesta = ordenService.enviarOrden(datos);
+        URI url = uriComponentsBuilder.path("/ordenes/{id}").buildAndExpand(datosRespuesta.id_orden()).toUri();
+        return ResponseEntity.created(url).body(datosRespuesta);
     }
 }

@@ -20,12 +20,21 @@ public class Producto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_productos;
+
+    @Column(unique = true, nullable = false)
     private String nombre;
+
+    @Column(name = "precio_comida", nullable = false)
     private BigDecimal precio_comida;
+
+    @Column(name = "precio_desayuno", nullable = false)
     private BigDecimal precio_desayuno;
+
+    @Column(nullable = false)
     private Boolean disponibilidad;
-    @ManyToOne
-    @JoinColumn(name = "id_categoria")
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_categoria", nullable = false)
     private Categoria categoria;
 
     public Producto(DatosRegistroProducto datosRegistroProducto) {

@@ -11,12 +11,10 @@ import restaurante.api.mesa.Estado;
 import restaurante.api.mesa.MesaRepository;
 import restaurante.api.ordenDetalle.*;
 import restaurante.api.producto.ProductoRepository;
-import restaurante.api.usuario.Usuario;
 import restaurante.api.usuario.UsuarioRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +40,7 @@ public class OrdenService {
 
 
     @Transactional
-    public Long abrirCuenta(DatosAbrirOrden datos){
+    public Long abrirCuenta(DatosAbrirOrden datos) {
         var usuario = usuarioRepository.getReferenceById(datos.id_usuario());
         var mesa = mesaRepository.getReferenceById(datos.id_mesa());
         if (mesa.getEstado() == Estado.OCUPADA) {
@@ -54,27 +52,27 @@ public class OrdenService {
         return ordenGuardada.getId_ordenes();
     }
 
-    public Page<DatosListaOrden> listar(Pageable pagina){
-        return ordenRepository.findAllByTipo(pagina,Tipo.LOZA).map(DatosListaOrden::new);
+    public Page<DatosListaOrden> listar(Pageable pagina) {
+        return ordenRepository.findAllByTipo(pagina, Tipo.LOZA).map(DatosListaOrden::new);
     }
 
     @Transactional
-    public DatosRespuestaOrden enviarOrden(DatosSincronizarComanda datos){
+    public DatosRespuestaOrden enviarOrden(DatosSincronizarComanda datos) {
         var orden = ordenRepository.findByIdConBloqueo(datos.id_orden()).orElseThrow();
         if (!orden.getUsuario().getId_usuarios().equals(datos.id_usuario())) {
             throw new RuntimeException("Solo un mesero puede tener la orden de la mesa");
         }
         for (DatosPlatilloLote platillo : datos.platillos()) {
-            if (platillo.id_detalle() == null){
+            if (platillo.id_detalle() == null) {
                 var producto = productoRepository.getReferenceById(platillo.id_producto());
                 OrdenDetalle detalle = new OrdenDetalle(platillo, producto, orden);
                 ordenDetalleRepository.save(detalle);
             } else {
-                if(platillo.cantidad()==0){
+                if (platillo.cantidad() == 0) {
                     ordenDetalleRepository.deleteById(platillo.id_detalle());
-                }else{
-                var modificado = ordenDetalleRepository.getReferenceById(platillo.id_detalle());
-                modificado.actualizarPlatillo(platillo);
+                } else {
+                    var modificado = ordenDetalleRepository.getReferenceById(platillo.id_detalle());
+                    modificado.actualizarPlatillo(platillo);
                 }
             }
         }
@@ -90,7 +88,7 @@ public class OrdenService {
     }
 
     @Transactional
-    public void darCuenta(Long id){
+    public void darCuenta(Long id) {
         var orden = ordenRepository.findById(id).orElseThrow();
 
         orden.finalizar();
@@ -99,12 +97,11 @@ public class OrdenService {
     }
 
 
-
-
     @Transactional
-    public BigDecimal totalGeneral(List<Orden> ordenes){
+    public BigDecimal totalGeneral(List<Orden> ordenes) {
         return ordenes.stream().map(Orden::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
     @Transactional
     public BigDecimal totalDesayuno(List<Orden> ordenes) {
         return ordenes.stream()
@@ -112,6 +109,7 @@ public class OrdenService {
                 .map(Orden::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
     @Transactional
     public BigDecimal totalComida(List<Orden> ordenes) {
         return ordenes.stream()
@@ -119,14 +117,17 @@ public class OrdenService {
                 .map(Orden::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
     @Transactional
-    public Long pedidosParaLlevar(List<Orden> ordenes){
+    public Long pedidosParaLlevar(List<Orden> ordenes) {
         return ordenes.stream().filter(o -> o.getTipo().equals(Tipo.LLEVAR)).count();
     }
+
     @Transactional
-    public Long pedidosLoza(List<Orden> ordenes){
+    public Long pedidosLoza(List<Orden> ordenes) {
         return ordenes.stream().filter(o -> o.getTipo().equals(Tipo.LOZA)).count();
     }
+
     @Transactional
     public List<DatosVentaEmpleado> ventaEmpleados(Map<String, List<Orden>> ventasPorNombre) {
         return ventasPorNombre.entrySet().stream()
@@ -140,12 +141,12 @@ public class OrdenService {
     }
 
     @Transactional
-    public DatosCorteDia corteDia(List<DatosVentaEmpleado> datosVentaEmpleados, BigDecimal totalDesayuno, BigDecimal totalComida, Long totalMesas, Long totalParaLlevar, BigDecimal totalGeneral){
+    public DatosCorteDia corteDia(List<DatosVentaEmpleado> datosVentaEmpleados, BigDecimal totalDesayuno, BigDecimal totalComida, Long totalLoza, Long totalParaLlevar, BigDecimal totalGeneral) {
         return new DatosCorteDia(
                 datosVentaEmpleados,
                 totalDesayuno,
                 totalComida,
-                totalMesas,
+                totalLoza,
                 totalParaLlevar,
                 totalGeneral
         );
@@ -155,16 +156,16 @@ public class OrdenService {
     public DatosCorteDia master() {
         var inicio = LocalDate.now().atStartOfDay();
         var fin = LocalDate.now().atTime(LocalTime.MAX);
-        List<Orden> ordenes = ordenRepository.findByFechaCierreBetweenAndEstatus(inicio, fin,Estatus.PAGADA);
+        List<Orden> ordenes = ordenRepository.findByFechaCierreBetweenAndEstatus(inicio, fin, Estatus.PAGADA);
         var ventasAgrupadas = ordenes.stream()
                 .collect(Collectors.groupingBy(o -> o.getUsuario().getNombre()));
         return new DatosCorteDia(
-                ventaEmpleados(ventasAgrupadas), // List<DatosVentaEmpleado>
-                totalDesayuno(ordenes),          // BigDecimal
-                totalComida(ordenes),            // BigDecimal
-                pedidosLoza(ordenes),            // Long (totalMesas)
-                pedidosParaLlevar(ordenes),      // Long (totalParaLlevar)
-                totalGeneral(ordenes)            // BigDecimal
+                ventaEmpleados(ventasAgrupadas),
+                totalDesayuno(ordenes),
+                totalComida(ordenes),
+                pedidosLoza(ordenes),
+                pedidosParaLlevar(ordenes),
+                totalGeneral(ordenes)
         );
     }
 }
