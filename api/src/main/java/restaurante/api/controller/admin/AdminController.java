@@ -2,6 +2,7 @@ package restaurante.api.controller.admin;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,8 +17,8 @@ public class AdminController {
     @Autowired
     OrdenService ordenService;
 
-    @PostMapping
+    @GetMapping
     public DatosCorteDia corteDia(){
-        return null;
+        return ordenService.master();
     }
 }

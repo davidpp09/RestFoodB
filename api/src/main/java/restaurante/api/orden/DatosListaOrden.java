@@ -10,7 +10,7 @@ public record DatosListaOrden(
         Long id_usuario,
         Long id_mesa,
          Tipo tipo,
-        LocalDateTime fecha_cierre,
+        LocalDateTime fechaCierre,
         Servicio servicio
 ) {
     public DatosListaOrden(Orden orden) {
@@ -21,7 +21,7 @@ public record DatosListaOrden(
                 orden.getUsuario().getId_usuarios(),
                 orden.getMesa().getId_mesas(),
                 orden.getTipo(),
-                orden.getFecha_cierre(),
+                orden.getFechaCierre(),
                 orden.getServicio());
     }
 }

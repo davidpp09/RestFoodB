@@ -145,20 +145,12 @@ public class OrdenService {
     }
 
     @Transactional
-    public DatosCorteDia obtenerCorteDelDia() {
-        // 1. Definimos el rango de hoy sin pedirlos por parámetro 🕒
+    public DatosCorteDia master() {
         var inicio = LocalDate.now().atStartOfDay();
         var fin = LocalDate.now().atTime(LocalTime.MAX);
-
-        // 2. Traemos las entidades completas de la BD 🗄️
-        // Asegúrate de que el repo devuelva List<Orden> y no DatosListaOrden
         List<Orden> ordenes = ordenRepository.findByFechaCierreBetweenAndEstatus(inicio, fin,Estatus.PAGADA);
-
-        // 3. Arreglamos la agrupación por empleado 👥
         var ventasAgrupadas = ordenes.stream()
                 .collect(Collectors.groupingBy(o -> o.getUsuario().getNombre()));
-
-        // 4. Retornamos el record con el orden exacto de sus campos 📊
         return new DatosCorteDia(
                 ventaEmpleados(ventasAgrupadas), // List<DatosVentaEmpleado>
                 totalDesayuno(ordenes),          // BigDecimal

@@ -36,7 +36,8 @@ public class Orden {
     private Mesa mesa;
     @Enumerated(EnumType.STRING)
     private Tipo tipo;
-    private LocalDateTime fecha_cierre;
+    @Column(name = "fecha_cierre")
+    private LocalDateTime fechaCierre;
     @Enumerated(EnumType.STRING)
     private Servicio servicio;
 
@@ -54,7 +55,7 @@ public class Orden {
         this.usuario = usuario;
         this.mesa = mesa;
         this.tipo = tipo;
-        this.fecha_cierre = null;
+        this.fechaCierre = null;
         this.servicio =servicio;
     }
 
@@ -68,7 +69,7 @@ public class Orden {
 
     public void finalizar(){
         this.estatus = Estatus.PAGADA;
-        this.fecha_cierre = LocalDateTime.now();
+        this.fechaCierre = LocalDateTime.now();
     }
 
 
