@@ -1,8 +1,11 @@
-HELP.md
+api/HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+### Archivos de entorno y contraseñas ###
+.env
 
 ### STS ###
 .apt_generated
@@ -14,6 +17,7 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
+.idea/
 .idea
 *.iws
 *.iml
