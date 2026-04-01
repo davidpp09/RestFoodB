@@ -30,6 +30,14 @@ public class SecurityConfigurations {
                 .cors(org.springframework.security.config.Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
+                    // 1. 🎟️ Pase VIP absoluto para Swagger y para la página de errores
+                    req.requestMatchers(
+                            "/v3/api-docs",
+                            "/v3/api-docs/**",
+                            "/swagger-ui/**",
+                            "/swagger-ui.html",
+                            "/error" // <-- ¡LA AMBULANCIA! 🚑
+                    ).permitAll();
                     // Lo que es público 🔓
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll();
                     req.requestMatchers(HttpMethod.POST, "/usuarios").permitAll();
@@ -40,7 +48,6 @@ public class SecurityConfigurations {
                     req.requestMatchers(HttpMethod.GET, "/productos/**").authenticated();
                     req.requestMatchers("/productos/**").hasAnyRole("ADMIN", "DEV");
                     req.requestMatchers(HttpMethod.POST, "/ordenes/**").hasAnyRole("ADMIN", "DEV", "MESERO", "REPARTIDOR");
-
                     // Todo lo demás requiere login 🔑
                     req.anyRequest().authenticated();
                 })
