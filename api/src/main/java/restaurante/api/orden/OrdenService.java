@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import restaurante.api.admin.DatosCorteDia;
 import restaurante.api.admin.DatosVentaEmpleado;
+import restaurante.api.infra.errores.ValidacionException;
 import restaurante.api.mesa.Estado;
 import restaurante.api.mesa.MesaRepository;
 import restaurante.api.ordenDetalle.*;
@@ -46,7 +47,7 @@ public class OrdenService {
         if (usuario.getRol().equals(Roles.MESERO)) {
             var mesa = mesaRepository.getReferenceById(datos.id_mesa());
             if (mesa.getEstado() == Estado.OCUPADA) {
-                throw new RuntimeException("La mesa ya está en uso, no se puede abrir otra cuenta.");
+                throw new ValidacionException("La mesa ya está en uso, no se puede abrir otra cuenta.");
             }
             mesa.abrirMesa();
             Orden ordenGuardada = ordenRepository.save(new Orden(mesa, usuario, datos.tipo(), datos.servicio()));
@@ -65,8 +66,11 @@ public class OrdenService {
     @Transactional
     public DatosRespuestaOrden enviarOrden(DatosSincronizarComanda datos) {
         var orden = ordenRepository.findByIdConBloqueo(datos.id_orden()).orElseThrow();
+        if (orden.getEstatus().equals(Estatus.PAGADA)) {
+            throw new ValidacionException("La orden ya fue pagada, no puedes modificarla wey");
+        }
         if (!orden.getUsuario().getId_usuarios().equals(datos.id_usuario())) {
-            throw new RuntimeException("Solo un mesero puede tener la orden de la mesa");
+            throw new ValidacionException("Solo un mesero puede tener la orden de la mesa");
         }
         for (DatosPlatilloLote platillo : datos.platillos()) {
             if (platillo.id_detalle() == null) {

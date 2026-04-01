@@ -26,25 +26,32 @@ public class SecurityConfigurations {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
+                // 1. Activamos la configuración de CORS definida abajo en el Bean corsConfigurer 🌐
+                .cors(org.springframework.security.config.Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
-                    // 1. Lo que es público para todos 🔓
+                    // Lo que es público 🔓
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll();
                     req.requestMatchers(HttpMethod.POST, "/usuarios").permitAll();
 
-                    // 2. Reglas por Rol (Sala VIP) 🛡️
-                    // Solo ADMIN y DEV pueden entrar a cualquier ruta que empiece con /admin
+                    // Reglas por Rol 🛡️
                     req.requestMatchers("/admin/**").hasAnyRole("ADMIN", "DEV");
                     req.requestMatchers("/usuarios/**").hasAnyRole("ADMIN", "DEV", "CAJERO");
                     req.requestMatchers(HttpMethod.GET, "/productos/**").authenticated();
                     req.requestMatchers("/productos/**").hasAnyRole("ADMIN", "DEV");
                     req.requestMatchers(HttpMethod.POST, "/ordenes/**").hasAnyRole("ADMIN", "DEV", "MESERO", "REPARTIDOR");
-                    // 3. Todo lo demás (Solo con estar logueado basta) 🔑
+
+                    // Todo lo demás requiere login 🔑
                     req.anyRequest().authenticated();
                 })
-                // 2. ¡ESTA ES LA LÍNEA MÁGICA!
-                // Le decimos: "Ejecuta mi filtro ANTES del filtro de login de Spring"
+                // 2. Ejecuta tu filtro de JWT antes del de Spring 🛡️
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                // 3. Manejo de excepciones para la "puerta de entrada" (cuando no hay token) 💂‍♂️
+                .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+                    response.setContentType("application/json");
+                    response.setStatus(403);
+                    response.getWriter().write("{\"mensaje\": \"No se encontró un token válido. Debes iniciar sesión.\"}");
+                }))
                 .build();
     }
 

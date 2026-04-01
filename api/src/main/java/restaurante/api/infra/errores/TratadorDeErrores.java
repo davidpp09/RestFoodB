@@ -38,4 +38,11 @@ public class TratadorDeErrores {
     public ResponseEntity tratarError500(Exception e) {
         return ResponseEntity.status(500).body(new DatosRespuestaError("Error interno en el servidor: " + e.getLocalizedMessage()));
     }
+
+    // Captura nuestras reglas de negocio personalizadas 🚦
+    @ExceptionHandler(ValidacionException.class)
+    public ResponseEntity tratarErrorDeValidacion(ValidacionException e) {
+        // Usamos e.getMessage() para atrapar el texto exacto que enviaste desde el OrdenService
+        return ResponseEntity.badRequest().body(new DatosRespuestaError(e.getMessage()));
+    }
 }
