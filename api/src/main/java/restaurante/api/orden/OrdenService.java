@@ -11,6 +11,7 @@ import restaurante.api.mesa.Estado;
 import restaurante.api.mesa.MesaRepository;
 import restaurante.api.ordenDetalle.*;
 import restaurante.api.producto.ProductoRepository;
+import restaurante.api.usuario.Roles;
 import restaurante.api.usuario.UsuarioRepository;
 
 import java.math.BigDecimal;
@@ -42,14 +43,19 @@ public class OrdenService {
     @Transactional
     public Long abrirCuenta(DatosAbrirOrden datos) {
         var usuario = usuarioRepository.getReferenceById(datos.id_usuario());
-        var mesa = mesaRepository.getReferenceById(datos.id_mesa());
-        if (mesa.getEstado() == Estado.OCUPADA) {
-            throw new RuntimeException("La mesa ya está en uso, no se puede abrir otra cuenta.");
-        }
+        if (usuario.getRol().equals(Roles.MESERO)) {
+            var mesa = mesaRepository.getReferenceById(datos.id_mesa());
+            if (mesa.getEstado() == Estado.OCUPADA) {
+                throw new RuntimeException("La mesa ya está en uso, no se puede abrir otra cuenta.");
+            }
+            mesa.abrirMesa();
+            Orden ordenGuardada = ordenRepository.save(new Orden(mesa, usuario, datos.tipo(), datos.servicio()));
+            return ordenGuardada.getId_ordenes();
+        } else {
+            Orden ordenGuardada = ordenRepository.save(new Orden(null, usuario, datos.tipo(), datos.servicio()));
+            return ordenGuardada.getId_ordenes();
 
-        mesa.abrirMesa();
-        Orden ordenGuardada = ordenRepository.save(new Orden(mesa, usuario, datos.tipo(), datos.servicio()));
-        return ordenGuardada.getId_ordenes();
+        }
     }
 
     public Page<DatosListaOrden> listar(Pageable pagina) {
@@ -92,8 +98,11 @@ public class OrdenService {
         var orden = ordenRepository.findById(id).orElseThrow();
 
         orden.finalizar();
-        orden.getMesa().liberar();
 
+        // Si la orden tiene una mesa asignada, la liberamos 🔓
+        if (orden.getMesa() != null) {
+            orden.getMesa().liberar();
+        }
     }
 
 

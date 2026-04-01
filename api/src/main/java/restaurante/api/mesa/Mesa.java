@@ -39,6 +39,7 @@ public class Mesa {
     }
 
     public void liberar() {
+        
         this.estado = Estado.LIBRE;
     }
 }

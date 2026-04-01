@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import restaurante.api.mesa.Mesa;
 import restaurante.api.ordenDetalle.OrdenDetalle;
+import restaurante.api.usuario.Roles;
 import restaurante.api.usuario.Usuario;
 
 import java.math.BigDecimal;
@@ -64,7 +65,11 @@ public class Orden {
         this.estatus = Estatus.PREPARANDO;
         this.total = BigDecimal.ZERO;
         this.usuario = usuario;
-        this.mesa = mesa;
+        if (usuario.getRol().equals(Roles.MESERO)) {
+            this.mesa = mesa;
+        } else {
+            this.mesa = null;
+        }
         this.tipo = tipo;
         this.fechaCierre = null;
         this.servicio = servicio;

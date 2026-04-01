@@ -36,6 +36,7 @@ public class SecurityConfigurations {
                     req.requestMatchers("/usuarios/**").hasAnyRole("ADMIN", "DEV", "CAJERO");
                     req.requestMatchers(HttpMethod.GET, "/productos/**").authenticated();
                     req.requestMatchers("/productos/**").hasAnyRole("ADMIN", "DEV");
+                    req.requestMatchers(HttpMethod.POST, "/ordenes/**").hasAnyRole("ADMIN", "DEV", "MESERO", "REPARTIDOR");
                     // 3. Todo lo demás (Solo con estar logueado basta) 🔑
                     req.anyRequest().authenticated();
                 })
