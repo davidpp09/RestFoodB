@@ -26,6 +26,7 @@ public class TokenService {
                     .withIssuer("restfood")
                     .withSubject(usuario.getEmail())
                     .withClaim("id", usuario.getId_usuarios())
+                    .withClaim("role", usuario.getRol().toString())
                     .withExpiresAt(generarFechaExpiracion())
                     .sign(algoritmo);
         } catch (JWTCreationException exception) {
@@ -35,7 +36,7 @@ public class TokenService {
 
     private Instant generarFechaExpiracion() {
         // El token durará 2 horas por seguridad
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-06:00"));
+        return LocalDateTime.now().plusHours(12).toInstant(ZoneOffset.of("-06:00"));
     }
 
     public String getSubject(String token) {

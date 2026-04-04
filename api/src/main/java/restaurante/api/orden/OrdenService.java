@@ -3,6 +3,7 @@ package restaurante.api.orden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import restaurante.api.admin.DatosCorteDia;
@@ -18,6 +19,7 @@ import restaurante.api.usuario.UsuarioRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,6 +42,9 @@ public class OrdenService {
     @Autowired
     OrdenDetalleRepository ordenDetalleRepository;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
 
     @Transactional
     public Long abrirCuenta(DatosAbrirOrden datos) {
@@ -51,6 +56,13 @@ public class OrdenService {
             }
             mesa.abrirMesa();
             Orden ordenGuardada = ordenRepository.save(new Orden(mesa, usuario, datos.tipo(), datos.servicio()));
+            DatosMesaAbierta avisoMesa = new DatosMesaAbierta(
+                    datos.id_mesa(),
+                    mesa.getEstado(),
+                    usuario.getNombre(),
+                    ordenGuardada.getId_ordenes()
+            );
+            messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
             return ordenGuardada.getId_ordenes();
         } else {
             Orden ordenGuardada = ordenRepository.save(new Orden(null, usuario, datos.tipo(), datos.servicio()));
@@ -72,17 +84,23 @@ public class OrdenService {
         if (!orden.getUsuario().getId_usuarios().equals(datos.id_usuario())) {
             throw new ValidacionException("Solo un mesero puede tener la orden de la mesa");
         }
+        List<DatosPlatilloTicket> ticketCocina = new ArrayList<>();
         for (DatosPlatilloLote platillo : datos.platillos()) {
             if (platillo.id_detalle() == null) {
                 var producto = productoRepository.getReferenceById(platillo.id_producto());
                 OrdenDetalle detalle = new OrdenDetalle(platillo, producto, orden);
                 ordenDetalleRepository.save(detalle);
+                ticketCocina.add(new DatosPlatilloTicket("🟢 NUEVO", producto.getNombre(), platillo.cantidad(), platillo.comentarios()));
             } else {
                 if (platillo.cantidad() == 0) {
+                    var producto = productoRepository.getReferenceById(platillo.id_producto());
                     ordenDetalleRepository.deleteById(platillo.id_detalle());
+                    ticketCocina.add(new DatosPlatilloTicket("🔴 CANCELADO", producto.getNombre(), 0, "No preparar"));
                 } else {
                     var modificado = ordenDetalleRepository.getReferenceById(platillo.id_detalle());
+                    var producto = productoRepository.getReferenceById(platillo.id_producto());
                     modificado.actualizarPlatillo(platillo);
+                    ticketCocina.add(new DatosPlatilloTicket("🟡 MODIFICADO", producto.getNombre(), platillo.cantidad(), platillo.comentarios()));
                 }
             }
         }
@@ -94,7 +112,17 @@ public class OrdenService {
                 .map(DatosDetalleRespuesta::new)
                 .toList();
 
-        return new DatosRespuestaOrden(orden.getId_ordenes(), orden.getTotal(), platillosMapeados);
+
+        DatosRespuestaOrden respuesta = new DatosRespuestaOrden(orden.getId_ordenes(), orden.getTotal(), platillosMapeados);
+
+        // 1. Empaquetamos el ticket exclusivo para la cocina
+        DatosTicketCocina ticketFinal = new DatosTicketCocina(orden.getId_ordenes(), orden.getUsuario().getNombre(), orden.getTipo(), ticketCocina);
+
+        // 2. ¡Enviamos el ticket a la impresora por el WebSocket! 🖨️
+        messagingTemplate.convertAndSend("/topic/cocina", ticketFinal);
+
+        // 3. El mesero recibe su respuesta normal
+        return respuesta;
     }
 
     @Transactional
