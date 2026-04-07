@@ -29,33 +29,37 @@ public class OrdenService {
 
     @Autowired
     OrdenRepository ordenRepository;
-
     @Autowired
     MesaRepository mesaRepository;
-
     @Autowired
     UsuarioRepository usuarioRepository;
-
     @Autowired
     ProductoRepository productoRepository;
-
     @Autowired
     OrdenDetalleRepository ordenDetalleRepository;
-
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    private boolean esSuperUsuario(Roles rol) {
+        return rol.equals(Roles.DEV) || rol.equals(Roles.ADMIN);
+    }
 
-    @Transactional
+    @Transactional // ✅ faltaba
     public Long abrirCuenta(DatosAbrirOrden datos) {
         var usuario = usuarioRepository.getReferenceById(datos.id_usuario());
-        if (usuario.getRol().equals(Roles.MESERO)) {
+        boolean conMesa = usuario.getRol().equals(Roles.MESERO) || esSuperUsuario(usuario.getRol());
+
+        if (conMesa) {
+            if (datos.id_mesa() == null) {
+                throw new ValidacionException("Debes indicar el número de mesa.");
+            }
             var mesa = mesaRepository.getReferenceById(datos.id_mesa());
             if (mesa.getEstado() == Estado.OCUPADA) {
                 throw new ValidacionException("La mesa ya está en uso, no se puede abrir otra cuenta.");
             }
             mesa.abrirMesa();
             Orden ordenGuardada = ordenRepository.save(new Orden(mesa, usuario, datos.tipo(), datos.servicio()));
+
             DatosMesaAbierta avisoMesa = new DatosMesaAbierta(
                     datos.id_mesa(),
                     mesa.getEstado(),
@@ -63,11 +67,13 @@ public class OrdenService {
                     ordenGuardada.getId_ordenes()
             );
             messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
+            System.out.println("✅ [WS /topic/mesas] Mesa abierta: " + avisoMesa);
             return ordenGuardada.getId_ordenes();
         } else {
+            // REPARTIDOR u otros roles sin mesa
             Orden ordenGuardada = ordenRepository.save(new Orden(null, usuario, datos.tipo(), datos.servicio()));
+            System.out.println("✅ Orden sin mesa creada, id: " + ordenGuardada.getId_ordenes());
             return ordenGuardada.getId_ordenes();
-
         }
     }
 
@@ -78,12 +84,17 @@ public class OrdenService {
     @Transactional
     public DatosRespuestaOrden enviarOrden(DatosSincronizarComanda datos) {
         var orden = ordenRepository.findByIdConBloqueo(datos.id_orden()).orElseThrow();
+        var usuario = usuarioRepository.getReferenceById(datos.id_usuario());
+
         if (orden.getEstatus().equals(Estatus.PAGADA)) {
-            throw new ValidacionException("La orden ya fue pagada, no puedes modificarla wey");
+            throw new ValidacionException("La orden ya fue pagada, no puedes modificarla.");
         }
-        if (!orden.getUsuario().getId_usuarios().equals(datos.id_usuario())) {
-            throw new ValidacionException("Solo un mesero puede tener la orden de la mesa");
+
+        // ✅ Superusuarios pueden modificar cualquier orden
+        if (!esSuperUsuario(usuario.getRol()) && !orden.getUsuario().getId_usuarios().equals(datos.id_usuario())) {
+            throw new ValidacionException("Solo el mesero asignado puede modificar esta orden.");
         }
+
         List<DatosPlatilloTicket> ticketCocina = new ArrayList<>();
         for (DatosPlatilloLote platillo : datos.platillos()) {
             if (platillo.id_detalle() == null) {
@@ -104,93 +115,41 @@ public class OrdenService {
                 }
             }
         }
+
         var platosActualizados = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes());
         orden.recalcularTotal(platosActualizados);
-
 
         List<DatosDetalleRespuesta> platillosMapeados = platosActualizados.stream()
                 .map(DatosDetalleRespuesta::new)
                 .toList();
 
-
         DatosRespuestaOrden respuesta = new DatosRespuestaOrden(orden.getId_ordenes(), orden.getTotal(), platillosMapeados);
+        DatosTicketCocina ticketFinal = new DatosTicketCocina(orden.getMesa().getId_mesas(), orden.getId_ordenes(), orden.getUsuario().getNombre(), orden.getTipo(), ticketCocina);
 
-        // 1. Empaquetamos el ticket exclusivo para la cocina
-        DatosTicketCocina ticketFinal = new DatosTicketCocina(orden.getId_ordenes(), orden.getUsuario().getNombre(), orden.getTipo(), ticketCocina);
+        messagingTemplate.convertAndSend("/topic/mesas", ticketFinal);
+        System.out.println("✅ [WS /topic/mesas] Ticket enviado orden #" + orden.getId_ordenes() + " con " + ticketCocina.size() + " platillos");
 
-        // 2. ¡Enviamos el ticket a la impresora por el WebSocket! 🖨️
-        messagingTemplate.convertAndSend("/topic/cocina", ticketFinal);
-
-        // 3. El mesero recibe su respuesta normal
         return respuesta;
     }
 
     @Transactional
     public void darCuenta(Long id) {
         var orden = ordenRepository.findById(id).orElseThrow();
-
         orden.finalizar();
 
-        // Si la orden tiene una mesa asignada, la liberamos 🔓
         if (orden.getMesa() != null) {
             orden.getMesa().liberar();
+
+            // ✅ Avisamos al frontend que la mesa quedó libre
+            DatosMesaAbierta avisoMesa = new DatosMesaAbierta(
+                    orden.getMesa().getId_mesas(),
+                    orden.getMesa().getEstado(),
+                    "",
+                    null
+            );
+            messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
+            System.out.println("✅ [WS /topic/mesas] Mesa liberada: " + orden.getMesa().getId_mesas());
         }
-    }
-
-
-    @Transactional
-    public BigDecimal totalGeneral(List<Orden> ordenes) {
-        return ordenes.stream().map(Orden::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    @Transactional
-    public BigDecimal totalDesayuno(List<Orden> ordenes) {
-        return ordenes.stream()
-                .filter(o -> Servicio.DESAYUNO.equals(o.getServicio()))
-                .map(Orden::getTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    @Transactional
-    public BigDecimal totalComida(List<Orden> ordenes) {
-        return ordenes.stream()
-                .filter(o -> Servicio.COMIDA.equals(o.getServicio()))
-                .map(Orden::getTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    @Transactional
-    public Long pedidosParaLlevar(List<Orden> ordenes) {
-        return ordenes.stream().filter(o -> o.getTipo().equals(Tipo.LLEVAR)).count();
-    }
-
-    @Transactional
-    public Long pedidosLoza(List<Orden> ordenes) {
-        return ordenes.stream().filter(o -> o.getTipo().equals(Tipo.LOZA)).count();
-    }
-
-    @Transactional
-    public List<DatosVentaEmpleado> ventaEmpleados(Map<String, List<Orden>> ventasPorNombre) {
-        return ventasPorNombre.entrySet().stream()
-                .map(entry -> new DatosVentaEmpleado(
-                        entry.getKey(),
-                        entry.getValue().size(),
-                        entry.getValue().stream()
-                                .map(Orden::getTotal)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                )).toList();
-    }
-
-    @Transactional
-    public DatosCorteDia corteDia(List<DatosVentaEmpleado> datosVentaEmpleados, BigDecimal totalDesayuno, BigDecimal totalComida, Long totalLoza, Long totalParaLlevar, BigDecimal totalGeneral) {
-        return new DatosCorteDia(
-                datosVentaEmpleados,
-                totalDesayuno,
-                totalComida,
-                totalLoza,
-                totalParaLlevar,
-                totalGeneral
-        );
     }
 
     @Transactional
@@ -209,6 +168,32 @@ public class OrdenService {
                 totalGeneral(ordenes)
         );
     }
+
+    // --- Métodos de cálculo ---
+    public BigDecimal totalGeneral(List<Orden> ordenes) {
+        return ordenes.stream().map(Orden::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal totalDesayuno(List<Orden> ordenes) {
+        return ordenes.stream().filter(o -> Servicio.DESAYUNO.equals(o.getServicio())).map(Orden::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal totalComida(List<Orden> ordenes) {
+        return ordenes.stream().filter(o -> Servicio.COMIDA.equals(o.getServicio())).map(Orden::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public Long pedidosParaLlevar(List<Orden> ordenes) {
+        return ordenes.stream().filter(o -> o.getTipo().equals(Tipo.LLEVAR)).count();
+    }
+
+    public Long pedidosLoza(List<Orden> ordenes) {
+        return ordenes.stream().filter(o -> o.getTipo().equals(Tipo.LOZA)).count();
+    }
+
+    public List<DatosVentaEmpleado> ventaEmpleados(Map<String, List<Orden>> ventasPorNombre) {
+        return ventasPorNombre.entrySet().stream()
+                .map(entry -> new DatosVentaEmpleado(entry.getKey(), entry.getValue().size(),
+                        entry.getValue().stream().map(Orden::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add)))
+                .toList();
+    }
 }
-
-

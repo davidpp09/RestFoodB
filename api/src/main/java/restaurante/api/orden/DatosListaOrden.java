@@ -18,7 +18,6 @@ public record DatosListaOrden(
         BigDecimal total,
         @NotNull @Positive
         Long id_usuario,
-        @Positive
         Long id_mesa,
         @NotNull
         Tipo tipo,
@@ -33,7 +32,7 @@ public record DatosListaOrden(
                 orden.getEstatus(),
                 orden.getTotal(),
                 orden.getUsuario().getId_usuarios(),
-                orden.getMesa().getId_mesas(),
+                orden.getMesa() != null ? orden.getMesa().getId_mesas() : null, // ✅ null safe
                 orden.getTipo(),
                 orden.getFechaCierre(),
                 orden.getServicio());

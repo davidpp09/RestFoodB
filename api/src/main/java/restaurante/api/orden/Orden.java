@@ -65,7 +65,7 @@ public class Orden {
         this.estatus = Estatus.PREPARANDO;
         this.total = BigDecimal.ZERO;
         this.usuario = usuario;
-        if (usuario.getRol().equals(Roles.MESERO)) {
+        if (usuario.getRol().equals(Roles.MESERO) || usuario.getRol().equals(Roles.DEV) || usuario.getRol().equals(Roles.ADMIN)) {
             this.mesa = mesa;
         } else {
             this.mesa = null;

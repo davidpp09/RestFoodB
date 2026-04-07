@@ -30,25 +30,29 @@ public class SecurityConfigurations {
                 .cors(org.springframework.security.config.Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
-                    // 1. 🎟️ Pase VIP absoluto para Swagger y para la página de errores
-                    req.requestMatchers(
-                            "/v3/api-docs",
-                            "/v3/api-docs/**",
-                            "/swagger-ui/**",
-                            "/swagger-ui.html",
-                            "/error" // <-- ¡LA AMBULANCIA! 🚑
-                    ).permitAll();
-                    // Lo que es público 🔓
+                    req.requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/error").permitAll();
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll();
-                    req.requestMatchers(HttpMethod.POST, "/usuarios").permitAll();
 
-                    // Reglas por Rol 🛡️
-                    req.requestMatchers("/admin/**").hasAnyRole("ADMIN", "DEV");
+                    // ✅ Solo ADMIN y DEV pueden registrar usuarios
+                    req.requestMatchers(HttpMethod.POST, "/usuarios").hasAnyRole("ADMIN", "DEV");
                     req.requestMatchers("/usuarios/**").hasAnyRole("ADMIN", "DEV", "CAJERO");
+
+                    req.requestMatchers("/admin/**").hasAnyRole("ADMIN", "DEV");
+                    req.requestMatchers("/mesas/**").hasAnyRole("ADMIN", "DEV");
+
                     req.requestMatchers(HttpMethod.GET, "/productos/**").authenticated();
                     req.requestMatchers("/productos/**").hasAnyRole("ADMIN", "DEV");
-                    req.requestMatchers(HttpMethod.POST, "/ordenes/**").hasAnyRole("ADMIN", "DEV", "MESERO", "REPARTIDOR");
-                    // Todo lo demás requiere login 🔑
+                    req.requestMatchers("/categorias/**").hasAnyRole("ADMIN", "DEV");
+
+                    // ✅ Todos los roles operativos pueden abrir/cerrar ordenes
+                    req.requestMatchers(HttpMethod.POST, "/ordenes").hasAnyRole("ADMIN", "DEV", "MESERO", "REPARTIDOR");
+                    req.requestMatchers(HttpMethod.PUT, "/ordenes/**").hasAnyRole("ADMIN", "DEV", "CAJERO");
+                    req.requestMatchers(HttpMethod.GET, "/ordenes/**").hasAnyRole("ADMIN", "DEV", "CAJERO");
+
+                    // ✅ Enviar platillos a cocina
+                    req.requestMatchers(HttpMethod.POST, "/ordendetalles").hasAnyRole("ADMIN", "DEV", "MESERO", "REPARTIDOR");
+
+                    req.requestMatchers("/ws-restfood/**").permitAll();
                     req.anyRequest().authenticated();
                 })
                 // 2. Ejecuta tu filtro de JWT antes del de Spring 🛡️
@@ -80,7 +84,8 @@ public class SecurityConfigurations {
                 registry.addMapping("/**") // Permitimos todas las rutas
                         .allowedOrigins("http://localhost:3000", "http://localhost:5173") // Puertos comunes de React/Vite
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Métodos permitidos
-                        .allowedHeaders("*"); // Permitimos todos los encabezados
+                        .allowedHeaders("*")
+                        .allowCredentials(true); // Permitimos todos los encabezados
             }
         };
     }

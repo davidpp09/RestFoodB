@@ -3,6 +3,7 @@ package restaurante.api.orden;
 import java.util.List;
 
 public record DatosTicketCocina(
+        Long id_mesa,
         Long id_orden,
         String nombre,
         Tipo tipo,

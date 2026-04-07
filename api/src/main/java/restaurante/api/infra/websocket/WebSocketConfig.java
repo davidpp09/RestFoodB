@@ -23,8 +23,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // 🔌 El punto de conexión físico para el Frontend
         registry.addEndpoint("/ws-restfood")
-                .setAllowedOrigins("*") // ⚠️ En red local permitimos todo, luego podemos ajustar
-                .withSockJS(); // 🛠️ Plan B por si el navegador no soporta WebSockets puros
+                .setAllowedOriginPatterns("http://localhost:5173") // ✅ setAllowedOriginPatterns, no setAllowedOrigins
+                .withSockJS();// 🛠️ Plan B por si el navegador no soporta WebSockets puros
     }
-    
+
 }
