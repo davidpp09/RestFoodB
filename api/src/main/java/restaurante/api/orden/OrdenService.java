@@ -135,14 +135,53 @@ public class OrdenService {
     }
 
     @Transactional
-    public void darCuenta(Long id) {
-        var orden = ordenRepository.findById(id).orElseThrow();
+    public DatosRespuestaCuenta darCuenta(Long id) {
+        var orden = ordenRepository.findById(id)
+                .orElseThrow(() -> new ValidacionException("Orden no encontrada"));
+
+        // ✅ VALIDACIÓN 1: No se puede cerrar una orden ya pagada
+        if (orden.getEstatus().equals(Estatus.PAGADA)) {
+            throw new ValidacionException("Esta orden ya fue pagada anteriormente");
+        }
+
+        // ✅ VALIDACIÓN 2: Si tiene mesa, verificar que la mesa esté ocupada
+        if (orden.getMesa() != null) {
+            if (orden.getMesa().getEstado().equals(Estado.LIBRE)) {
+                throw new ValidacionException("La mesa ya fue liberada");
+            }
+
+            // ✅ VALIDACIÓN 3 CORREGIDA: Verificar si hay una orden MÁS NUEVA en la mesa
+            var ordenesActivas = ordenRepository.findByMesaAndEstatus(
+                    orden.getMesa(),
+                    Estatus.PREPARANDO
+            );
+
+            // Filtrar órdenes que NO sean la que estamos cerrando
+            var otrasOrdenes = ordenesActivas.stream()
+                    .filter(o -> !o.getId_ordenes().equals(id))
+                    .toList();
+
+            // Si hay otras órdenes preparando en esta mesa
+            if (!otrasOrdenes.isEmpty()) {
+                // Verificar si alguna de esas órdenes es MÁS NUEVA que la que queremos cerrar
+                boolean hayOrdenMasNueva = otrasOrdenes.stream()
+                        .anyMatch(o -> o.getFecha_apertura().isAfter(orden.getFecha_apertura()));
+
+                if (hayOrdenMasNueva) {
+                    throw new ValidacionException(
+                            "No puedes cerrar esta orden porque hay una orden más nueva activa en la mesa"
+                    );
+                }
+            }
+        }
+
+        // ✅ Si pasa todas las validaciones, procede a cerrar
         orden.finalizar();
 
+        // ✅ Si tiene mesa, liberarla y avisar por WebSocket
         if (orden.getMesa() != null) {
             orden.getMesa().liberar();
 
-            // ✅ Avisamos al frontend que la mesa quedó libre
             DatosMesaAbierta avisoMesa = new DatosMesaAbierta(
                     orden.getMesa().getId_mesas(),
                     orden.getMesa().getEstado(),
@@ -152,6 +191,31 @@ public class OrdenService {
             messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
             System.out.println("✅ [WS /topic/mesas] Mesa liberada: " + orden.getMesa().getId_mesas());
         }
+
+        // ✅ Obtener platillos para el ticket
+        var platillos = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes());
+        List<DatosDetalleRespuesta> platillosMapeados = platillos.stream()
+                .map(DatosDetalleRespuesta::new)
+                .toList();
+
+        // ✅ Crear el ticket completo
+        DatosRespuestaCuenta ticket = new DatosRespuestaCuenta(
+                orden.getId_ordenes(),
+                orden.getMesa() != null ? orden.getMesa().getId_mesas() : null,
+                orden.getTipo().toString(),
+                orden.getFecha_apertura(),
+                orden.getFechaCierre(),
+                platillosMapeados,
+                orden.getTotal(),
+                orden.getEstatus().toString()
+        );
+
+        // ✅ ENVIAR TICKET POR WEBSOCKET PARA IMPRESIÓN
+        messagingTemplate.convertAndSend("/topic/tickets", ticket);
+        System.out.println("🖨️ [WS /topic/tickets] Ticket enviado para impresión: Orden #" + orden.getId_ordenes());
+
+        // ✅ Devolver ticket al frontend
+        return ticket;
     }
 
     @Transactional

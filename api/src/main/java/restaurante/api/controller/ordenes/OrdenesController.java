@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import restaurante.api.orden.DatosAbrirOrden;
 import restaurante.api.orden.DatosListaOrden;
+import restaurante.api.orden.DatosRespuestaCuenta;
 import restaurante.api.orden.OrdenService;
 
 @RequestMapping("/ordenes")
@@ -36,8 +37,8 @@ public class OrdenesController {
 
     @PutMapping("/{id}/cerrar")
     @Transactional
-    public ResponseEntity darCuenta(@PathVariable Long id) {
-        service.darCuenta(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<DatosRespuestaCuenta> darCuenta(@PathVariable Long id) {  // ⬅️ CAMBIO AQUÍ
+        var ticket = service.darCuenta(id);  // ⬅️ CAMBIO AQUÍ
+        return ResponseEntity.ok(ticket);    // ⬅️ CAMBIO AQUÍ
     }
 }

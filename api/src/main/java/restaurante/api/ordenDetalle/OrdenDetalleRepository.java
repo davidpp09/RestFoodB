@@ -29,4 +29,5 @@ public interface OrdenDetalleRepository extends JpaRepository<OrdenDetalle, Long
             @Param("tipo") Tipo tipo
     );
 
+
 }
