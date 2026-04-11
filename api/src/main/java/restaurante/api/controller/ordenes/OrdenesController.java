@@ -35,6 +35,11 @@ public class OrdenesController {
         return ResponseEntity.ok(page);
     }
 
+    @GetMapping("/activa/{id_mesa}")
+    public ResponseEntity<Long> obtenerOrdenActiva(@PathVariable Long id_mesa) {
+        return ResponseEntity.ok(service.obtenerOrdenActiva(id_mesa));
+    }
+
     @PutMapping("/{id}/cerrar")
     @Transactional
     public ResponseEntity<DatosRespuestaCuenta> darCuenta(@PathVariable Long id) {  // ⬅️ CAMBIO AQUÍ

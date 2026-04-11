@@ -1,5 +1,7 @@
 package restaurante.api.producto;
 
+import restaurante.api.categoria.DatosRespuestaCategoria;
+
 import java.math.BigDecimal;
 
 public record DatosRespuestaProducto(
@@ -7,16 +9,21 @@ public record DatosRespuestaProducto(
         String nombre,
         BigDecimal precioComida,
         BigDecimal precioDesayuno,
-        Boolean disponibilidad
+        Boolean disponibilidad,
+        DatosRespuestaCategoria categoria
 ) {
-    // Este es el constructor que necesita el Controller para el .map()
     public DatosRespuestaProducto(Producto producto) {
         this(
                 producto.getId_productos(),
                 producto.getNombre(),
                 producto.getPrecio_comida(),
                 producto.getPrecio_desayuno(),
-                producto.getDisponibilidad()
+                producto.getDisponibilidad(),
+                new DatosRespuestaCategoria(
+                        producto.getCategoria().getId_categorias(),
+                        producto.getCategoria().getNombre(),
+                        producto.getCategoria().getImpresora()
+                )
         );
     }
 }

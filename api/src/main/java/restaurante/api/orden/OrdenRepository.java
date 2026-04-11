@@ -23,4 +23,7 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
 
     List<Orden> findByMesaAndEstatus(Mesa mesa, Estatus estatus);
 
+    @Query("SELECT o FROM orden o WHERE o.mesa.id_mesas = :id_mesa AND o.estatus = 'PREPARANDO'")
+    Optional<Orden> findActivaByMesa(Long id_mesa);
+
 }

@@ -126,7 +126,7 @@ public class OrdenService {
                 .toList();
 
         DatosRespuestaOrden respuesta = new DatosRespuestaOrden(orden.getId_ordenes(), orden.getTotal(), platillosMapeados);
-        DatosTicketCocina ticketFinal = new DatosTicketCocina(orden.getMesa().getId_mesas(), orden.getId_ordenes(), orden.getUsuario().getNombre(), orden.getTipo(), ticketCocina);
+        DatosTicketCocina ticketFinal = new DatosTicketCocina(orden.getMesa() != null ? orden.getMesa().getId_mesas() : null, orden.getId_ordenes(), orden.getUsuario().getNombre(), orden.getTipo(), ticketCocina);
 
         messagingTemplate.convertAndSend("/topic/mesas", ticketFinal);
         System.out.println("✅ [WS /topic/mesas] Ticket enviado orden #" + orden.getId_ordenes() + " con " + ticketCocina.size() + " platillos");
@@ -216,6 +216,12 @@ public class OrdenService {
 
         // ✅ Devolver ticket al frontend
         return ticket;
+    }
+
+    public Long obtenerOrdenActiva(Long id_mesa) {
+        return ordenRepository.findActivaByMesa(id_mesa)
+                .map(Orden::getId_ordenes)
+                .orElseThrow(() -> new ValidacionException("No hay orden activa para esta mesa"));
     }
 
     @Transactional

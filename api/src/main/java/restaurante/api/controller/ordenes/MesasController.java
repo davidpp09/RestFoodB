@@ -41,4 +41,12 @@ public class MesasController {
                 .toList();
         return ResponseEntity.ok(mesas);
     }
+
+    @GetMapping("/rango/{inicio}/{fin}")
+    public ResponseEntity<List<DatosRespuestaMesa>> mesasRango(@PathVariable long inicio, @PathVariable long fin) {
+        var mesas = repository.buscarPorRango(inicio, fin).stream()
+                .map(m -> new DatosRespuestaMesa(m.getId_mesas(), m.getNumero(), m.getEstado().toString()))
+                .toList();
+        return ResponseEntity.ok(mesas);
+    }
 }

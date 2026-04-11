@@ -38,15 +38,16 @@ public class SecurityConfigurations {
                     req.requestMatchers("/usuarios/**").hasAnyRole("ADMIN", "DEV", "CAJERO");
 
                     req.requestMatchers("/admin/**").hasAnyRole("ADMIN", "DEV");
-                    req.requestMatchers("/mesas/**").hasAnyRole("ADMIN", "DEV");
+                    req.requestMatchers("/mesas/**").hasAnyRole("ADMIN", "DEV", "MESERO");
 
-                    req.requestMatchers(HttpMethod.GET, "/productos/**").authenticated();
+                    req.requestMatchers(HttpMethod.GET, "/productos/**").hasAnyRole("ADMIN", "DEV", "MESERO");
                     req.requestMatchers("/productos/**").hasAnyRole("ADMIN", "DEV");
                     req.requestMatchers("/categorias/**").hasAnyRole("ADMIN", "DEV");
 
                     // ✅ Todos los roles operativos pueden abrir/cerrar ordenes
                     req.requestMatchers(HttpMethod.POST, "/ordenes").hasAnyRole("ADMIN", "DEV", "MESERO", "REPARTIDOR");
                     req.requestMatchers(HttpMethod.PUT, "/ordenes/**").hasAnyRole("ADMIN", "DEV", "CAJERO");
+                    req.requestMatchers(HttpMethod.GET, "/ordenes/activa/**").hasAnyRole("ADMIN", "DEV", "CAJERO", "MESERO");
                     req.requestMatchers(HttpMethod.GET, "/ordenes/**").hasAnyRole("ADMIN", "DEV", "CAJERO");
 
                     // ✅ Enviar platillos a cocina
