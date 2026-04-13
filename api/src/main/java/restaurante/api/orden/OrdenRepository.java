@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import restaurante.api.mesa.Mesa;
 
 import java.time.LocalDateTime;
@@ -27,4 +28,9 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
     Optional<Orden> findActivaByMesa(Long id_mesa);
 
     List<Orden> findByEstatus(Estatus estatus);
+
+    @Query("SELECT o FROM orden o WHERE o.tipo = :tipo AND o.fecha_apertura BETWEEN :inicio AND :fin")
+    List<Orden> findEntregasDelDia(@Param("tipo") Tipo tipo,
+                                   @Param("inicio") LocalDateTime inicio,
+                                   @Param("fin") LocalDateTime fin);
 }

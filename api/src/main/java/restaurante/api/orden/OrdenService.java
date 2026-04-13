@@ -249,6 +249,24 @@ public class OrdenService {
         return new DatosRespuestaOrden(orden.getId_ordenes(), orden.getTotal(), platillosMapeados, orden.getTipo().toString(), orden.getMesa() != null ? orden.getMesa().getId_mesas() : null);
     }
 
+    public List<DatosEntregaHoy> obtenerEntregasHoy() {
+        LocalDateTime inicio = LocalDate.now().atStartOfDay();
+        LocalDateTime fin    = LocalDate.now().atTime(LocalTime.MAX);
+        return ordenRepository.findEntregasDelDia(Tipo.LLEVAR, inicio, fin)
+                .stream()
+                .map(orden -> {
+                    var platillos = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes())
+                            .stream().map(DatosDetalleRespuesta::new).toList();
+                    return new DatosEntregaHoy(
+                            orden.getId_ordenes(),
+                            orden.getFecha_apertura(),
+                            orden.getEstatus(),
+                            orden.getTotal(),
+                            platillos
+                    );
+                }).toList();
+    }
+
     public List<DatosRespuestaOrden> listarOrdenesCocina() {
         return ordenRepository.findByEstatus(Estatus.PREPARANDO).stream().map(orden -> {
             var platillos = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes());

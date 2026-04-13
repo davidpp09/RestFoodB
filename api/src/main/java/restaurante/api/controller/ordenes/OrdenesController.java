@@ -7,10 +7,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import java.util.List;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
 import restaurante.api.orden.DatosAbrirOrden;
+import restaurante.api.orden.DatosEntregaHoy;
 import restaurante.api.orden.DatosListaOrden;
 import restaurante.api.orden.DatosRespuestaCuenta;
 import restaurante.api.orden.DatosRespuestaOrden;
@@ -45,9 +47,15 @@ public class OrdenesController {
         return ResponseEntity.ok(service.obtenerOrdenActiva(id_mesa));
     }
 
+    @GetMapping("/entregas/hoy")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'REPARTIDOR')")
+    public ResponseEntity<List<DatosEntregaHoy>> obtenerEntregasHoy() {
+        return ResponseEntity.ok(service.obtenerEntregasHoy());
+    }
+
     @PutMapping("/{id}/cerrar")
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'CAJERO', 'MESERO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'CAJERO', 'MESERO', 'REPARTIDOR')")
     public ResponseEntity<DatosRespuestaCuenta> darCuenta(@PathVariable Long id) {  // ⬅️ CAMBIO AQUÍ
         var ticket = service.darCuenta(id);  // ⬅️ CAMBIO AQUÍ
         return ResponseEntity.ok(ticket);    // ⬅️ CAMBIO AQUÍ

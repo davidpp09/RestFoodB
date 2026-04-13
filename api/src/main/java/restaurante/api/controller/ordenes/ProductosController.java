@@ -33,7 +33,7 @@ public class ProductosController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'MESERO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'MESERO', 'REPARTIDOR')")
     public ResponseEntity<List<DatosRespuestaProducto>> listar() {
         var lista = repository.findAllWithCategoria().stream().map(DatosRespuestaProducto::new).toList();
         return ResponseEntity.ok(lista);
