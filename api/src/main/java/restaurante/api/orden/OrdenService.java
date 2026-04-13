@@ -229,6 +229,10 @@ public class OrdenService {
         messagingTemplate.convertAndSend("/topic/tickets", ticket);
         System.out.println("🖨️ [WS /topic/tickets] Ticket enviado para impresión: Orden #" + orden.getId_ordenes());
 
+        // ✅ AVISAR A COCINA QUE LA ORDEN FUE CERRADA (independientemente del estatus)
+        messagingTemplate.convertAndSend("/topic/cocina", Map.of("accion", "CERRADA", "id_orden", orden.getId_ordenes()));
+        System.out.println("🍳 [WS /topic/cocina] Orden cerrada: #" + orden.getId_ordenes());
+
         // ✅ Devolver ticket al frontend
         return ticket;
     }
