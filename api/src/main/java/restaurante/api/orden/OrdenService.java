@@ -44,6 +44,8 @@ public class OrdenService {
     OrdenDetalleRepository ordenDetalleRepository;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private restaurante.api.infra.impresora.ImpresoraService impresoraService;
 
 
     private boolean esSuperUsuario(Roles rol) {
@@ -163,6 +165,9 @@ public class OrdenService {
         messagingTemplate.convertAndSend("/topic/mesas", updateAdmin);
         
         System.out.println("✅ [WS /topic/cocina] Ticket enviado orden #" + orden.getId_ordenes() + " con " + ticketCocina.size() + " platillos");
+
+        // Enviar impresión física
+        impresoraService.imprimirComandaCocina(ticketFinal);
 
         return respuesta;
     }
