@@ -46,4 +46,11 @@ public class Producto {
         this.categoria = new Categoria(datosRegistroProducto.id_categoria());
     }
 
+    public void actualizar(DatosActualizacionProducto datos) {
+        if (datos.nombre() != null)          this.nombre          = datos.nombre();
+        if (datos.precio_comida() != null)   this.precio_comida   = datos.precio_comida();
+        if (datos.precio_desayuno() != null) this.precio_desayuno = datos.precio_desayuno();
+        if (datos.disponibilidad() != null)  this.disponibilidad  = datos.disponibilidad();
+        if (datos.id_categoria() != null)    this.categoria        = new Categoria(datos.id_categoria());
+    }
 }

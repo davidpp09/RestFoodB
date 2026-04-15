@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
+import restaurante.api.producto.DatosActualizacionProducto;
 import restaurante.api.producto.DatosRegistroProducto;
 import restaurante.api.producto.DatosRespuestaProducto;
 import restaurante.api.producto.Producto;
@@ -24,12 +25,11 @@ public class ProductosController {
 
     @PostMapping
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
-    public ResponseEntity<DatosRespuestaProducto> registrar(@RequestBody @Valid DatosRegistroProducto datosRegistroProducto, UriComponentsBuilder uriComponentsBuilder) {
-        Producto producto = repository.save(new Producto(datosRegistroProducto));
-        DatosRespuestaProducto datosRespuesta = new DatosRespuestaProducto(producto);
+    @PreAuthorize("hasRole('DEV')")
+    public ResponseEntity<DatosRespuestaProducto> registrar(@RequestBody @Valid DatosRegistroProducto datos, UriComponentsBuilder uriComponentsBuilder) {
+        Producto producto = repository.save(new Producto(datos));
         URI url = uriComponentsBuilder.path("/productos/{id}").buildAndExpand(producto.getId_productos()).toUri();
-        return ResponseEntity.created(url).body(datosRespuesta);
+        return ResponseEntity.created(url).body(new DatosRespuestaProducto(producto));
     }
 
     @GetMapping
@@ -37,5 +37,23 @@ public class ProductosController {
     public ResponseEntity<List<DatosRespuestaProducto>> listar() {
         var lista = repository.findAllWithCategoria().stream().map(DatosRespuestaProducto::new).toList();
         return ResponseEntity.ok(lista);
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    @PreAuthorize("hasRole('DEV')")
+    public ResponseEntity<DatosRespuestaProducto> actualizar(@PathVariable Long id,
+                                                              @RequestBody @Valid DatosActualizacionProducto datos) {
+        Producto producto = repository.findById(id).orElseThrow();
+        producto.actualizar(datos);
+        return ResponseEntity.ok(new DatosRespuestaProducto(producto));
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    @PreAuthorize("hasRole('DEV')")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        repository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
