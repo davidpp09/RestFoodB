@@ -53,4 +53,9 @@ public class Producto {
         if (datos.disponibilidad() != null)  this.disponibilidad  = datos.disponibilidad();
         if (datos.id_categoria() != null)    this.categoria        = new Categoria(datos.id_categoria());
     }
+
+    public void actualizarDia(DatosActualizacionDia datos) {
+        if (datos.precio_comida() != null)  this.precio_comida  = datos.precio_comida();
+        if (datos.disponibilidad() != null) this.disponibilidad = datos.disponibilidad();
+    }
 }

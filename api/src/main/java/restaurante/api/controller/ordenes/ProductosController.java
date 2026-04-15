@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
+import restaurante.api.producto.DatosActualizacionDia;
 import restaurante.api.producto.DatosActualizacionProducto;
 import restaurante.api.producto.DatosRegistroProducto;
 import restaurante.api.producto.DatosRespuestaProducto;
@@ -54,6 +55,29 @@ public class ProductosController {
     @PreAuthorize("hasRole('DEV')")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         repository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/dia")
+    @Transactional
+    @PreAuthorize("hasAnyRole('DEV', 'REPARTIDOR')")
+    public ResponseEntity<?> actualizarDia(@PathVariable Long id, @RequestBody DatosActualizacionDia datos) {
+        Producto producto = repository.findById(id).orElseThrow();
+        if (Boolean.TRUE.equals(datos.disponibilidad()) && !producto.getDisponibilidad()) {
+            long activos = repository.countActivosPorCategoria(producto.getCategoria().getId_categorias());
+            if (activos >= 7) {
+                return ResponseEntity.badRequest().body("Máximo 7 platillos activos por categoría");
+            }
+        }
+        producto.actualizarDia(datos);
+        return ResponseEntity.ok(new DatosRespuestaProducto(producto));
+    }
+
+    @PutMapping("/desactivar-dia/{categoriaId}")
+    @Transactional
+    @PreAuthorize("hasAnyRole('DEV', 'REPARTIDOR')")
+    public ResponseEntity<Void> desactivarDia(@PathVariable Long categoriaId) {
+        repository.desactivarPorCategoria(categoriaId);
         return ResponseEntity.noContent().build();
     }
 }

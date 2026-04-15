@@ -18,13 +18,13 @@ import java.net.URI;
 
 @RequestMapping("/categorias")
 @RestController
-@PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
 public class CategoriasController {
 
     @Autowired
     private CategoriaRepository repository;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'REPARTIDOR')")
     public ResponseEntity<List<DatosRespuestaCategoria>> listar() {
         var lista = repository.findAll().stream()
                 .map(c -> new DatosRespuestaCategoria(c.getId_categorias(), c.getNombre(), c.getImpresora()))
@@ -34,6 +34,7 @@ public class CategoriasController {
 
     @PostMapping
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
     public ResponseEntity<DatosRespuestaCategoria> registrar(@RequestBody @Valid DatosRegistroCategoria datosRegistroCategoria, UriComponentsBuilder uriComponentsBuilder) {
         Categoria categoria = repository.save(new Categoria(datosRegistroCategoria));
         DatosRespuestaCategoria datosRespuesta = new DatosRespuestaCategoria(
