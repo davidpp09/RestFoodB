@@ -7,7 +7,12 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import restaurante.api.evento.EventoOrden;
+import restaurante.api.evento.EventoOrdenRepository;
+import restaurante.api.evento.TipoEvento;
+import restaurante.api.admin.DatosCancelacionMesero;
 import restaurante.api.admin.DatosCorteDia;
+import restaurante.api.admin.DatosProductoCancelado;
 import restaurante.api.admin.DatosVentaEmpleado;
 import restaurante.api.infra.errores.ValidacionException;
 import restaurante.api.mesa.Estado;
@@ -20,6 +25,7 @@ import restaurante.api.usuario.UsuarioRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -46,6 +52,8 @@ public class OrdenService {
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
     private restaurante.api.infra.impresora.ImpresoraService impresoraService;
+    @Autowired
+    private EventoOrdenRepository eventoOrdenRepository;
 
 
     private boolean esSuperUsuario(Roles rol) {
@@ -69,6 +77,8 @@ public class OrdenService {
             var mesa = mesaRepository.getReferenceById(datos.id_mesa());
             mesa.abrirMesa();
             Orden ordenGuardada = ordenRepository.save(new Orden(mesa, usuario, datos.tipo(), datos.servicio(), numeroComanda));
+
+            eventoOrdenRepository.save(new EventoOrden(ordenGuardada, usuario, TipoEvento.MESA_ABIERTA));
 
             DatosMesaAbierta avisoMesa = new DatosMesaAbierta(
                     datos.id_mesa(),
@@ -121,6 +131,11 @@ public class OrdenService {
         for (OrdenDetalle platilloDb : platosEnDb) {
             if (!idsRecibidos.contains(platilloDb.getId_detalle())) {
                 String impresora = platilloDb.getProducto().getCategoria().getImpresora();
+                eventoOrdenRepository.save(new EventoOrden(orden, usuario, TipoEvento.PLATILLO_CANCELADO,
+                        platilloDb.getProducto().getNombre(),
+                        platilloDb.getCantidad(), 0,
+                        platilloDb.getPrecio_unitario(),
+                        platilloDb.getComentarios(), null));
                 ordenDetalleRepository.delete(platilloDb);
                 ticketCocina.add(new DatosPlatilloTicket("🔴 CANCELADO", platilloDb.getProducto().getNombre(), 0, "Cancelado por el mesero", impresora));
             }
@@ -131,7 +146,12 @@ public class OrdenService {
             if (platillo.id_detalle() == null) {
                 var producto = productoRepository.findById(platillo.id_producto()).orElseThrow();
                 String impresora = producto.getCategoria().getImpresora();
-                ordenDetalleRepository.save(new OrdenDetalle(platillo, producto, orden));
+                OrdenDetalle nuevoDetalle = ordenDetalleRepository.save(new OrdenDetalle(platillo, producto, orden));
+                eventoOrdenRepository.save(new EventoOrden(orden, usuario, TipoEvento.PLATILLO_NUEVO,
+                        producto.getNombre(),
+                        null, platillo.cantidad(),
+                        nuevoDetalle.getPrecio_unitario(),
+                        null, platillo.comentarios()));
                 ticketCocina.add(new DatosPlatilloTicket("🟢 NUEVO", producto.getNombre(), platillo.cantidad(), platillo.comentarios(), impresora));
             } else {
                 var modificado = ordenDetalleRepository.findById(platillo.id_detalle()).orElseThrow();
@@ -143,6 +163,11 @@ public class OrdenService {
                         || (modificado.getComentarios() != null && !modificado.getComentarios().equals(platillo.comentarios()));
 
                 if (cambioCantidad || cambioComentarios) {
+                    eventoOrdenRepository.save(new EventoOrden(orden, usuario, TipoEvento.PLATILLO_MODIFICADO,
+                            producto.getNombre(),
+                            modificado.getCantidad(), platillo.cantidad(),
+                            modificado.getPrecio_unitario(),
+                            modificado.getComentarios(), platillo.comentarios()));
                     modificado.actualizarPlatillo(platillo);
                     ticketCocina.add(new DatosPlatilloTicket("🟡 MODIFICADO", producto.getNombre(), platillo.cantidad(), platillo.comentarios(), impresora));
                 }
@@ -245,11 +270,83 @@ public class OrdenService {
         messagingTemplate.convertAndSend("/topic/tickets", ticket);
         System.out.println("🖨️ [WS /topic/tickets] Ticket enviado para impresión: Orden #" + orden.getId_ordenes());
 
+        // ✅ IMPRIMIR TICKET FÍSICO DE CLIENTE
+        impresoraService.imprimirTicketCliente(ticket);
+
+        eventoOrdenRepository.save(new EventoOrden(orden, usuarioAutenticado, TipoEvento.MESA_CERRADA));
+
         // ✅ AVISAR A COCINA QUE LA ORDEN FUE CERRADA (independientemente del estatus)
         messagingTemplate.convertAndSend("/topic/cocina", Map.of("accion", "CERRADA", "id_orden", orden.getId_ordenes()));
         System.out.println("🍳 [WS /topic/cocina] Orden cerrada: #" + orden.getId_ordenes());
 
         // ✅ Devolver ticket al frontend
+        return ticket;
+    }
+
+    public void reenviarACocina(Long idOrden) {
+        var orden = ordenRepository.findById(idOrden)
+                .orElseThrow(() -> new ValidacionException("Orden no encontrada"));
+
+        if (orden.getEstatus().equals(Estatus.PAGADA)) {
+            throw new ValidacionException("No se puede reenviar una orden ya pagada.");
+        }
+
+        var platillos = ordenDetalleRepository.findAllByOrdenId(idOrden);
+
+        List<DatosPlatilloTicket> ticketCocina = platillos.stream()
+                .map(p -> new DatosPlatilloTicket(
+                        "🔄 REENVIO",
+                        p.getProducto().getNombre(),
+                        p.getCantidad(),
+                        p.getComentarios(),
+                        p.getProducto().getCategoria().getImpresora()
+                ))
+                .toList();
+
+        Long idMesa = orden.getMesa() != null ? orden.getMesa().getId_mesas() : null;
+        DatosTicketCocina ticketFinal = new DatosTicketCocina(
+                idMesa,
+                orden.getId_ordenes(),
+                orden.getNumero_comanda(),
+                orden.getUsuario().getNombre(),
+                orden.getTipo(),
+                ticketCocina
+        );
+
+        messagingTemplate.convertAndSend("/topic/cocina", ticketFinal);
+        System.out.println("🔄 [WS /topic/cocina] Reenvío a cocina Orden #" + idOrden);
+
+        impresoraService.imprimirComandaCocina(ticketFinal);
+    }
+
+    public DatosRespuestaCuenta reimprimirTicket(Long idOrden) {
+        var orden = ordenRepository.findById(idOrden)
+                .orElseThrow(() -> new ValidacionException("Orden no encontrada"));
+
+        var platillos = ordenDetalleRepository.findAllByOrdenId(idOrden);
+        List<DatosDetalleRespuesta> platillosMapeados = platillos.stream()
+                .map(DatosDetalleRespuesta::new)
+                .toList();
+
+        DatosRespuestaCuenta ticket = new DatosRespuestaCuenta(
+                orden.getId_ordenes(),
+                orden.getNumero_comanda(),
+                orden.getMesa() != null ? orden.getMesa().getId_mesas() : null,
+                orden.getTipo().toString(),
+                orden.getFecha_apertura(),
+                orden.getFechaCierre(),
+                platillosMapeados,
+                orden.getTotal(),
+                orden.getEstatus().toString()
+        );
+
+        // Re-enviar por WebSocket al frontend que esté escuchando /topic/tickets
+        messagingTemplate.convertAndSend("/topic/tickets", ticket);
+        System.out.println("🖨️ [WS /topic/tickets] Reimpresión ticket Orden #" + idOrden);
+
+        // Imprimir físicamente
+        impresoraService.imprimirTicketCliente(ticket);
+
         return ticket;
     }
 
@@ -304,9 +401,9 @@ public class OrdenService {
     }
 
     @Transactional
-    public DatosCorteDia master() {
-        var inicio = LocalDate.now().atStartOfDay();
-        var fin = LocalDate.now().atTime(LocalTime.MAX);
+    public DatosCorteDia master(LocalDate fecha) {
+        var inicio = fecha.atStartOfDay();
+        var fin    = fecha.atTime(LocalTime.MAX);
         List<Orden> ordenes = ordenRepository.findByFechaCierreBetweenAndEstatus(inicio, fin, Estatus.PAGADA);
         var ventasAgrupadas = ordenes.stream()
                 .collect(Collectors.groupingBy(o -> o.getUsuario().getNombre()));
@@ -345,6 +442,36 @@ public class OrdenService {
         return ventasPorNombre.entrySet().stream()
                 .map(entry -> new DatosVentaEmpleado(entry.getKey(), entry.getValue().size(),
                         entry.getValue().stream().map(Orden::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add)))
+                .toList();
+    }
+
+    public List<DatosCancelacionMesero> cancelacionesPorMesero(LocalDate desde, LocalDate hasta) {
+        LocalDateTime inicio = desde.atStartOfDay();
+        LocalDateTime fin    = hasta.atTime(LocalTime.MAX);
+
+        var eventos = eventoOrdenRepository.findByTipoEventoAndTimestampBetween(
+                TipoEvento.PLATILLO_CANCELADO, inicio, fin);
+
+        return eventos.stream()
+                .collect(Collectors.groupingBy(EventoOrden::getNombreMesero))
+                .entrySet().stream()
+                .map(entry -> {
+                    List<DatosProductoCancelado> productos = entry.getValue().stream()
+                            .collect(Collectors.groupingBy(
+                                    e -> e.getNombreProducto() != null ? e.getNombreProducto() : "Desconocido",
+                                    Collectors.counting()))
+                            .entrySet().stream()
+                            .map(p -> new DatosProductoCancelado(p.getKey(), p.getValue()))
+                            .sorted(Comparator.comparingLong(DatosProductoCancelado::veces).reversed())
+                            .toList();
+
+                    return new DatosCancelacionMesero(
+                            entry.getKey(),
+                            (long) entry.getValue().size(),
+                            productos
+                    );
+                })
+                .sorted(Comparator.comparingLong(DatosCancelacionMesero::totalCancelaciones).reversed())
                 .toList();
     }
 }

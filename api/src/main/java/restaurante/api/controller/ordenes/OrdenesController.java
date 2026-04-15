@@ -11,13 +11,8 @@ import java.util.List;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
-import restaurante.api.orden.DatosAbrirOrden;
-import restaurante.api.orden.DatosApertura;
-import restaurante.api.orden.DatosEntregaHoy;
-import restaurante.api.orden.DatosListaOrden;
-import restaurante.api.orden.DatosRespuestaCuenta;
-import restaurante.api.orden.DatosRespuestaOrden;
-import restaurante.api.orden.OrdenService;
+import restaurante.api.orden.*;
+
 
 @RequestMapping("/ordenes")
 @RestController
@@ -57,8 +52,21 @@ public class OrdenesController {
     @PutMapping("/{id}/cerrar")
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'CAJERO', 'MESERO', 'REPARTIDOR')")
-    public ResponseEntity<DatosRespuestaCuenta> darCuenta(@PathVariable Long id) {  // ⬅️ CAMBIO AQUÍ
-        var ticket = service.darCuenta(id);  // ⬅️ CAMBIO AQUÍ
-        return ResponseEntity.ok(ticket);    // ⬅️ CAMBIO AQUÍ
+    public ResponseEntity<DatosRespuestaCuenta> darCuenta(@PathVariable Long id) {
+        var ticket = service.darCuenta(id);
+        return ResponseEntity.ok(ticket);
+    }
+
+    @PostMapping("/{id}/reimprimir-ticket")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'CAJERO', 'MESERO')")
+    public ResponseEntity<DatosRespuestaCuenta> reimprimirTicket(@PathVariable Long id) {
+        return ResponseEntity.ok(service.reimprimirTicket(id));
+    }
+
+    @PostMapping("/{id}/reenviar-cocina")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'MESERO')")
+    public ResponseEntity<Void> reenviarACocina(@PathVariable Long id) {
+        service.reenviarACocina(id);
+        return ResponseEntity.ok().build();
     }
 }

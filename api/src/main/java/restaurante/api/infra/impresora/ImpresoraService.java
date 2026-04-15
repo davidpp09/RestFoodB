@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import restaurante.api.orden.DatosPlatilloTicket;
+import restaurante.api.orden.DatosRespuestaCuenta;
 import restaurante.api.orden.DatosTicketCocina;
 import restaurante.api.orden.Tipo;
+import restaurante.api.ordenDetalle.DatosDetalleRespuesta;
 
 import javax.print.PrintService;
 import java.util.List;
@@ -27,6 +29,9 @@ public class ImpresoraService {
 
     @Value("${impresora.cocina2.nombre}")
     private String nombreCocina2;
+
+    @Value("${impresora.tickets.nombre}")
+    private String nombreTickets;
 
     /**
      * Punto de entrada. Agrupa los platillos del ticket por su impresora destino
@@ -138,5 +143,106 @@ public class ImpresoraService {
 
         escpos.writeLF("================================");
         escpos.writeLF(normal, "        -- FIN ORDEN --         ");
+    }
+
+    // ─── Ticket de cliente ───────────────────────────────────────────────────────
+
+    @Async
+    public void imprimirTicketCliente(DatosRespuestaCuenta ticket) {
+        try {
+            PrintService printService = PrinterOutputStream.getPrintServiceByName(nombreTickets);
+            if (printService == null) {
+                System.err.println("🖨️❌ No se encontró la impresora de tickets: " + nombreTickets);
+                return;
+            }
+
+            PrinterOutputStream printerOutputStream = new PrinterOutputStream(printService);
+            EscPos escpos = new EscPos(printerOutputStream);
+
+            escribirTicketCliente(escpos, ticket);
+
+            escpos.feed(5);
+            escpos.cut(EscPos.CutMode.FULL);
+            escpos.close();
+
+            System.out.println("🖨️✅ Ticket de cliente impreso en: " + nombreTickets + " (Orden #" + ticket.id_orden() + ")");
+
+        } catch (Exception e) {
+            System.err.println("🖨️❌ Error al imprimir ticket de cliente: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void escribirTicketCliente(EscPos escpos, DatosRespuestaCuenta ticket) throws Exception {
+        Style titulo = new Style()
+                .setFontSize(Style.FontSize._2, Style.FontSize._2)
+                .setJustification(EscPosConst.Justification.Center)
+                .setBold(true);
+
+        Style centro = new Style()
+                .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                .setJustification(EscPosConst.Justification.Center);
+
+        Style normal = new Style()
+                .setFontSize(Style.FontSize._1, Style.FontSize._1);
+
+        Style negrita = new Style()
+                .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                .setBold(true);
+
+        Style derecha = new Style()
+                .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                .setJustification(EscPosConst.Justification.Right);
+
+        Style totalStyle = new Style()
+                .setFontSize(Style.FontSize._2, Style.FontSize._2)
+                .setBold(true);
+
+        // Cabecera
+        escpos.writeLF(titulo, "RESTFOOD");
+        escpos.writeLF(centro, "Ticket de Venta");
+        escpos.writeLF("================================");
+
+        // Datos de la orden
+        escpos.writeLF(normal, "Orden  : #" + ticket.id_orden());
+        escpos.writeLF(normal, "Comanda: #" + ticket.numero_comanda());
+        if (ticket.numeroMesa() != null) {
+            escpos.writeLF(normal, "Mesa   : " + ticket.numeroMesa());
+        } else {
+            escpos.writeLF(normal, "Tipo   : Para llevar");
+        }
+        if (ticket.fechaCierre() != null) {
+            escpos.writeLF(normal, "Fecha  : " + ticket.fechaCierre().toLocalDate());
+            escpos.writeLF(normal, "Hora   : " + ticket.fechaCierre().toLocalTime().withNano(0));
+        }
+        escpos.writeLF("================================");
+        escpos.writeLF(negrita, "CONSUMO");
+        escpos.writeLF("================================");
+        escpos.feed(1);
+
+        // Platillos
+        for (DatosDetalleRespuesta p : ticket.platillos()) {
+            // Nombre + cantidad
+            escpos.writeLF(negrita, p.cantidad() + "x " + p.nombre_producto());
+            if (p.comentarios() != null && !p.comentarios().isBlank()) {
+                escpos.writeLF(normal, "  (" + p.comentarios() + ")");
+            }
+            // Precio unitario izq, subtotal der
+            String precioFila = "$" + p.precio_unitario() + "    $" + p.subtotal();
+            escpos.writeLF(derecha, precioFila);
+            escpos.feed(1);
+        }
+
+        escpos.writeLF("================================");
+        escpos.writeLF(normal, "");
+
+        // Total
+        escpos.writeLF(negrita, "TOTAL:");
+        escpos.writeLF(totalStyle, "$" + ticket.total());
+
+        escpos.writeLF("================================");
+        escpos.feed(1);
+        escpos.writeLF(centro, "!Gracias por su visita!");
+        escpos.writeLF(centro, "Vuelva pronto :)");
     }
 }
