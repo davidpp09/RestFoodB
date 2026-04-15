@@ -33,4 +33,9 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
     List<Orden> findEntregasDelDia(@Param("tipo") Tipo tipo,
                                    @Param("inicio") LocalDateTime inicio,
                                    @Param("fin") LocalDateTime fin);
+
+    @Query("SELECT COUNT(o) FROM orden o WHERE o.usuario.id_usuarios = :idUsuario AND o.fecha_apertura BETWEEN :inicio AND :fin")
+    Long countByUsuarioIdAndFechaBetween(@Param("idUsuario") Long idUsuario,
+                                         @Param("inicio") LocalDateTime inicio,
+                                         @Param("fin") LocalDateTime fin);
 }

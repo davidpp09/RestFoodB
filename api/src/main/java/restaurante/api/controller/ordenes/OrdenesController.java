@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
 import restaurante.api.orden.DatosAbrirOrden;
+import restaurante.api.orden.DatosApertura;
 import restaurante.api.orden.DatosEntregaHoy;
 import restaurante.api.orden.DatosListaOrden;
 import restaurante.api.orden.DatosRespuestaCuenta;
@@ -28,10 +29,10 @@ public class OrdenesController {
     @PostMapping
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'MESERO', 'REPARTIDOR')")
-    public ResponseEntity<Long> abrirMesa(@RequestBody @Valid DatosAbrirOrden datos, UriComponentsBuilder uriBuilder) {
-        Long id = service.abrirCuenta(datos);
-        var url = uriBuilder.path("/ordenes/{id}").buildAndExpand(id).toUri();
-        return ResponseEntity.created(url).body(id);
+    public ResponseEntity<DatosApertura> abrirMesa(@RequestBody @Valid DatosAbrirOrden datos, UriComponentsBuilder uriBuilder) {
+        DatosApertura apertura = service.abrirCuenta(datos);
+        var url = uriBuilder.path("/ordenes/{id}").buildAndExpand(apertura.id_orden()).toUri();
+        return ResponseEntity.created(url).body(apertura);
     }
 
     @GetMapping

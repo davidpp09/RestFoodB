@@ -5,6 +5,7 @@ import java.util.List;
 public record DatosTicketCocina(
         Long id_mesa,
         Long id_orden,
+        Integer numero_comanda,
         String nombre,
         Tipo tipo,
         List<DatosPlatilloTicket> platillos

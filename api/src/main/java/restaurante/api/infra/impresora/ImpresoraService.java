@@ -108,7 +108,7 @@ public class ImpresoraService {
 
         // Cabecera
         escpos.writeLF(titulo, "NUEVA ORDEN");
-        escpos.writeLF(subtitulo, "ORDEN #" + ticket.id_orden());
+        escpos.writeLF(subtitulo, "COMANDA #" + ticket.numero_comanda());
         escpos.writeLF("================================");
 
         if (ticket.tipo() == Tipo.LOZA && ticket.id_mesa() != null) {

@@ -53,9 +53,14 @@ public class OrdenService {
     }
 
     @Transactional // ✅ faltaba
-    public Long abrirCuenta(DatosAbrirOrden datos) {
+    public DatosApertura abrirCuenta(DatosAbrirOrden datos) {
         var usuario = usuarioRepository.getReferenceById(datos.id_usuario());
         boolean conMesa = usuario.getRol().equals(Roles.MESERO) || esSuperUsuario(usuario.getRol());
+
+        LocalDateTime inicioDia = LocalDate.now().atStartOfDay();
+        LocalDateTime finDia    = LocalDate.now().atTime(LocalTime.MAX);
+        int numeroComanda = ordenRepository.countByUsuarioIdAndFechaBetween(
+                usuario.getId_usuarios(), inicioDia, finDia).intValue() + 1;
 
         if (conMesa) {
             if (datos.id_mesa() == null) {
@@ -63,22 +68,23 @@ public class OrdenService {
             }
             var mesa = mesaRepository.getReferenceById(datos.id_mesa());
             mesa.abrirMesa();
-            Orden ordenGuardada = ordenRepository.save(new Orden(mesa, usuario, datos.tipo(), datos.servicio()));
+            Orden ordenGuardada = ordenRepository.save(new Orden(mesa, usuario, datos.tipo(), datos.servicio(), numeroComanda));
 
             DatosMesaAbierta avisoMesa = new DatosMesaAbierta(
                     datos.id_mesa(),
                     mesa.getEstado(),
                     usuario.getNombre(),
-                    ordenGuardada.getId_ordenes()
+                    ordenGuardada.getId_ordenes(),
+                    numeroComanda
             );
             messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
             System.out.println("✅ [WS /topic/mesas] Mesa abierta: " + avisoMesa);
-            return ordenGuardada.getId_ordenes();
+            return new DatosApertura(ordenGuardada.getId_ordenes(), numeroComanda);
         } else {
             // REPARTIDOR u otros roles sin mesa
-            Orden ordenGuardada = ordenRepository.save(new Orden(null, usuario, datos.tipo(), datos.servicio()));
-            System.out.println("✅ Orden sin mesa creada, id: " + ordenGuardada.getId_ordenes());
-            return ordenGuardada.getId_ordenes();
+            Orden ordenGuardada = ordenRepository.save(new Orden(null, usuario, datos.tipo(), datos.servicio(), numeroComanda));
+            System.out.println("✅ Orden sin mesa creada, id: " + ordenGuardada.getId_ordenes() + " comanda #" + numeroComanda);
+            return new DatosApertura(ordenGuardada.getId_ordenes(), numeroComanda);
         }
     }
 
@@ -152,8 +158,8 @@ public class OrdenService {
                 .toList();
 
         Long idMesa = orden.getMesa() != null ? orden.getMesa().getId_mesas() : null;
-        DatosRespuestaOrden respuesta  = new DatosRespuestaOrden(orden.getId_ordenes(), orden.getTotal(), platillosMapeados, orden.getTipo().toString(), idMesa);
-        DatosTicketCocina  ticketFinal = new DatosTicketCocina(idMesa, orden.getId_ordenes(), orden.getUsuario().getNombre(), orden.getTipo(), ticketCocina);
+        DatosRespuestaOrden respuesta  = new DatosRespuestaOrden(orden.getId_ordenes(), orden.getNumero_comanda(), orden.getTotal(), platillosMapeados, orden.getTipo().toString(), idMesa);
+        DatosTicketCocina  ticketFinal = new DatosTicketCocina(idMesa, orden.getId_ordenes(), orden.getNumero_comanda(), orden.getUsuario().getNombre(), orden.getTipo(), ticketCocina);
 
         messagingTemplate.convertAndSend("/topic/cocina", ticketFinal);
 
@@ -209,6 +215,7 @@ public class OrdenService {
                     orden.getMesa().getId_mesas(),
                     orden.getMesa().getEstado(),
                     "",
+                    null,
                     null
             );
             messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
@@ -224,6 +231,7 @@ public class OrdenService {
         // ✅ Crear el ticket completo
         DatosRespuestaCuenta ticket = new DatosRespuestaCuenta(
                 orden.getId_ordenes(),
+                orden.getNumero_comanda(),
                 orden.getMesa() != null ? orden.getMesa().getId_mesas() : null,
                 orden.getTipo().toString(),
                 orden.getFecha_apertura(),
@@ -254,7 +262,7 @@ public class OrdenService {
                 .map(DatosDetalleRespuesta::new)
                 .toList();
 
-        return new DatosRespuestaOrden(orden.getId_ordenes(), orden.getTotal(), platillosMapeados, orden.getTipo().toString(), orden.getMesa() != null ? orden.getMesa().getId_mesas() : null);
+        return new DatosRespuestaOrden(orden.getId_ordenes(), orden.getNumero_comanda(), orden.getTotal(), platillosMapeados, orden.getTipo().toString(), orden.getMesa() != null ? orden.getMesa().getId_mesas() : null);
     }
 
     public List<DatosEntregaHoy> obtenerEntregasHoy() {
@@ -267,6 +275,7 @@ public class OrdenService {
                             .stream().map(DatosDetalleRespuesta::new).toList();
                     return new DatosEntregaHoy(
                             orden.getId_ordenes(),
+                            orden.getNumero_comanda(),
                             orden.getFecha_apertura(),
                             orden.getEstatus(),
                             orden.getTotal(),
@@ -281,7 +290,7 @@ public class OrdenService {
             List<DatosDetalleRespuesta> platillosMapeados = platillos.stream()
                     .map(DatosDetalleRespuesta::new)
                     .toList();
-            return new DatosRespuestaOrden(orden.getId_ordenes(), orden.getTotal(), platillosMapeados, orden.getTipo().toString(), orden.getMesa() != null ? orden.getMesa().getId_mesas() : null);
+            return new DatosRespuestaOrden(orden.getId_ordenes(), orden.getNumero_comanda(), orden.getTotal(), platillosMapeados, orden.getTipo().toString(), orden.getMesa() != null ? orden.getMesa().getId_mesas() : null);
         }).toList();
     }
 

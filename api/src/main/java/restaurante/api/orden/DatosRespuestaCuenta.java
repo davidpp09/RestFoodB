@@ -8,6 +8,7 @@ import java.util.List;
 
 public record DatosRespuestaCuenta(
         Long id_orden,
+        Integer numero_comanda,
         Long numeroMesa,
         String tipoOrden,
         LocalDateTime fechaApertura,
@@ -15,5 +16,4 @@ public record DatosRespuestaCuenta(
         List<DatosDetalleRespuesta> platillos,
         BigDecimal total,
         String estatus
-) {
-}
+) {}

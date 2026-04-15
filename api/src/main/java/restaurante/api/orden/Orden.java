@@ -54,12 +54,14 @@ public class Orden {
     @Column(nullable = false)
     private Servicio servicio;
 
+    @Column(name = "numero_comanda", nullable = false)
+    private Integer numero_comanda;
 
     public Orden(Long aLong) {
         this.id_ordenes = aLong;
     }
 
-    public Orden(Mesa mesa, Usuario usuario, Tipo tipo, Servicio servicio) {
+    public Orden(Mesa mesa, Usuario usuario, Tipo tipo, Servicio servicio, Integer numeroComanda) {
         this.id_ordenes = null;
         this.fecha_apertura = LocalDateTime.now();
         this.estatus = Estatus.PREPARANDO;
@@ -73,6 +75,7 @@ public class Orden {
         this.tipo = tipo;
         this.fechaCierre = null;
         this.servicio = servicio;
+        this.numero_comanda = numeroComanda;
     }
 
     public void recalcularTotal(List<OrdenDetalle> detalles) {

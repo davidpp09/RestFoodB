@@ -14,6 +14,7 @@ public record DatosRespuestaOrden(
         @NotNull
         @Positive
         Long id_orden,
+        Integer numero_comanda,
         @NotNull
         @PositiveOrZero
         BigDecimal total,

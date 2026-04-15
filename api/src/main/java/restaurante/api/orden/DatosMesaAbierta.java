@@ -6,6 +6,7 @@ public record DatosMesaAbierta(
         Long id_mesa,
         Estado estado,
         String nombre_mesero,
-        Long id_orden
+        Long id_orden,
+        Integer numero_comanda
 ) {
 }

@@ -8,6 +8,7 @@ import java.util.List;
 
 public record DatosEntregaHoy(
         Long id_orden,
+        Integer numero_comanda,
         LocalDateTime fechaApertura,
         Estatus estatus,
         BigDecimal total,
