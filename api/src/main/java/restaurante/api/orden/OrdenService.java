@@ -15,6 +15,7 @@ import restaurante.api.admin.DatosCorteDia;
 import restaurante.api.admin.DatosProductoCancelado;
 import restaurante.api.admin.DatosVentaEmpleado;
 import restaurante.api.infra.errores.ValidacionException;
+import restaurante.api.infra.errores.RecursoNoEncontradoException;
 import restaurante.api.mesa.Estado;
 import restaurante.api.mesa.MesaRepository;
 import restaurante.api.ordenDetalle.*;
@@ -209,51 +210,29 @@ public class OrdenService {
     @Transactional
     public DatosRespuestaCuenta darCuenta(Long id) {
         var orden = ordenRepository.findById(id)
-                .orElseThrow(() -> new ValidacionException("Orden no encontrada"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Orden no encontrada"));
 
-        // ✅ VALIDACIÓN: Solo el mesero que abrió la orden o un ADMIN/DEV pueden cerrarla
+        // VALIDACIÓN: Solo el mesero que abrió la orden o un ADMIN/DEV pueden cerrarla
         var usuarioAutenticado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!esSuperUsuario(usuarioAutenticado.getRol()) && !orden.getUsuario().getId_usuarios().equals(usuarioAutenticado.getId_usuarios())) {
             throw new ValidacionException("No tienes permiso para cerrar esta orden porque no la abriste tú.");
         }
 
-        // ✅ VALIDACIÓN 1: No se puede cerrar una orden ya pagada
         List<Orden> otrasOrdenes = new ArrayList<>();
         if (orden.getMesa() != null) {
-            var ordenesActivas = ordenRepository.findByMesaAndEstatus(
-                    orden.getMesa(),
-                    Estatus.PREPARANDO
-            );
-            otrasOrdenes = ordenesActivas.stream()
-                    .filter(o -> !o.getId_ordenes().equals(id))
-                    .toList();
+            var ordenesActivas = ordenRepository.findByMesaAndEstatus(orden.getMesa(), Estatus.PREPARANDO);
+            otrasOrdenes = ordenesActivas.stream().filter(o -> !o.getId_ordenes().equals(id)).toList();
         }
 
-        // ✅ Llama al método de dominio que tiene las reglas de negocio
+        // --- Todas las escrituras DB primero ---
         orden.finalizar(otrasOrdenes);
+        if (orden.getMesa() != null) orden.getMesa().liberar();
+        eventoOrdenRepository.save(new EventoOrden(orden, usuarioAutenticado, TipoEvento.MESA_CERRADA));
 
-        // ✅ Si tiene mesa, liberarla y avisar por WebSocket
-        if (orden.getMesa() != null) {
-            orden.getMesa().liberar();
-
-            DatosMesaAbierta avisoMesa = new DatosMesaAbierta(
-                    orden.getMesa().getId_mesas(),
-                    orden.getMesa().getEstado(),
-                    "",
-                    null,
-                    null
-            );
-            messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
-            System.out.println("✅ [WS /topic/mesas] Mesa liberada: " + orden.getMesa().getId_mesas());
-        }
-
-        // ✅ Obtener platillos para el ticket
+        // --- Lecturas y construcción del ticket ---
         var platillos = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes());
-        List<DatosDetalleRespuesta> platillosMapeados = platillos.stream()
-                .map(DatosDetalleRespuesta::new)
-                .toList();
+        List<DatosDetalleRespuesta> platillosMapeados = platillos.stream().map(DatosDetalleRespuesta::new).toList();
 
-        // ✅ Crear el ticket completo
         DatosRespuestaCuenta ticket = new DatosRespuestaCuenta(
                 orden.getId_ordenes(),
                 orden.getNumero_comanda(),
@@ -266,26 +245,26 @@ public class OrdenService {
                 orden.getEstatus().toString()
         );
 
-        // ✅ ENVIAR TICKET POR WEBSOCKET PARA IMPRESIÓN
+        // --- WebSocket: todos después de confirmar DB ---
+        if (orden.getMesa() != null) {
+            DatosMesaAbierta avisoMesa = new DatosMesaAbierta(orden.getMesa().getId_mesas(), orden.getMesa().getEstado(), "", null, null);
+            messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
+            System.out.println("✅ [WS /topic/mesas] Mesa liberada: " + orden.getMesa().getId_mesas());
+        }
         messagingTemplate.convertAndSend("/topic/tickets", ticket);
         System.out.println("🖨️ [WS /topic/tickets] Ticket enviado para impresión: Orden #" + orden.getId_ordenes());
-
-        // ✅ IMPRIMIR TICKET FÍSICO DE CLIENTE
-        impresoraService.imprimirTicketCliente(ticket);
-
-        eventoOrdenRepository.save(new EventoOrden(orden, usuarioAutenticado, TipoEvento.MESA_CERRADA));
-
-        // ✅ AVISAR A COCINA QUE LA ORDEN FUE CERRADA (independientemente del estatus)
         messagingTemplate.convertAndSend("/topic/cocina", Map.of("accion", "CERRADA", "id_orden", orden.getId_ordenes()));
         System.out.println("🍳 [WS /topic/cocina] Orden cerrada: #" + orden.getId_ordenes());
 
-        // ✅ Devolver ticket al frontend
+        // --- Efecto secundario (impresora, fuera del camino crítico) ---
+        impresoraService.imprimirTicketCliente(ticket);
+
         return ticket;
     }
 
     public void reenviarACocina(Long idOrden) {
         var orden = ordenRepository.findById(idOrden)
-                .orElseThrow(() -> new ValidacionException("Orden no encontrada"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Orden no encontrada"));
 
         if (orden.getEstatus().equals(Estatus.PAGADA)) {
             throw new ValidacionException("No se puede reenviar una orden ya pagada.");
@@ -321,7 +300,7 @@ public class OrdenService {
 
     public DatosRespuestaCuenta reimprimirTicket(Long idOrden) {
         var orden = ordenRepository.findById(idOrden)
-                .orElseThrow(() -> new ValidacionException("Orden no encontrada"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Orden no encontrada"));
 
         var platillos = ordenDetalleRepository.findAllByOrdenId(idOrden);
         List<DatosDetalleRespuesta> platillosMapeados = platillos.stream()
@@ -352,7 +331,7 @@ public class OrdenService {
 
     public DatosRespuestaOrden obtenerOrdenActiva(Long id_mesa) {
         var orden = ordenRepository.findActivaByMesa(id_mesa)
-                .orElseThrow(() -> new ValidacionException("No hay orden activa para esta mesa"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("No hay orden activa para esta mesa"));
 
         var platillos = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes());
         List<DatosDetalleRespuesta> platillosMapeados = platillos.stream()
@@ -394,7 +373,7 @@ public class OrdenService {
     @Transactional
     public void marcarOrdenServida(Long idOrden) {
         var orden = ordenRepository.findById(idOrden)
-                .orElseThrow(() -> new ValidacionException("Orden no encontrada"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Orden no encontrada"));
         orden.marcarComoServido();
         // Opcional: avisar por websocket enviando un objeto JSON válido
         messagingTemplate.convertAndSend("/topic/cocina", Map.of("mensaje", "Orden " + idOrden + " está lista", "id_orden", idOrden));

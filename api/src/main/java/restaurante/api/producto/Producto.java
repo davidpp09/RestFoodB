@@ -46,12 +46,12 @@ public class Producto {
         this.categoria = new Categoria(datosRegistroProducto.id_categoria());
     }
 
-    public void actualizar(DatosActualizacionProducto datos) {
+    public void actualizar(DatosActualizacionProducto datos, Categoria categoriaCompleta) {
         if (datos.nombre() != null)          this.nombre          = datos.nombre();
         if (datos.precio_comida() != null)   this.precio_comida   = datos.precio_comida();
         if (datos.precio_desayuno() != null) this.precio_desayuno = datos.precio_desayuno();
         if (datos.disponibilidad() != null)  this.disponibilidad  = datos.disponibilidad();
-        if (datos.id_categoria() != null)    this.categoria        = new Categoria(datos.id_categoria());
+        if (categoriaCompleta != null)       this.categoria        = categoriaCompleta;
     }
 
     public void actualizarDia(DatosActualizacionDia datos) {

@@ -42,7 +42,12 @@ public class TratadorDeErrores {
     // Captura nuestras reglas de negocio personalizadas 🚦
     @ExceptionHandler(ValidacionException.class)
     public ResponseEntity tratarErrorDeValidacion(ValidacionException e) {
-        // Usamos e.getMessage() para atrapar el texto exacto que enviaste desde el OrdenService
         return ResponseEntity.badRequest().body(new DatosRespuestaError(e.getMessage()));
+    }
+
+    // Recursos no encontrados → 404
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ResponseEntity tratarErrorNoEncontrado(RecursoNoEncontradoException e) {
+        return ResponseEntity.status(404).body(new DatosRespuestaError(e.getMessage()));
     }
 }

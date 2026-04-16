@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
+import restaurante.api.categoria.Categoria;
+import restaurante.api.categoria.CategoriaRepository;
 import restaurante.api.producto.DatosActualizacionDia;
 import restaurante.api.producto.DatosActualizacionProducto;
 import restaurante.api.producto.DatosRegistroProducto;
@@ -23,6 +25,9 @@ public class ProductosController {
 
     @Autowired
     private ProductoRepository repository;
+
+    @Autowired
+    private CategoriaRepository categoriaRepository;
 
     @PostMapping
     @Transactional
@@ -46,7 +51,10 @@ public class ProductosController {
     public ResponseEntity<DatosRespuestaProducto> actualizar(@PathVariable Long id,
                                                               @RequestBody @Valid DatosActualizacionProducto datos) {
         Producto producto = repository.findById(id).orElseThrow();
-        producto.actualizar(datos);
+        Categoria categoria = datos.id_categoria() != null
+                ? categoriaRepository.findById(datos.id_categoria()).orElseThrow()
+                : null;
+        producto.actualizar(datos, categoria);
         return ResponseEntity.ok(new DatosRespuestaProducto(producto));
     }
 
