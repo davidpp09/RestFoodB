@@ -1,5 +1,6 @@
 package restaurante.api.usuario;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import lombok.*;
@@ -29,6 +30,7 @@ public class Usuario implements UserDetails {
     private Roles rol;
 
     @Setter
+    @JsonIgnore
     @Column(nullable = false)
     private String contrasena;
 

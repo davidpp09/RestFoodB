@@ -1,6 +1,7 @@
 package restaurante.api.infra.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,6 +25,9 @@ public class SecurityConfigurations {
 
     @Autowired
     private SecurityFilter securityFilter; // 1. Inyectamos tu filtro (el guardia)
+
+    @Value("${cors.allowed-origins:*}")
+    private String[] origenesPermitidos;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -63,11 +67,11 @@ public class SecurityConfigurations {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // Permitimos todas las rutas
-                        .allowedOriginPatterns("*") // Permitimos cualquier origen (incluyendo la IP local de Vite/React en celulares)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH") // Métodos permitidos
+                registry.addMapping("/**")
+                        .allowedOriginPatterns(origenesPermitidos)
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                         .allowedHeaders("*")
-                        .allowCredentials(true); // Permitimos todos los encabezados
+                        .allowCredentials(true);
             }
         };
     }

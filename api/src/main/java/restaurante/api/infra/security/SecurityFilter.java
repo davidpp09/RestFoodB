@@ -24,27 +24,26 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // 1. Obtener el token del encabezado "Authorization"
         var authHeader = request.getHeader("Authorization");
 
-        if (authHeader != null) {
-            // 2. Limpiar el token (quitar "Bearer ")
-            var token = authHeader.replace("Bearer ", "");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            var token = authHeader.substring(7).trim();
 
-            // 3. Validar el token y obtener el "subject" (el email del usuario)
-            var nombreUsuario = tokenService.getSubject(token);
-
-            if (nombreUsuario != null) {
-                // 4. Si el token es válido, buscamos al usuario en la BD
-                var usuario = repository.findByEmail(nombreUsuario);
-
-                // 5. Forzamos el inicio de sesión en el sistema de Spring
-                var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            try {
+                var nombreUsuario = tokenService.getSubject(token);
+                if (nombreUsuario != null) {
+                    var usuario = repository.findByEmail(nombreUsuario);
+                    if (usuario != null) {
+                        var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    }
+                }
+            } catch (RuntimeException e) {
+                // Token inválido/expirado: no autenticamos, la cadena decidirá (EntryPoint → 401)
+                SecurityContextHolder.clearContext();
             }
         }
 
-        // 6. ¡Siga su camino! (Pasa al siguiente filtro o al Controller)
         filterChain.doFilter(request, response);
     }
 }

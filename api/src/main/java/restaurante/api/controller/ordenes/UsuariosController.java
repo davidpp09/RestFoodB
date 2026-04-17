@@ -6,11 +6,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
+import restaurante.api.infra.security.DatosLoginRespuesta;
+import restaurante.api.infra.security.RoutingService;
 import restaurante.api.usuario.*;
 
 import java.net.URI;
@@ -25,6 +28,24 @@ public class UsuariosController {
 
     @Autowired
     private PasswordEncoder passwordEncoder; // 1. Inyectamos la herramienta de cifrado
+
+    @Autowired
+    private RoutingService routingService;
+
+    // Revalidación de sesión: el frontend llama esto al arrancar para saber si el token sigue siendo válido.
+    // Cualquier rol autenticado puede consultar sus propios datos (override del @PreAuthorize de clase).
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<DatosLoginRespuesta> me(@AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(new DatosLoginRespuesta(
+                null, // no reemitir el token
+                usuario.getRol().name(),
+                usuario.getNombre(),
+                usuario.getId_usuarios(),
+                usuario.getSeccion(),
+                routingService.rutaPorRol(usuario.getRol())
+        ));
+    }
 
     @PostMapping
     @Transactional
@@ -61,6 +82,7 @@ public class UsuariosController {
 
     @PutMapping
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
     public ResponseEntity<DatosRespuestaUsuario> actualizar(@RequestBody @Valid DatosActualizacionUsuario datos) {
         var usuario = repository.getReferenceById(datos.id_usuarios());
         usuario.actualizarInformacion(datos);
@@ -75,6 +97,7 @@ public class UsuariosController {
 
     @DeleteMapping("/{id}")
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
     public ResponseEntity eliminarLogico(@PathVariable Long id) {
         var usuario = repository.getReferenceById(id);
         usuario.eliminarUsuario(id);
@@ -83,14 +106,17 @@ public class UsuariosController {
 
     @PutMapping("/activar/{id}")
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
     public ResponseEntity activar(@PathVariable Long id) {
         var usuario = repository.getReferenceById(id);
         usuario.activarUsuario(id);
         return ResponseEntity.noContent().build();
     }
 
+    // Borrado físico: sólo DEV (riesgoso; puede romper FK e historial de órdenes)
     @DeleteMapping("/eliminar/{id}")
     @Transactional
+    @PreAuthorize("hasRole('DEV')")
     public ResponseEntity eliminar(@PathVariable Long id) {
         repository.deleteById(id);
         return ResponseEntity.noContent().build();

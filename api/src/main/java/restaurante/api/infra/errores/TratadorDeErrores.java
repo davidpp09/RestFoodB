@@ -36,7 +36,9 @@ public class TratadorDeErrores {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity tratarError500(Exception e) {
-        return ResponseEntity.status(500).body(new DatosRespuestaError("Error interno en el servidor: " + e.getLocalizedMessage()));
+        // No filtrar el mensaje de excepción al cliente (puede contener info de infra). Log en server.
+        e.printStackTrace();
+        return ResponseEntity.status(500).body(new DatosRespuestaError("Error interno en el servidor."));
     }
 
     // Captura nuestras reglas de negocio personalizadas 🚦

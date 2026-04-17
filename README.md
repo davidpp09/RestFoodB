@@ -1,229 +1,260 @@
-# RestFood API — Backend
+# RestFood — Backend
 
-Sistema de gestión para restaurante construido con **Spring Boot 3.5.10** y **Java 17**. Maneja autenticación JWT, órdenes en tiempo real via WebSocket, impresión de tickets y reportes de corte de caja.
+API REST + WebSocket que orquesta toda la operación del restaurante: meseros, cocina, caja, entregas, impresoras y reportes. Escrito en Spring Boot 3.5 sobre Java 17.
+
+Es el cerebro del sistema. Todo lo importante (cálculos de total, validación de quién puede hacer qué, auditoría de cambios) vive aquí. El frontend es una vista bonita; este módulo es el que no puede mentir.
 
 ---
 
-## Stack tecnológico
+## Por qué Spring Boot
 
-| Tecnología | Versión | Uso |
-|---|---|---|
-| Spring Boot | 3.5.10 | Framework principal |
-| Java | 17 | Lenguaje |
-| Maven | — | Build tool |
-| MySQL | 5.7+ | Base de datos |
-| Spring Data JPA / Hibernate | — | ORM |
-| Spring Security | — | Autenticación y autorización |
-| Auth0 java-jwt | 4.4.0 | Generación y validación de JWT |
-| Spring WebSocket (STOMP) | — | Tiempo real (cocina, mesas, tickets) |
-| Flyway | — | Migraciones de base de datos |
-| SpringDoc OpenAPI | — | Documentación Swagger |
-| Jakarta Bean Validation | — | Validación de inputs |
+Lo elegí por tres razones concretas:
+
+1. **Spring Security + JWT** ya resuelto como framework: no quería inventar auth desde cero siendo un sistema que maneja dinero.
+2. **JPA/Hibernate** para modelar la realidad del negocio con relaciones (orden → detalles → productos → categorías) sin escribir SQL a mano.
+3. **Stack que conozco y estoy aprendiendo en la escuela.** El proyecto sirve para aterrizar conceptos de 5to semestre (middleware, filtros, AOP, transaccionalidad).
+
+La contraparte es que el binario pesa y arranca en 10+ segundos, pero eso no importa en un servidor que se enciende una vez al día.
 
 ---
 
 ## Requisitos
 
-- Java 17
-- MySQL 5.7 o superior
-- Maven 3.8+
-- Variable de entorno `JWT_SECRET` configurada
+- **Java 17** (el proyecto usa records y `var`, no compila en 11)
+- **MySQL 5.7+** (probado en 8.0)
+- **Maven 3.8+**
+- Una impresora térmica USB (POS-58 o compatible ESC/POS) si vas a probar impresión real
 
 ---
 
-## Configuración
+## Variables de entorno
 
-### Variables de entorno
+Todas las variables tienen un *default* razonable para desarrollo local, excepto `JWT_SECRET` que es **obligatoria**.
+
+| Variable | Obligatoria | Default | Para qué sirve |
+|---|---|---|---|
+| `JWT_SECRET` | **Sí** | — | Firma los tokens. Mínimo 32 caracteres. Si se filtra, cualquiera puede falsificar sesiones. |
+| `DB_URL` | No | `jdbc:mysql://localhost:3306/restaurante?...` | Cadena JDBC de MySQL. |
+| `DB_USER` | No | `root` | Usuario de BD. |
+| `DB_PASSWORD` | No | `root` | Password de BD. |
+| `JPA_DDL_AUTO` | No | `validate` | `validate` compara el schema con las entidades y falla si no cuadra. En dev puedes usar `update`. **Nunca `create` o `create-drop` en producción.** |
+| `CORS_ORIGINS` | No | `http://localhost:5173,http://127.0.0.1:5173,http://192.168.*.*:*` | Lista separada por comas de orígenes permitidos. Aplica tanto a REST como a WebSocket. |
+
+Ejemplo de `.env` para correr local en Linux/Mac (en Windows usa `set` o configúralo en IntelliJ/VS Code):
 
 ```bash
-JWT_SECRET=tu_clave_secreta_jwt
-```
-
-### Base de datos
-
-Crea la base de datos manualmente:
-
-```sql
-CREATE DATABASE restaurante;
-```
-
-Flyway aplica las migraciones automáticamente al iniciar la app (baseline en versión 0).
-
-### `application.properties`
-
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/restaurante
-spring.datasource.username=root
-spring.datasource.password=root
-spring.jpa.hibernate.ddl-auto=update
-spring.flyway.baseline-on-migrate=true
-spring.flyway.baseline-version=0
+export JWT_SECRET="cambia-esto-por-algo-largo-y-aleatorio-min-32-chars"
+export DB_URL="jdbc:mysql://localhost:3306/restaurante?createDatabaseIfNotExist=true"
+export DB_USER="root"
+export DB_PASSWORD="root"
+export JPA_DDL_AUTO="update"
+export CORS_ORIGINS="http://localhost:5173,http://127.0.0.1:5173"
 ```
 
 ---
 
-## Levantar el proyecto
+## Levantarlo en desarrollo
 
 ```bash
 cd RestFoodB/api
 mvn spring-boot:run
 ```
 
-La API queda disponible en `http://localhost:8080`.
+La API queda en `http://localhost:8080`. Swagger UI en `http://localhost:8080/swagger-ui/index.html`.
 
-Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+Flyway aplica las migraciones automáticamente al arrancar, con `baseline-on-migrate=true` (asume que una BD vacía está en versión 0).
 
 ---
 
-## Arquitectura
+## Modelo de datos
+
+El esquema refleja cómo funciona el negocio, no un modelo abstracto de "sistema de punto de venta":
+
+```mermaid
+erDiagram
+    USUARIO ||--o{ ORDEN : abre
+    USUARIO ||--o{ EVENTO_ORDEN : genera
+    MESA ||--o{ ORDEN : "hospeda"
+    ORDEN ||--o{ ORDEN_DETALLE : contiene
+    ORDEN ||--o{ EVENTO_ORDEN : registra
+    PRODUCTO ||--o{ ORDEN_DETALLE : "ordenado en"
+    CATEGORIA ||--o{ PRODUCTO : agrupa
+
+    USUARIO {
+        long id_usuarios PK
+        string nombre UK
+        string email UK
+        string contrasena "BCrypt"
+        enum rol "ADMIN|DEV|MESERO|COCINA|CAJERO|REPARTIDOR"
+        int seccion "solo meseros"
+        bool estatus "soft delete"
+    }
+    MESA {
+        long id_mesas PK
+        string numero UK
+        enum estado "LIBRE|OCUPADA"
+    }
+    ORDEN {
+        long id_ordenes PK
+        int numero_comanda
+        enum tipo "LOZA|LLEVAR"
+        enum servicio "DESAYUNO|COMIDA"
+        enum estatus "PREPARANDO|SERVIDO|PAGADA"
+        decimal total
+    }
+    ORDEN_DETALLE {
+        long id_detalle PK
+        int cantidad
+        decimal precio_unitario
+        decimal subtotal
+        string comentarios
+    }
+    PRODUCTO {
+        long id_productos PK
+        string nombre UK
+        decimal precio_comida
+        decimal precio_desayuno
+        bool disponibilidad
+    }
+    CATEGORIA {
+        long id_categorias PK
+        string nombre UK
+        string impresora "nombre fisico"
+    }
+    EVENTO_ORDEN {
+        long id_evento PK
+        enum tipo_evento
+        datetime timestamp
+        string nombre_mesero "desnormalizado"
+        string nombre_producto "desnormalizado"
+    }
+```
+
+**Por qué hay campos desnormalizados en `evento_orden`** (como `nombre_mesero`, `nombre_producto`): porque es un log histórico. Si un mesero es dado de baja o un producto se renombra, el reporte de "cancelaciones por mesero del mes pasado" debe seguir mostrando el nombre real que tenía cuando pasó el evento, no el actual. Es trade-off entre pureza del modelo y utilidad del reporte.
+
+**Por qué las órdenes tienen dos precios (`precio_comida` y `precio_desayuno`)** y el detalle tiene su propio `precio_unitario`: el precio del turno puede cambiar de un día a otro; el detalle captura el precio en el momento de la venta. Si subes el precio del platillo mañana, no se altera el total de una orden vieja.
+
+---
+
+## Estructura del código
 
 ```
 src/main/java/restaurante/api/
-├── controller/          # Controladores REST y WS
-├── domain/
-│   ├── entity/          # Entidades JPA
-│   ├── dto/             # DTOs de entrada y salida
-│   ├── repository/      # Interfaces JPA
-│   └── service/         # Lógica de negocio
+├── controller/            # HTTP endpoints (REST)
+│   ├── ordenes/           # AutenticacionController, OrdenController, ...
+│   └── ...
+├── orden/                 # Dominio "orden": entidad, servicio, DTOs
+├── mesa/                  # Dominio "mesa"
+├── producto/              # Dominio "producto"
+├── usuario/               # Dominio "usuario"
+├── reportes/              # Corte del dia, cancelaciones
+├── evento/                # Registro de EventoOrden
 ├── infra/
-│   ├── security/        # JWT, filtros, configuración Spring Security
-│   ├── websocket/       # Configuración STOMP
-│   ├── errores/         # Manejador global de excepciones
-│   └── impresora/       # Servicio de impresión (USB / TCP-IP)
+│   ├── security/          # Filtros, JWT, RoutingService, SecurityConfigurations
+│   ├── websocket/         # Configuracion STOMP
+│   ├── errores/           # Handler global de excepciones
+│   └── impresora/         # Servicio de impresion USB/TCP-IP
+└── RestFoodApiApplication.java
 ```
 
----
-
-## Entidades de base de datos
-
-### `usuario`
-| Campo | Tipo | Descripción |
-|---|---|---|
-| id_usuarios | Long (PK) | ID autoincremental |
-| nombre | String UNIQUE | Nombre de usuario |
-| email | String UNIQUE | Correo (usado para login) |
-| contrasena | String | Hash BCrypt |
-| rol | Enum | ADMIN, DEV, MESERO, COCINA, CAJERO, REPARTIDOR |
-| estatus | Boolean | Activo / inactivo (soft delete) |
-| seccion | Integer | Sección de mesas asignada al mesero |
-
-### `mesas`
-| Campo | Tipo | Descripción |
-|---|---|---|
-| id_mesas | Long (PK) | — |
-| numero | String UNIQUE | Número de mesa |
-| estado | Enum | LIBRE / OCUPADA |
-
-### `ordenes`
-| Campo | Tipo | Descripción |
-|---|---|---|
-| id_ordenes | Long (PK) | — |
-| numero_comanda | Integer | Número secuencial de comanda |
-| tipo | Enum | LOZA (mesa) / LLEVAR (para llevar) |
-| servicio | Enum | DESAYUNO / COMIDA |
-| estatus | Enum | PREPARANDO / SERVIDO / PAGADA |
-| total | BigDecimal | Total calculado automáticamente |
-| fecha_apertura | LocalDateTime | Cuándo se abrió la orden |
-| fecha_cierre | LocalDateTime | Cuándo se cerró (nullable) |
-| id_usuario (FK) | Long | Mesero/repartidor que la abrió |
-| id_mesa (FK) | Long | Mesa asociada (nullable para LLEVAR) |
-
-### `orden_detalles`
-| Campo | Tipo | Descripción |
-|---|---|---|
-| id_detalle | Long (PK) | — |
-| cantidad | Integer | Cantidad del platillo |
-| precio_unitario | BigDecimal | Precio al momento del pedido |
-| subtotal | BigDecimal | cantidad × precio_unitario |
-| comentarios | String | Instrucciones especiales (nullable) |
-| id_orden (FK) | Long | Orden a la que pertenece |
-| id_producto (FK) | Long | Producto ordenado |
-
-### `productos`
-| Campo | Tipo | Descripción |
-|---|---|---|
-| id_productos | Long (PK) | — |
-| nombre | String UNIQUE | Nombre del platillo |
-| precio_comida | BigDecimal | Precio turno comida |
-| precio_desayuno | BigDecimal | Precio turno desayuno |
-| disponibilidad | Boolean | Si está disponible hoy |
-| id_categoria (FK) | Long | Categoría del platillo |
-
-Restricción: máximo 7 productos activos por categoría.
-
-### `categorias`
-| Campo | Tipo | Descripción |
-|---|---|---|
-| id_categorias | Long (PK) | — |
-| nombre | String UNIQUE | Nombre de la categoría |
-| impresora | String | Nombre de la impresora de cocina asignada |
-
-### `evento_orden` (Auditoría)
-Registra cada cambio en las órdenes para reportes y trazabilidad.
-
-| Campo | Tipo | Descripción |
-|---|---|---|
-| id_evento | Long (PK) | — |
-| tipo_evento | Enum | MESA_ABIERTA, MESA_CERRADA, PLATILLO_NUEVO, PLATILLO_MODIFICADO, PLATILLO_CANCELADO |
-| timestamp | LocalDateTime | Cuándo ocurrió |
-| id_orden (FK) | Long | Orden afectada |
-| id_mesa | Long | Mesa (desnormalizado) |
-| id_usuario (FK) | Long | Usuario que realizó la acción |
-| nombre_mesero | String | Desnormalizado para reportes |
-| nombre_producto | String | Platillo afectado (nullable) |
-| cantidad_anterior | Integer | Valor antes del cambio |
-| cantidad_nueva | Integer | Valor después del cambio |
-| comentarios_anterior | String | Comentario previo |
-| comentarios_nuevo | String | Comentario nuevo |
+La organización es **por dominio, no por capa**. En lugar de tener `controllers/`, `services/`, `repositories/` cada uno con todo mezclado, cada paquete (orden, mesa, producto) contiene su entidad, DTOs, servicio y repositorio. Así, trabajar en órdenes significa tocar un solo paquete.
 
 ---
 
-## Endpoints
+## Seguridad
 
-### Autenticación — `/login`
+### Flujo de autenticación
 
-| Método | Ruta | Auth | Descripción |
-|---|---|---|---|
-| POST | `/login` | Pública | Login con email/contraseña, retorna JWT |
+```mermaid
+sequenceDiagram
+    participant C as Cliente
+    participant L as AutenticacionController
+    participant T as TokenService
+    participant R as RoutingService
+    participant F as SecurityFilter
+    participant E as Endpoint protegido
 
-**Body:**
+    C->>L: POST /login {email, contrasena}
+    L->>L: BCrypt check
+    L->>T: Genera JWT (sub=email, claim=id+role+seccion)
+    L->>R: Calcula ruta home segun rol
+    L-->>C: { jwTtoken, rol, nombre, seccion, destino }
+
+    Note over C: Guarda token en localStorage
+
+    C->>F: GET /mesas con Authorization: Bearer <token>
+    F->>F: Valida firma + expiracion
+    F->>F: Carga Usuario y pone Authentication en el contexto
+    F->>E: Pasa la request
+    E->>E: @PreAuthorize verifica el rol
+    E-->>C: 200 OK / 401 / 403
+```
+
+### Reglas clave
+
+- **STATELESS**: no hay sesión de servidor. Cada request trae su token.
+- **JWT con firma HMAC-SHA256**. El issuer es `RestFood API`. El subject es el email.
+- **Passwords en BCrypt** (nunca en claro, nunca MD5/SHA). El campo `contrasena` tiene `@JsonIgnore` en la entidad para que no se serialice nunca por error.
+- **CORS configurable** por env var. Sin wildcard en producción.
+- **CSRF deshabilitado** porque la API es stateless y no usa cookies.
+- **401 vs 403** diferenciado: 401 = no tienes sesión válida; 403 = tienes sesión pero no el rol requerido.
+- **El `id_usuario` nunca viene del body.** El backend lo lee del `SecurityContextHolder` (quien hizo la request). Esto evita que un mesero impersone a otro pasando un `id_usuario` distinto al suyo.
+
+### Matriz de permisos
+
+| Área | ADMIN | DEV | MESERO | COCINA | CAJERO | REPARTIDOR |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|
+| Login | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Abrir orden (mesa) | ✔ | ✔ | ✔ | | | |
+| Abrir orden (llevar) | ✔ | ✔ | | | | ✔ |
+| Sincronizar platillos | ✔ | ✔ | ✔ | | | ✔ |
+| Cerrar orden | ✔ | ✔ | ✔ | | ✔ | ✔ |
+| Ver cocina | ✔ | ✔ | | ✔ | | |
+| Marcar servido | ✔ | ✔ | | ✔ | | |
+| CRUD productos | | ✔ | | | | |
+| Disponibilidad del día | | ✔ | | | | ✔ |
+| Gestión usuarios | ✔ | ✔ | | | | |
+| Eliminar físico usuario | | ✔ | | | | |
+| Corte del día / reportes | ✔ | ✔ | | | | |
+
+El rol `CAJERO` tenía al principio permiso sobre usuarios (crear/eliminar). Se lo quité porque un cajero no debería poder crear cuentas de admin. La gestión de personal la hace solo ADMIN o DEV.
+
+---
+
+## Endpoints principales
+
+### `/login` (Pública)
+
+**POST** — email + contraseña → token + info de routing.
+
 ```json
+// Request
 { "email": "mesero@rest.com", "contrasena": "1234" }
+
+// Response
+{
+  "jwTtoken": "eyJhbGciOi...",
+  "rol": "MESERO",
+  "nombre": "Juan",
+  "id_usuarios": 3,
+  "seccion": 2,
+  "destino": "/mesero"
+}
 ```
-**Response:**
-```json
-{ "jwTtoken": "eyJ..." }
-```
 
----
+El campo `destino` lo calcula `RoutingService` basado en el rol. El frontend navega directamente a esa URL sin tener que decidir nada.
 
-### Órdenes — `/ordenes`
+### `/usuarios/me` (cualquier rol autenticado)
 
-| Método | Ruta | Roles | Descripción |
-|---|---|---|---|
-| POST | `/ordenes` | ADMIN, DEV, MESERO, REPARTIDOR | Abrir nueva orden |
-| GET | `/ordenes` | ADMIN, DEV, CAJERO, MESERO | Listar órdenes (paginado) |
-| GET | `/ordenes/activa/{id_mesa}` | ADMIN, DEV, CAJERO, MESERO | Obtener orden activa de una mesa |
-| GET | `/ordenes/entregas/hoy` | ADMIN, DEV, REPARTIDOR | Órdenes de entrega del día |
-| PUT | `/ordenes/{id}/cerrar` | ADMIN, DEV, CAJERO, MESERO, REPARTIDOR | Cerrar orden e imprimir ticket |
-| POST | `/ordenes/{id}/reimprimir-ticket` | ADMIN, DEV, CAJERO, MESERO | Reimprimir ticket final |
-| POST | `/ordenes/{id}/reenviar-cocina` | ADMIN, DEV, MESERO | Reenviar comanda a cocina |
+**GET** — devuelve los datos del usuario del token. Se usa para revalidar la sesión cada 5 minutos desde el frontend.
 
----
+### `/ordendetalles` (Sincronizador — el corazón del sistema)
 
-### Detalle de Órdenes — `/ordendetalles`
+**POST** — recibe la comanda completa de una orden y calcula diferencias contra lo que ya está guardado.
 
-| Método | Ruta | Roles | Descripción |
-|---|---|---|---|
-| POST | `/ordendetalles` | ADMIN, DEV, MESERO, REPARTIDOR | Sincronizar platillos de una orden |
-
-Este endpoint es el núcleo del sistema. Recibe la comanda completa y calcula diferencias: crea nuevos detalles, actualiza modificados y elimina los removidos. Dispara impresión de ticket de cocina y broadcast WebSocket.
-
-**Body:**
 ```json
 {
   "id_orden": 1,
-  "id_usuario": 3,
   "platillos": [
     { "id_detalle": null, "id_producto": 5, "cantidad": 2, "comentarios": "sin cebolla" },
     { "id_detalle": 14,   "id_producto": 8, "cantidad": 1, "comentarios": null }
@@ -231,182 +262,121 @@ Este endpoint es el núcleo del sistema. Recibe la comanda completa y calcula di
 }
 ```
 
----
+- `id_detalle: null` → platillo nuevo
+- `id_detalle: <numero>` con cambios → platillo modificado
+- detalle que existía en BD pero no viene en el payload → platillo cancelado
 
-### Mesas — `/mesas`
+Cada caso dispara:
+1. Registro en `evento_orden`.
+2. Impresión del ticket de cocina (solo NUEVO/MODIFICADO/CANCELADO).
+3. Broadcast por WebSocket a `/topic/cocina`.
 
-| Método | Ruta | Roles | Descripción |
-|---|---|---|---|
-| POST | `/mesas` | ADMIN, DEV, MESERO | Crear nueva mesa |
-| GET | `/mesas` | ADMIN, DEV, MESERO | Listar todas con su orden activa |
-| GET | `/mesas/rango/{inicio}/{fin}` | ADMIN, DEV, MESERO | Mesas en rango (para secciones de meseros) |
+`id_usuario` no se lee del body: se toma del contexto de seguridad para evitar impersonación.
 
----
+### Resto de endpoints
 
-### Cocina — `/cocina`
+Documentados en Swagger (`/swagger-ui/index.html`). Los grupos son:
 
-| Método | Ruta | Roles | Descripción |
-|---|---|---|---|
-| GET | `/cocina` | ADMIN, DEV, COCINA | Listar órdenes pendientes |
-| PATCH | `/cocina/{id}/servido` | ADMIN, DEV, COCINA | Marcar orden como servida |
-
----
-
-### Productos — `/productos`
-
-| Método | Ruta | Roles | Descripción |
-|---|---|---|---|
-| POST | `/productos` | DEV | Crear producto |
-| GET | `/productos` | ADMIN, DEV, MESERO, REPARTIDOR | Listar todos con categoría |
-| PUT | `/productos/{id}` | DEV | Actualizar producto |
-| DELETE | `/productos/{id}` | DEV | Eliminar producto |
-| PATCH | `/productos/{id}/dia` | DEV, REPARTIDOR | Actualizar disponibilidad/precio del día |
-| PUT | `/productos/desactivar-dia/{categoriaId}` | DEV, REPARTIDOR | Desactivar todos los de una categoría |
-
----
-
-### Categorías — `/categorias`
-
-| Método | Ruta | Roles | Descripción |
-|---|---|---|---|
-| GET | `/categorias` | ADMIN, DEV, REPARTIDOR | Listar categorías |
-| POST | `/categorias` | ADMIN, DEV | Crear categoría |
-
----
-
-### Usuarios — `/usuarios`
-
-| Método | Ruta | Roles | Descripción |
-|---|---|---|---|
-| POST | `/usuarios` | ADMIN, DEV | Crear usuario |
-| GET | `/usuarios` | ADMIN, DEV, CAJERO | Listar usuarios (paginado) |
-| PUT | `/usuarios` | ADMIN, DEV, CAJERO | Actualizar usuario |
-| DELETE | `/usuarios/{id}` | ADMIN, DEV, CAJERO | Baja lógica (soft delete) |
-| PUT | `/usuarios/activar/{id}` | ADMIN, DEV, CAJERO | Reactivar usuario |
-| DELETE | `/usuarios/eliminar/{id}` | ADMIN, DEV, CAJERO | Eliminar físico |
-
----
-
-### Admin / Reportes — `/admin`
-
-| Método | Ruta | Roles | Descripción |
-|---|---|---|---|
-| GET | `/admin?fecha=YYYY-MM-DD` | ADMIN, DEV | Corte de caja del día |
-| GET | `/admin/cancelaciones?desde=&hasta=` | ADMIN, DEV | Cancelaciones por mesero en rango de fechas |
-
-**Response corte (`DatosCorteDia`):**
-```json
-{
-  "totalGeneral": 4500.00,
-  "totalDesayuno": 1200.00,
-  "totalComida": 3300.00,
-  "totalPlatillosLoza": 87,
-  "totalPlatillosParaLlevar": 34,
-  "ventasPorEmpleado": [...]
-}
-```
+- `/ordenes`, `/ordendetalles` — flujo de ventas.
+- `/mesas` — listado y estados de mesas.
+- `/cocina` — pantalla de cocina.
+- `/productos`, `/categorias` — menú.
+- `/usuarios` — gestión de personal.
+- `/admin` — corte del día y cancelaciones.
 
 ---
 
 ## WebSocket (STOMP)
 
-**Endpoint de conexión:** `ws://localhost:8080/ws-restfood`  
-**Fallback SockJS:** `http://localhost:8080/ws-restfood`  
-**Prefijo app:** `/app`  
-**Broker topics:** `/topic`
+Endpoint de conexión: `ws://<host>:8080/ws-restfood` (con fallback SockJS).
 
-### Topics disponibles
+El handshake requiere el JWT. Se valida en `StompChannelInterceptor` — si el token no es válido, la conexión se rechaza antes de que el cliente pueda suscribirse a nada.
 
-| Topic | Cuándo se emite | Quién escucha |
-|---|---|---|
-| `/topic/mesas` | Al abrir o cerrar una orden de mesa | Panel admin, panel mesero |
-| `/topic/cocina` | Al sincronizar platillos (nuevo/modificado/cancelado) | Panel cocina |
-| `/topic/tickets` | Al cerrar una orden | Panel admin (impresión) |
+### Topics
 
-**Payload `/topic/cocina`** (ejemplo ticket de cocina):
-```json
-{
-  "numero_comanda": 42,
-  "tipo": "LOZA",
-  "mesa": "5",
-  "platillos": [
-    { "nombre": "Enchiladas", "cantidad": 2, "estado": "NUEVO", "comentarios": "" },
-    { "nombre": "Agua fresca", "cantidad": 1, "estado": "CANCELADO", "comentarios": "" }
-  ]
-}
-```
+| Topic | Cuándo se emite | Quién escucha | Payload (resumen) |
+|---|---|---|---|
+| `/topic/mesas` | Al abrir/cerrar una orden de mesa | Panel admin, panel mesero | `{ id_mesa, estado, id_orden, nombre_mesero, platillos }` |
+| `/topic/cocina` | Al sincronizar platillos o cerrar cuenta | Panel cocina | `{ numero_comanda, tipo, mesa, platillos: [{nombre, cantidad, estado, comentarios}] }` |
+| `/topic/tickets` | Al cerrar una orden | Panel admin (impresión opcional) | `{ id_orden, numero_comanda, total, numeroMesa }` |
+
+El broadcast ocurre **después** de hacer commit en la BD. Si la transacción falla, el mensaje no se emite.
 
 ---
 
-## Seguridad
+## Impresión
 
-- **Autenticación:** JWT con `Authorization: Bearer <token>` en cada request
-- **Contraseñas:** BCrypt
-- **Sesión:** STATELESS (sin cookies ni sesiones del servidor)
-- **CORS:** Wildcard `*` (ajustar para producción)
-- **CSRF:** Deshabilitado (API stateless)
-- **Rutas públicas:** POST `/login`, docs Swagger, endpoint WS
+`ImpresoraService` soporta dos modos:
 
-### Roles y permisos
+1. **USB local** (activo): abre el device por nombre de impresora del sistema operativo.
+2. **TCP/IP** (comentado, listo para activar): para impresoras de red.
 
-| Rol | Acceso principal |
-|---|---|
-| ADMIN | Todo excepto gestión de productos (DEV) |
-| DEV | Todo, incluyendo CRUD de productos y categorías |
-| MESERO | Mesas, órdenes, platillos de su sección |
-| COCINA | Ver pedidos pendientes, marcar como servido |
-| CAJERO | Cerrar órdenes, ver usuarios, reportes |
-| REPARTIDOR | Órdenes para llevar, disponibilidad de platillos del día |
+Cada categoría tiene un campo `impresora` (string con el nombre del device). Así, los platillos de "Parrilla" se imprimen en la impresora de la parrilla y los de "Bebidas" en la de barra, sin que el mesero tenga que pensar en eso.
 
----
+Momentos en que se dispara:
 
-## Impresión de tickets
-
-El servicio `ImpresoraService` soporta:
-- **USB local:** Impresoras POS-58 conectadas por USB
-- **TCP/IP:** Configuración lista (comentada) para impresoras de red
-
-Cada categoría tiene un campo `impresora` que determina a qué impresora se enruta el ticket de cocina de esa categoría.
-
-Se imprime automáticamente al:
-1. Sincronizar platillos → ticket de cocina
-2. Cerrar orden → ticket del cliente
+1. `POST /ordendetalles` → ticket de cocina (por cada impresora involucrada).
+2. `PUT /ordenes/{id}/cerrar` → ticket del cliente.
+3. `POST /ordenes/{id}/reimprimir-ticket` → reimprime el ticket del cliente.
+4. `POST /ordenes/{id}/reenviar-cocina` → reenvía la comanda completa marcada como REENVIO.
 
 ---
 
 ## Manejo de errores
 
-`TratadorDeErrores.java` intercepta excepciones globalmente:
+`TratadorDeErrores` intercepta globalmente:
 
-| Excepción | HTTP | Descripción |
+| Excepción | HTTP | Cuándo |
 |---|---|---|
-| `ValidacionException` | 400 | Violación de regla de negocio |
-| `RecursoNoEncontradoException` | 404 | Entidad no encontrada |
-| `MethodArgumentNotValidException` | 400 | Fallo de Bean Validation |
-| Otras | 500 | Error interno |
+| `ValidacionException` | 400 | Regla de negocio rota (e.g. "mesa ya está ocupada", "categoría llena") |
+| `RecursoNoEncontradoException` | 404 | Entidad no existe |
+| `MethodArgumentNotValidException` | 400 | Bean Validation falla en el DTO |
+| `BadCredentialsException` | 401 | Login incorrecto |
+| `AccessDeniedException` | 403 | Rol insuficiente |
+| Otras | 500 | Error interno, mensaje genérico (sin stack) |
 
-**Response de error:**
+Respuesta estandarizada:
+
 ```json
-{ "mensaje": "Descripción del error", "ruta": "/ordenes/cerrar/99" }
+{ "mensaje": "Descripcion del error", "ruta": "/ordenes/99/cerrar" }
 ```
+
+**En 500 nunca se expone el mensaje de la excepción original** para no filtrar info de infraestructura (nombres de columnas, stack traces). Solo se loggea server-side.
 
 ---
 
-## Relaciones entre entidades
+## Decisiones que podrías cuestionar
 
-```
-Usuario ──< Orden ──< OrdenDetalle >── Producto >── Categoria
-Mesa    ──< Orden
-Orden   ──< EventoOrden
-Usuario ──< EventoOrden
-```
+**¿Por qué no usas DDD estricto / CQRS / event sourcing?** Porque es un sistema para un restaurante de un pueblo, no un banco. Over-engineering aquí es peor que la deuda técnica.
+
+**¿Por qué no hay tests unitarios todavía?** Honestamente porque estaba priorizando que funcione para desplegar. Es lo primero que voy a agregar en la v2.
+
+**¿Por qué MySQL y no Postgres?** Porque es lo que está instalado en las PCs del restaurante y lo que conozco. Postgres sería técnicamente mejor para reportes complejos.
+
+**¿Por qué Flyway en `validate` por defecto?** Porque `update` deja que Hibernate altere el schema silenciosamente; eso está bien en dev pero en producción quieres que cada cambio de schema pase por una migración versionada.
 
 ---
 
-## Notas de producción
+## Despliegue (cheat sheet)
 
-- Cambiar `spring.jpa.hibernate.ddl-auto=update` a `validate` en producción
-- Definir `JWT_SECRET` como variable de entorno segura (mínimo 256 bits)
-- Restringir CORS a los dominios permitidos en `SecurityConfigurations.java`
-- Configurar IP de impresoras de red en `ImpresoraService.java`
-- Revisar credenciales de base de datos en `application.properties`
+1. `mvn clean package` → genera `target/api-0.0.1-SNAPSHOT.jar`.
+2. Copia el jar al servidor.
+3. Configura variables de entorno (JWT_SECRET real, DB_URL con IP del MySQL, CORS_ORIGINS con la IP del frontend).
+4. Arráncalo con `java -jar api.jar` o como servicio (systemd / NSSM en Windows).
+5. Verifica que `curl http://localhost:8080/swagger-ui/index.html` responda 200.
+6. Verifica que `POST /login` funcione con un usuario real.
+
+Si algo falla, los logs están en `logs/` (configurable en `application.properties`).
+
+---
+
+## Problemas comunes
+
+| Síntoma | Causa probable | Solución |
+|---|---|---|
+| `Communications link failure` al arrancar | MySQL no está corriendo o `DB_URL` apunta mal | Verifica `systemctl status mysql` o `services.msc` |
+| `JWT secret is too short` | `JWT_SECRET` < 32 chars | Usa `openssl rand -base64 48` |
+| CORS bloqueado en el browser | Origen del frontend no está en `CORS_ORIGINS` | Agrégalo a la variable y reinicia |
+| Impresora no responde | Device name mal escrito en la categoría | Verifica el nombre exacto en "Impresoras del sistema" |
+| WebSocket se desconecta constantemente | Token expiró o fue revocado | El frontend debería reconectar solo; si no, revisar `websocketService.js` |
+| 401 en `/usuarios/me` inmediato | El token en localStorage es viejo y `JWT_SECRET` cambió | Logout + login. Los tokens firmados con el secret anterior ya no valen |

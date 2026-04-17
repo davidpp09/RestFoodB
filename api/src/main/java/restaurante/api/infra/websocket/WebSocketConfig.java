@@ -1,5 +1,6 @@
 package restaurante.api.infra.websocket;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -9,6 +10,9 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    @Value("${cors.allowed-origins:*}")
+    private String[] origenesPermitidos;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -21,10 +25,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // 🔌 El punto de conexión físico para el Frontend
+        // 🔌 Acepta orígenes desde propiedad cors.allowed-origins (patrón, p. ej. http://192.168.*.*:5173)
         registry.addEndpoint("/ws-restfood")
-                .setAllowedOriginPatterns("http://localhost:5173") // ✅ setAllowedOriginPatterns, no setAllowedOrigins
-                .withSockJS();// 🛠️ Plan B por si el navegador no soporta WebSockets puros
+                .setAllowedOriginPatterns(origenesPermitidos)
+                .withSockJS();
     }
 
 }

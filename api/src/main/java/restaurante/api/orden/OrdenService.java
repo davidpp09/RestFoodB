@@ -63,7 +63,9 @@ public class OrdenService {
 
     @Transactional // ✅ faltaba
     public DatosApertura abrirCuenta(DatosAbrirOrden datos) {
-        var usuario = usuarioRepository.getReferenceById(datos.id_usuario());
+        // Tomar SIEMPRE el usuario del token — nunca confiar en el id_usuario del body
+        var autenticado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var usuario = usuarioRepository.getReferenceById(autenticado.getId_usuarios());
         boolean conMesa = usuario.getRol().equals(Roles.MESERO) || esSuperUsuario(usuario.getRol());
 
         LocalDateTime inicioDia = LocalDate.now().atStartOfDay();
@@ -105,15 +107,18 @@ public class OrdenService {
 
     @Transactional
     public DatosRespuestaOrden enviarOrden(DatosSincronizarComanda datos) {
-        var orden = ordenRepository.findByIdConBloqueo(datos.id_orden()).orElseThrow();
-        var usuario = usuarioRepository.getReferenceById(datos.id_usuario());
+        var orden = ordenRepository.findByIdConBloqueo(datos.id_orden())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Orden no encontrada"));
+        // Tomar SIEMPRE el usuario del token — nunca confiar en el id_usuario del body
+        var autenticado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var usuario = usuarioRepository.getReferenceById(autenticado.getId_usuarios());
 
         if (orden.getEstatus().equals(Estatus.PAGADA)) {
             throw new ValidacionException("La orden ya fue pagada, no puedes modificarla.");
         }
 
         // ✅ Superusuarios pueden modificar cualquier orden
-        if (!esSuperUsuario(usuario.getRol()) && !orden.getUsuario().getId_usuarios().equals(datos.id_usuario())) {
+        if (!esSuperUsuario(usuario.getRol()) && !orden.getUsuario().getId_usuarios().equals(usuario.getId_usuarios())) {
             throw new ValidacionException("Solo el mesero asignado puede modificar esta orden.");
         }
 
@@ -145,7 +150,8 @@ public class OrdenService {
         // 4. Procesar platillos del frontend (nuevos o modificados)
         for (DatosPlatilloLote platillo : datos.platillos()) {
             if (platillo.id_detalle() == null) {
-                var producto = productoRepository.findById(platillo.id_producto()).orElseThrow();
+                var producto = productoRepository.findById(platillo.id_producto())
+                        .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado: " + platillo.id_producto()));
                 String impresora = producto.getCategoria().getImpresora();
                 OrdenDetalle nuevoDetalle = ordenDetalleRepository.save(new OrdenDetalle(platillo, producto, orden));
                 eventoOrdenRepository.save(new EventoOrden(orden, usuario, TipoEvento.PLATILLO_NUEVO,
@@ -155,8 +161,10 @@ public class OrdenService {
                         null, platillo.comentarios()));
                 ticketCocina.add(new DatosPlatilloTicket("🟢 NUEVO", producto.getNombre(), platillo.cantidad(), platillo.comentarios(), impresora));
             } else {
-                var modificado = ordenDetalleRepository.findById(platillo.id_detalle()).orElseThrow();
-                var producto   = productoRepository.findById(platillo.id_producto()).orElseThrow();
+                var modificado = ordenDetalleRepository.findById(platillo.id_detalle())
+                        .orElseThrow(() -> new RecursoNoEncontradoException("Detalle no encontrado: " + platillo.id_detalle()));
+                var producto   = productoRepository.findById(platillo.id_producto())
+                        .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado: " + platillo.id_producto()));
                 String impresora = producto.getCategoria().getImpresora();
 
                 boolean cambioCantidad    = !modificado.getCantidad().equals(platillo.cantidad());
@@ -262,6 +270,7 @@ public class OrdenService {
         return ticket;
     }
 
+    @Transactional(readOnly = true)
     public void reenviarACocina(Long idOrden) {
         var orden = ordenRepository.findById(idOrden)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Orden no encontrada"));
@@ -298,6 +307,7 @@ public class OrdenService {
         impresoraService.imprimirComandaCocina(ticketFinal);
     }
 
+    @Transactional(readOnly = true)
     public DatosRespuestaCuenta reimprimirTicket(Long idOrden) {
         var orden = ordenRepository.findById(idOrden)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Orden no encontrada"));
@@ -329,6 +339,7 @@ public class OrdenService {
         return ticket;
     }
 
+    @Transactional(readOnly = true)
     public DatosRespuestaOrden obtenerOrdenActiva(Long id_mesa) {
         var orden = ordenRepository.findActivaByMesa(id_mesa)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No hay orden activa para esta mesa"));
@@ -341,6 +352,7 @@ public class OrdenService {
         return new DatosRespuestaOrden(orden.getId_ordenes(), orden.getNumero_comanda(), orden.getTotal(), platillosMapeados, orden.getTipo().toString(), orden.getMesa() != null ? orden.getMesa().getId_mesas() : null);
     }
 
+    @Transactional(readOnly = true)
     public List<DatosEntregaHoy> obtenerEntregasHoy() {
         LocalDateTime inicio = LocalDate.now().atStartOfDay();
         LocalDateTime fin    = LocalDate.now().atTime(LocalTime.MAX);
@@ -360,6 +372,7 @@ public class OrdenService {
                 }).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<DatosRespuestaOrden> listarOrdenesCocina() {
         return ordenRepository.findByEstatus(Estatus.PREPARANDO).stream().map(orden -> {
             var platillos = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes());
