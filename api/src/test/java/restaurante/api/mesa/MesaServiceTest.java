@@ -206,4 +206,57 @@ class MesaServiceTest {
 
         assertThrows(ValidacionException.class, mesa::abrirMesa);
     }
+
+    @Test
+    @DisplayName("Lote 51-65: crea las 15 mesas, LIBRES y con su mesera")
+    void crearLote_CreaElRango() {
+        var magui = empleado(12, "MAGUI", Roles.MESERO, true);
+        when(mesaRepository.numerosExistentes(any())).thenReturn(List.of());
+        when(mesaRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        List<Mesa> nuevas = servicio.crearLote(new DatosRegistroLoteMesas(51, 65, 12L));
+
+        assertEquals(15, nuevas.size());
+        assertEquals("51", nuevas.get(0).getNumero());
+        assertEquals("65", nuevas.get(14).getNumero());
+        nuevas.forEach(m -> {
+            assertEquals(Estado.LIBRE, m.getEstado());
+            assertTrue(m.estaAsignadaA(magui));
+        });
+    }
+
+    @Test
+    @DisplayName("Lote con mesas que ya existen: no crea NINGUNA y dice cuáles chocan")
+    void crearLote_ConRepetidas_TodoONada() {
+        when(mesaRepository.numerosExistentes(any())).thenReturn(List.of("53", "51"));
+
+        var error = assertThrows(ValidacionException.class,
+                () -> servicio.crearLote(new DatosRegistroLoteMesas(51, 55, null)));
+
+        assertTrue(error.getMessage().contains("51, 53"), error.getMessage());
+        verify(mesaRepository, never()).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("Rango al revés (65-51) se rechaza")
+    void crearLote_AlReves_Falla() {
+        assertThrows(ValidacionException.class, () -> servicio.crearLote(new DatosRegistroLoteMesas(65, 51, null)));
+        verify(mesaRepository, never()).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("Un dedazo (51-650) no crea 600 mesas: tope de 50 por lote")
+    void crearLote_Enorme_Falla() {
+        assertThrows(ValidacionException.class, () -> servicio.crearLote(new DatosRegistroLoteMesas(51, 650, null)));
+        verify(mesaRepository, never()).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("Una sola mesa por lote (51-51) también vale")
+    void crearLote_UnaSola() {
+        when(mesaRepository.numerosExistentes(any())).thenReturn(List.of());
+        when(mesaRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        assertEquals(1, servicio.crearLote(new DatosRegistroLoteMesas(51, 51, null)).size());
+    }
 }

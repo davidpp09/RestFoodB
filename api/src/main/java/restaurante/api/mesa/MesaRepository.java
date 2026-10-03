@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +34,9 @@ public interface MesaRepository extends JpaRepository<Mesa, Long> {
 
     @Query("SELECT m FROM mesa m WHERE m.usuarioAsignado.id_usuarios = :idUsuario")
     List<Mesa> findAsignadasA(@Param("idUsuario") Long idUsuario);
+
+    @Query("SELECT m.numero FROM mesa m WHERE m.numero IN :numeros")
+    List<String> numerosExistentes(@Param("numeros") Collection<String> numeros);
 
     @Query("SELECT COUNT(m) > 0 FROM mesa m WHERE m.numero = :numero")
     boolean existeNumero(@Param("numero") String numero);

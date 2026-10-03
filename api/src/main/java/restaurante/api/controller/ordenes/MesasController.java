@@ -76,6 +76,13 @@ public class MesasController {
         return ResponseEntity.created(url).body(new DatosMesaGestion(mesa));
     }
 
+    // Alta por rango: "de la 51 a la 65"
+    @PostMapping("/lote")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public ResponseEntity<List<DatosMesaGestion>> registrarLote(@RequestBody @Valid DatosRegistroLoteMesas datos) {
+        return ResponseEntity.status(201).body(mesaService.crearLote(datos).stream().map(DatosMesaGestion::new).toList());
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
     public ResponseEntity<DatosMesaGestion> renombrar(@PathVariable Long id, @RequestBody @Valid DatosActualizacionMesa datos) {

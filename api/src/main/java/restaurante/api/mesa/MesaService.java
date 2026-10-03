@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * Alta, baja y reparto de mesas entre las meseras.
@@ -64,6 +65,36 @@ public class MesaService {
         }
         Usuario mesera = datos.id_usuario_asignado() != null ? meseraActiva(datos.id_usuario_asignado()) : null;
         return mesaRepository.save(new Mesa(numero, mesera));
+    }
+
+    /** Tope por lote: un dedazo (51-650 en vez de 51-65) no debe crear 600 mesas. */
+    static final int MAXIMO_POR_LOTE = 50;
+
+    /**
+     * Crea las mesas desde..hasta de un jalón. Todo o nada: si alguna ya existe
+     * no se crea ninguna y se dice cuáles chocan, para no dejar el rango a medias.
+     */
+    @Transactional
+    public List<Mesa> crearLote(DatosRegistroLoteMesas datos) {
+        int desde = datos.desde();
+        int hasta = datos.hasta();
+        if (desde > hasta) {
+            throw new ValidacionException("El rango va al revés: " + desde + " es mayor que " + hasta + ".");
+        }
+        int cuantas = hasta - desde + 1;
+        if (cuantas > MAXIMO_POR_LOTE) {
+            throw new ValidacionException("Son " + cuantas + " mesas; el máximo por lote es " + MAXIMO_POR_LOTE + ".");
+        }
+        List<String> numeros = IntStream.rangeClosed(desde, hasta).mapToObj(String::valueOf).toList();
+        List<String> repetidas = mesaRepository.numerosExistentes(numeros).stream()
+                .sorted(Comparator.comparingInt(Integer::parseInt))
+                .toList();
+        if (!repetidas.isEmpty()) {
+            throw new ValidacionException("Ya existen las mesas " + String.join(", ", repetidas)
+                    + ". No se creó ninguna; ajusta el rango.");
+        }
+        Usuario mesera = datos.id_usuario_asignado() != null ? meseraActiva(datos.id_usuario_asignado()) : null;
+        return mesaRepository.saveAll(numeros.stream().map(n -> new Mesa(n, mesera)).toList());
     }
 
     @Transactional

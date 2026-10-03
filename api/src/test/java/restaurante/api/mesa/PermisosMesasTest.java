@@ -55,7 +55,7 @@ class PermisosMesasTest {
     @DisplayName("Crear, renombrar, dar de baja y repartir mesas: solo ADMIN y DEV")
     void gestion_SoloAdminYDev() {
         Set<String> esperado = Set.of("ADMIN", "DEV");
-        for (String metodo : List.of("gestion", "registrar", "renombrar", "darDeBaja",
+        for (String metodo : List.of("gestion", "registrar", "registrarLote", "renombrar", "darDeBaja",
                 "reactivar", "asignar", "cubrirTurno")) {
             assertEquals(esperado, rolesDe(metodo), metodo);
         }
