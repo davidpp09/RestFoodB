@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,6 +22,7 @@ import restaurante.api.usuario.*;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.List;
 
 @RequestMapping("/usuarios")
 @RestController
@@ -88,6 +90,15 @@ public class UsuariosController {
     public ResponseEntity<Page<DatosListaUsuario>> listar(@PageableDefault(size = 10, sort = {"nombre"}) Pageable pagina) {
         var page = repository.findAllByEstatusTrue(pagina).map(DatosListaUsuario::new);
         return ResponseEntity.ok(page);
+    }
+
+    // Pantalla de Personal: activos Y dados de baja, sin paginar. El listado de
+    // arriba pagina de 10 en 10 y el frontend solo leía la primera página: el
+    // empleado número 11 desaparecía de la lista sin aviso.
+    @GetMapping("/todos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public ResponseEntity<List<DatosListaUsuario>> listarTodos() {
+        return ResponseEntity.ok(repository.findAll(Sort.by("nombre")).stream().map(DatosListaUsuario::new).toList());
     }
 
     @PutMapping
