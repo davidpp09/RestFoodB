@@ -16,9 +16,11 @@ import restaurante.api.infra.errores.RecursoNoEncontradoException;
 import restaurante.api.infra.errores.ValidacionException;
 import restaurante.api.infra.security.DatosLoginRespuesta;
 import restaurante.api.infra.security.RoutingService;
+import restaurante.api.mesa.MesaService;
 import restaurante.api.usuario.*;
 
 import java.net.URI;
+import java.time.LocalDate;
 
 @RequestMapping("/usuarios")
 @RestController
@@ -33,6 +35,12 @@ public class UsuariosController {
 
     @Autowired
     private RoutingService routingService;
+
+    @Autowired
+    private MesaService mesaService;
+
+    @Autowired
+    private VentasEmpleadoService ventasEmpleadoService;
 
     // Revalidación de sesión: el frontend llama esto al arrancar para saber si el token sigue siendo válido.
     // Cualquier rol autenticado puede consultar sus propios datos (override del @PreAuthorize de clase).
@@ -99,6 +107,10 @@ public class UsuariosController {
             }
         }
         usuario.actualizarInformacion(datos);
+        // Si deja de ser mesera, sus mesas quedan libres para repartirse
+        if (usuario.getRol() != Roles.MESERO) {
+            mesaService.quitarAsignaciones(usuario.getId_usuarios());
+        }
         return ResponseEntity.ok(new DatosRespuestaUsuario(
                 usuario.getId_usuarios(),
                 usuario.getNombre(),
@@ -130,7 +142,20 @@ public class UsuariosController {
     public ResponseEntity eliminarLogico(@PathVariable Long id) {
         var usuario = repository.getReferenceById(id);
         usuario.eliminarUsuario(id);
+        // Una mesera dada de baja no puede atender: sus mesas quedan sin asignar
+        // y la pantalla de Personal las marca para repartirlas.
+        mesaService.quitarAsignaciones(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Ficha del empleado: lo que vendió hoy, en la semana y en el mes.
+    @GetMapping("/{id}/ventas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public ResponseEntity<DatosVentasEmpleado> ventas(@PathVariable Long id) {
+        if (!repository.existsById(id)) {
+            throw new RecursoNoEncontradoException("Usuario no encontrado");
+        }
+        return ResponseEntity.ok(ventasEmpleadoService.resumen(id, LocalDate.now()));
     }
 
     @PutMapping("/activar/{id}")

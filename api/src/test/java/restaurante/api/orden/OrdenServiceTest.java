@@ -20,7 +20,9 @@ import restaurante.api.usuario.UsuarioRepository;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -70,9 +72,50 @@ class OrdenServiceTest {
 
         when(usuarioFalso.getId_usuarios()).thenReturn(1L);
         when(usuarioFalso.getRol()).thenReturn(Roles.MESERO);
+        // La mesa es SUYA: así el error que sale es el de "ocupada" y no el de
+        // "no está asignada a ti", que se revisa antes.
+        mesaOcupada.asignarA(usuarioFalso);
         when(usuarioRepository.findByIdConBloqueo(1L)).thenReturn(Optional.of(usuarioFalso));
         when(mesaRepository.findByIdConBloqueo(1L)).thenReturn(Optional.of(mesaOcupada));
         autenticarComo(usuarioFalso);
+
+        var error = assertThrows(ValidacionException.class, () -> ordenService.abrirCuenta(datos));
+        assertTrue(error.getMessage().contains("en uso"), error.getMessage());
+    }
+
+    // 🧪 La mesera no puede abrir una mesa asignada a otra
+    @Test
+    void abrirCuenta_MesaDeOtraMesera_LanzaExcepcion() {
+        var datos = new DatosAbrirOrden(5L, 8L, Tipo.LOZA, Servicio.COMIDA);
+        var valeria = Mockito.mock(Usuario.class);
+        var magui = Mockito.mock(Usuario.class);
+        var mesaDeMagui = new Mesa(5L, "5", Estado.LIBRE);
+
+        when(valeria.getId_usuarios()).thenReturn(8L);
+        when(valeria.getRol()).thenReturn(Roles.MESERO);
+        when(magui.getId_usuarios()).thenReturn(12L);
+        mesaDeMagui.asignarA(magui);
+        when(usuarioRepository.findByIdConBloqueo(8L)).thenReturn(Optional.of(valeria));
+        when(mesaRepository.findByIdConBloqueo(5L)).thenReturn(Optional.of(mesaDeMagui));
+        autenticarComo(valeria);
+
+        var error = assertThrows(ValidacionException.class, () -> ordenService.abrirCuenta(datos));
+        assertTrue(error.getMessage().contains("no está asignada a ti"), error.getMessage());
+        assertEquals(Estado.LIBRE, mesaDeMagui.getEstado(), "La mesa ajena no debe quedar ocupada");
+    }
+
+    // 🧪 Una mesa sin mesera asignada tampoco la abre una mesera
+    @Test
+    void abrirCuenta_MesaSinAsignar_LaMeseraNoLaAbre() {
+        var datos = new DatosAbrirOrden(51L, 8L, Tipo.LOZA, Servicio.COMIDA);
+        var valeria = Mockito.mock(Usuario.class);
+        var mesaNueva = new Mesa(51L, "51", Estado.LIBRE);
+
+        when(valeria.getId_usuarios()).thenReturn(8L);
+        when(valeria.getRol()).thenReturn(Roles.MESERO);
+        when(usuarioRepository.findByIdConBloqueo(8L)).thenReturn(Optional.of(valeria));
+        when(mesaRepository.findByIdConBloqueo(51L)).thenReturn(Optional.of(mesaNueva));
+        autenticarComo(valeria);
 
         assertThrows(ValidacionException.class, () -> ordenService.abrirCuenta(datos));
     }
