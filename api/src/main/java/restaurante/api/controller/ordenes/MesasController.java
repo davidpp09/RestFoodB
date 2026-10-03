@@ -1,19 +1,22 @@
 package restaurante.api.controller.ordenes;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
-import restaurante.api.mesa.DatosRegistroMesa;
-import restaurante.api.mesa.DatosRespuestaMesa;
-import restaurante.api.mesa.Mesa;
-import restaurante.api.mesa.MesaRepository;
+import restaurante.api.mesa.*;
+import restaurante.api.orden.OrdenRepository;
+import restaurante.api.ordenDetalle.DatosDetalleRespuesta;
+import restaurante.api.ordenDetalle.OrdenDetalleRepository;
+import restaurante.api.usuario.Usuario;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/mesas")
 @RestController
@@ -24,77 +27,110 @@ public class MesasController {
     private MesaRepository repository;
 
     @Autowired
-    private restaurante.api.orden.OrdenRepository ordenRepository;
+    private MesaService mesaService;
 
     @Autowired
-    private restaurante.api.ordenDetalle.OrdenDetalleRepository ordenDetalleRepository;
+    private OrdenRepository ordenRepository;
+
+    @Autowired
+    private OrdenDetalleRepository ordenDetalleRepository;
+
+    // ---------- Lo que ven las tablets ----------
+
+    // Vista de sala del ADMIN: todas las mesas activas con su cuenta abierta.
+    @GetMapping
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<DatosRespuestaMesa>> listar() {
+        return ResponseEntity.ok(repository.findActivas().stream().map(this::conOrdenActiva).toList());
+    }
+
+    // Tablet de la mesera: solo sus mesas (ver MesaService.mesasDe).
+    @GetMapping("/mias")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<DatosRespuestaMesa>> mias(@AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(mesaService.mesasDe(usuario).stream().map(this::conOrdenActiva).toList());
+    }
+
+    // Lo usa el frontend anterior a /mias. Se puede borrar cuando todas las tablets
+    // hayan recargado la versión nueva.
+    @GetMapping("/rango/{inicio}/{fin}")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<DatosRespuestaMesa>> mesasRango(@PathVariable long inicio, @PathVariable long fin) {
+        return ResponseEntity.ok(repository.buscarPorRango(inicio, fin).stream().map(this::conOrdenActiva).toList());
+    }
+
+    // ---------- Gestión (pantalla de Personal) ----------
+
+    @GetMapping("/gestion")
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public ResponseEntity<List<DatosMesaGestion>> gestion() {
+        return ResponseEntity.ok(repository.findTodasConAsignacion().stream().map(DatosMesaGestion::new).toList());
+    }
 
     @PostMapping
-    @Transactional
-    public ResponseEntity<DatosRespuestaMesa> registrar(@RequestBody @Valid DatosRegistroMesa datosRegistroMesa, UriComponentsBuilder uriComponentsBuilder) {
-        Mesa mesa = repository.save(new Mesa(datosRegistroMesa));
-        DatosRespuestaMesa datosRespuesta = new DatosRespuestaMesa(
-                mesa.getId_mesas(),
-                mesa.getNumero(),
-                mesa.getEstado().toString(),
-                null,
-                null,
-                java.util.List.of(),
-                null
-        );
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public ResponseEntity<DatosMesaGestion> registrar(@RequestBody @Valid DatosRegistroMesa datos, UriComponentsBuilder uriComponentsBuilder) {
+        Mesa mesa = mesaService.crear(datos);
         URI url = uriComponentsBuilder.path("/mesas/{id}").buildAndExpand(mesa.getId_mesas()).toUri();
-        return ResponseEntity.created(url).body(datosRespuesta);
+        return ResponseEntity.created(url).body(new DatosMesaGestion(mesa));
     }
 
-    @GetMapping
-    public ResponseEntity<List<DatosRespuestaMesa>> listar() {
-        var mesas = repository.findAll().stream()
-                .map(m -> {
-                    var orden = ordenRepository.findActivaByMesa(m.getId_mesas()).orElse(null);
-                    List<restaurante.api.ordenDetalle.DatosDetalleRespuesta> platillos = java.util.List.of();
-                    String nombreMesero = null;
-                    if (orden != null) {
-                        platillos = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes())
-                                .stream().map(restaurante.api.ordenDetalle.DatosDetalleRespuesta::new).toList();
-                        nombreMesero = orden.getUsuario().getNombre();
-                    }
-                    return new DatosRespuestaMesa(
-                            m.getId_mesas(),
-                            m.getNumero(),
-                            m.getEstado().toString(),
-                            orden != null ? orden.getId_ordenes() : null,
-                            nombreMesero,
-                            platillos,
-                            orden != null ? orden.getFecha_apertura() : null
-                    );
-                })
-                .toList();
-        return ResponseEntity.ok(mesas);
+    // Alta por rango: "de la 51 a la 65"
+    @PostMapping("/lote")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public ResponseEntity<List<DatosMesaGestion>> registrarLote(@RequestBody @Valid DatosRegistroLoteMesas datos) {
+        return ResponseEntity.status(201).body(mesaService.crearLote(datos).stream().map(DatosMesaGestion::new).toList());
     }
 
-    @GetMapping("/rango/{inicio}/{fin}")
-    public ResponseEntity<List<DatosRespuestaMesa>> mesasRango(@PathVariable long inicio, @PathVariable long fin) {
-        var mesas = repository.buscarPorRango(inicio, fin).stream()
-                .map(m -> {
-                    var orden = ordenRepository.findActivaByMesa(m.getId_mesas()).orElse(null);
-                    List<restaurante.api.ordenDetalle.DatosDetalleRespuesta> platillos = java.util.List.of();
-                    String nombreMesero = null;
-                    if (orden != null) {
-                        platillos = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes())
-                                .stream().map(restaurante.api.ordenDetalle.DatosDetalleRespuesta::new).toList();
-                        nombreMesero = orden.getUsuario().getNombre();
-                    }
-                    return new DatosRespuestaMesa(
-                            m.getId_mesas(),
-                            m.getNumero(),
-                            m.getEstado().toString(),
-                            orden != null ? orden.getId_ordenes() : null,
-                            nombreMesero,
-                            platillos,
-                            orden != null ? orden.getFecha_apertura() : null
-                    );
-                })
-                .toList();
-        return ResponseEntity.ok(mesas);
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public ResponseEntity<DatosMesaGestion> renombrar(@PathVariable Long id, @RequestBody @Valid DatosActualizacionMesa datos) {
+        return ResponseEntity.ok(new DatosMesaGestion(mesaService.renombrar(id, datos)));
+    }
+
+    // Baja lógica: la mesa conserva su historial de órdenes.
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public ResponseEntity<DatosMesaGestion> darDeBaja(@PathVariable Long id) {
+        return ResponseEntity.ok(new DatosMesaGestion(mesaService.darDeBaja(id)));
+    }
+
+    @PutMapping("/{id}/activar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public ResponseEntity<DatosMesaGestion> reactivar(@PathVariable Long id) {
+        return ResponseEntity.ok(new DatosMesaGestion(mesaService.reactivar(id)));
+    }
+
+    @PutMapping("/asignacion")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public ResponseEntity<List<DatosMesaGestion>> asignar(@RequestBody @Valid DatosAsignacionMesas datos) {
+        return ResponseEntity.ok(mesaService.asignar(datos).stream().map(DatosMesaGestion::new).toList());
+    }
+
+    @PostMapping("/cubrir-turno")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public ResponseEntity<Map<String, Integer>> cubrirTurno(@RequestBody @Valid DatosCubrirTurno datos) {
+        return ResponseEntity.ok(Map.of("mesas_movidas", mesaService.cubrirTurno(datos)));
+    }
+
+    private DatosRespuestaMesa conOrdenActiva(Mesa m) {
+        var orden = ordenRepository.findActivaByMesa(m.getId_mesas()).orElse(null);
+        List<DatosDetalleRespuesta> platillos = List.of();
+        String nombreMesero = null;
+        if (orden != null) {
+            platillos = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes())
+                    .stream().map(DatosDetalleRespuesta::new).toList();
+            nombreMesero = orden.getUsuario().getNombre();
+        }
+        return new DatosRespuestaMesa(
+                m.getId_mesas(),
+                m.getNumero(),
+                m.getEstado().toString(),
+                orden != null ? orden.getId_ordenes() : null,
+                nombreMesero,
+                platillos,
+                orden != null ? orden.getFecha_apertura() : null
+        );
     }
 }

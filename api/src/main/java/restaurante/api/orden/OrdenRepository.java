@@ -33,6 +33,18 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
 
     List<Orden> findByEstatus(Estatus estatus);
 
+    // Mesas donde este empleado tiene una cuenta abierta (aunque la mesa ya se
+    // haya reasignado a otra mesera): las necesita ver para poder cobrarla.
+    @Query("SELECT o.mesa FROM orden o WHERE o.usuario.id_usuarios = :idUsuario AND o.mesa IS NOT NULL AND o.estatus = restaurante.api.orden.Estatus.PREPARANDO")
+    List<Mesa> findMesasConOrdenActivaDe(@Param("idUsuario") Long idUsuario);
+
+    // Ventas cobradas de un empleado en un periodo: [cantidad de órdenes, total].
+    // Mismo criterio que el corte del día: solo PAGADA, por fecha de cierre.
+    @Query("SELECT COUNT(o), COALESCE(SUM(o.total), 0) FROM orden o WHERE o.usuario.id_usuarios = :idUsuario AND o.estatus = restaurante.api.orden.Estatus.PAGADA AND o.fechaCierre BETWEEN :inicio AND :fin")
+    List<Object[]> resumenVentasDe(@Param("idUsuario") Long idUsuario,
+                                   @Param("inicio") LocalDateTime inicio,
+                                   @Param("fin") LocalDateTime fin);
+
     // Las CANCELADAS no cuentan como entregas del día
     @Query("SELECT o FROM orden o WHERE o.tipo = :tipo AND o.fecha_apertura BETWEEN :inicio AND :fin AND o.estatus <> restaurante.api.orden.Estatus.CANCELADA")
     List<Orden> findEntregasDelDia(@Param("tipo") Tipo tipo,

@@ -90,6 +90,12 @@ public class OrdenService {
             // espera y encuentra la mesa ya OCUPADA (abrirMesa lanza la validación).
             var mesa = mesaRepository.findByIdConBloqueo(datos.id_mesa())
                     .orElseThrow(() -> new RecursoNoEncontradoException("Mesa no encontrada"));
+            // La mesera solo abre las mesas que le asignaron en Personal; ADMIN y DEV
+            // abren cualquiera (son quienes cubren cuando algo se atora).
+            if (!esSuperUsuario(usuario.getRol()) && !mesa.estaAsignadaA(usuario)) {
+                throw new ValidacionException("La mesa " + mesa.getNumero()
+                        + " no está asignada a ti. Pide al encargado que te la asigne.");
+            }
             mesa.abrirMesa();
             Orden ordenGuardada = ordenRepository.save(new Orden(mesa, usuario, datos.tipo(), datos.servicio(), numeroComanda));
 
