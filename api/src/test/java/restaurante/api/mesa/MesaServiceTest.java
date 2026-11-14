@@ -192,7 +192,7 @@ class MesaServiceTest {
     @DisplayName("Una mesa con cuenta abierta no se da de baja")
     void darDeBaja_Ocupada_Falla() {
         var ocupada = new Mesa(3L, "3", Estado.OCUPADA);
-        when(mesaRepository.findById(3L)).thenReturn(Optional.of(ocupada));
+        when(mesaRepository.findByIdConAsignacion(3L)).thenReturn(Optional.of(ocupada));
 
         assertThrows(ValidacionException.class, () -> servicio.darDeBaja(3L));
         assertTrue(ocupada.getActiva());

@@ -2,6 +2,7 @@ package restaurante.api.usuario;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import restaurante.api.evento.EventoOrdenRepository;
 import restaurante.api.evento.TipoEvento;
 import restaurante.api.orden.OrdenRepository;
@@ -22,6 +23,9 @@ import java.util.List;
  * que sí es una cancelación real es el evento PLATILLO_CANCELADO.
  */
 @Service
+// Este servicio solo lee: todas sus consultas corren en una transacción de solo
+// lectura (Hibernate no revisa cambios al cerrar y MySQL puede optimizarla).
+@Transactional(readOnly = true)
 public class VentasEmpleadoService {
 
     @Autowired

@@ -1,8 +1,8 @@
 package restaurante.api.inventario;
 
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import restaurante.api.infra.errores.RecursoNoEncontradoException;
 import restaurante.api.infra.errores.ValidacionException;
 import restaurante.api.usuario.Usuario;
@@ -115,10 +115,12 @@ public class InventarioService {
         return new DatosRespuestaConteo(conteoRepository.save(conteo));
     }
 
+    @Transactional(readOnly = true)
     public List<DatosExistencia> existencias() {
         return insumoRepository.existencias();
     }
 
+    @Transactional(readOnly = true)
     public List<DatosRespuestaMovimiento> kardex(Long idInsumo) {
         return movimientoRepository.kardexDe(idInsumo).stream()
                 .map(DatosRespuestaMovimiento::new).toList();
@@ -135,6 +137,7 @@ public class InventarioService {
      * Los insumos sin un solo movimiento en el periodo no aparecen: un renglón
      * de puros ceros no dice nada y estorba para leer los que sí importan.
      */
+    @Transactional(readOnly = true)
     public List<DatosTeoricoReal> teoricoContraReal(LocalDate desde, LocalDate hasta) {
         var movimientos = movimientoRepository.entre(desde.atStartOfDay(), hasta.atTime(LocalTime.MAX));
 
