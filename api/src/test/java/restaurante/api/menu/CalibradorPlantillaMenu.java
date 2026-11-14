@@ -26,6 +26,26 @@ import java.util.List;
  */
 class CalibradorPlantillaMenu {
 
+    @Test
+    @EnabledIfSystemProperty(named = "calibrar", matches = "true")
+    void coordenadasDePreciosDeTodaLaCarta() throws Exception {
+        try (var in = getClass().getResourceAsStream("/menu/plantilla-menu.pdf"); var documento = Loader.loadPDF(in.readAllBytes())) {
+            var lineas = new ArrayList<String>();
+            var extractor = new PDFTextStripper() {
+                @Override protected void processTextPosition(TextPosition p) {
+                    if (p.getUnicode().contains("$")) lineas.add(String.format(java.util.Locale.ROOT,
+                            "%d,%.3f,%.3f,%.3f,%.3f", getCurrentPageNo(), p.getXDirAdj(), p.getYDirAdj(), p.getWidthDirAdj(), p.getFontSizeInPt()));
+                    super.processTextPosition(p);
+                }
+            };
+            extractor.getText(documento);
+            java.nio.file.Files.createDirectories(java.nio.file.Path.of("target/menu-precios"));
+            java.nio.file.Files.write(java.nio.file.Path.of("target/menu-precios/calibracion.csv"), lineas);
+            System.out.println("Precios detectados: " + lineas.size());
+            lineas.stream().limit(10).forEach(System.out::println);
+        }
+    }
+
     private record Renglon(String texto, float x, float y, float alto, String fuente, float tamano) {}
 
     /**

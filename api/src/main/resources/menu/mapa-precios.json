@@ -1,0 +1,3654 @@
+{
+  "plantillaSha256": "3462d5e4fc68b6daca775ef3b8c170908e3e67400c5dd6b81b49e057d870c270",
+  "anchoPagina": 595.5,
+  "altoPagina": 842.25,
+  "entradas": [
+    {
+      "clave": "desayuno-01",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Pozole de pollo o cerdo",
+      "productos": [
+        "Pozole de pollo",
+        "Pozole de cerdo"
+      ],
+      "precioPlantilla": 115.0,
+      "cajas": [
+        {
+          "x": 111.897,
+          "y": 200.675,
+          "ancho": 23.036,
+          "alto": 10.601,
+          "base": 208.476,
+          "tamano": 10.001,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 16.591,
+          "etiqueta": "Pozole de pollo o cerdo",
+          "cursiva": true
+        },
+        {
+          "x": 414.753,
+          "y": 205.676,
+          "ancho": 23.036,
+          "alto": 10.601,
+          "base": 213.477,
+          "tamano": 10.001,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 319.448,
+          "etiqueta": "Pozole de pollo o cerdo",
+          "cursiva": true
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-02",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Pancita chica",
+      "productos": [
+        "Pancita chica"
+      ],
+      "precioPlantilla": 125.0,
+      "cajas": [
+        {
+          "x": 71.033,
+          "y": 212.679,
+          "ancho": 23.036,
+          "alto": 10.601,
+          "base": 220.48,
+          "tamano": 10.001,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 16.591,
+          "etiqueta": "Pancita chica",
+          "cursiva": true
+        },
+        {
+          "x": 373.89,
+          "y": 217.681,
+          "ancho": 23.036,
+          "alto": 10.601,
+          "base": 225.482,
+          "tamano": 10.001,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 319.448,
+          "etiqueta": "Pancita chica",
+          "cursiva": true
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-03",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Pancita grande",
+      "productos": [
+        "Pancita grande"
+      ],
+      "precioPlantilla": 160.0,
+      "cajas": [
+        {
+          "x": 132.902,
+          "y": 212.679,
+          "ancho": 23.036,
+          "alto": 10.601,
+          "base": 220.48,
+          "tamano": 10.001,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 96.077,
+          "etiqueta": "o grande",
+          "cursiva": true
+        },
+        {
+          "x": 435.759,
+          "y": 217.681,
+          "ancho": 23.036,
+          "alto": 10.601,
+          "base": 225.482,
+          "tamano": 10.001,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 398.934,
+          "etiqueta": "o grande",
+          "cursiva": true
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-04",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Desayunos - grupo 80",
+      "productos": [
+        "Rollos de jamón con ensalada",
+        "Huevos con chorizo",
+        "Molletes con jamón",
+        "Salchichas con huevo",
+        "Huevos rancheros",
+        "Huevos divorciados"
+      ],
+      "precioPlantilla": 80.0,
+      "cajas": [
+        {
+          "x": 246.95,
+          "y": 237.632,
+          "ancho": 22.322,
+          "alto": 14.953,
+          "base": 248.697,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 246.95,
+          "etiqueta": "",
+          "cursiva": false
+        },
+        {
+          "x": 549.807,
+          "y": 242.633,
+          "ancho": 22.322,
+          "alto": 14.953,
+          "base": 253.698,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 549.807,
+          "etiqueta": "",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-05",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Desayunos - grupo 60",
+      "productos": [
+        "Enchiladas sencillas",
+        "Enfrijoladas sencillas",
+        "Huevos en salsa verde",
+        "Molletes sencillos"
+      ],
+      "precioPlantilla": 60.0,
+      "cajas": [
+        {
+          "x": 72.585,
+          "y": 239.696,
+          "ancho": 25.205,
+          "alto": 20.146,
+          "base": 255.338,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 72.585,
+          "etiqueta": "",
+          "cursiva": false
+        },
+        {
+          "x": 375.442,
+          "y": 244.698,
+          "ancho": 25.205,
+          "alto": 20.146,
+          "base": 260.339,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 375.442,
+          "etiqueta": "",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-06",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Desayunos - grupo 70",
+      "productos": [
+        "Chilaquiles sencillos",
+        "Sopes sencillos",
+        "Huevos a la mexicana",
+        "Huevos con jamón"
+      ],
+      "precioPlantilla": 70.0,
+      "cajas": [
+        {
+          "x": 73.074,
+          "y": 304.728,
+          "ancho": 22.322,
+          "alto": 14.953,
+          "base": 315.793,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 73.074,
+          "etiqueta": "",
+          "cursiva": false
+        },
+        {
+          "x": 375.931,
+          "y": 309.73,
+          "ancho": 22.322,
+          "alto": 14.953,
+          "base": 320.794,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 375.931,
+          "etiqueta": "",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-07",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Desayunos - grupo 90",
+      "productos": [
+        "Molletes con tocino",
+        "Omelet de jamón con queso",
+        "Omelet poblano",
+        "Huevos con tocino",
+        "Tacos dorados de pollo",
+        "Tacos dorados de jamón con queso",
+        "Chuleta ahumada con ensalada"
+      ],
+      "precioPlantilla": 90.0,
+      "cajas": [
+        {
+          "x": 234.756,
+          "y": 316.436,
+          "ancho": 22.322,
+          "alto": 14.953,
+          "base": 327.5,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 234.756,
+          "etiqueta": "",
+          "cursiva": false
+        },
+        {
+          "x": 537.613,
+          "y": 321.437,
+          "ancho": 22.322,
+          "alto": 14.953,
+          "base": 332.502,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 537.613,
+          "etiqueta": "",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-08",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Desayunos - grupo 95",
+      "productos": [
+        "Omelet vegetariano",
+        "Molletes con chorizo",
+        "Enchiladas verdes con pollo",
+        "Enfrijoladas de pollo",
+        "Enfrijoladas de jamón",
+        "Enfrijoladas con jamón",
+        "Chilaquiles con huevo",
+        "Chilaquiles con chuleta ahumada",
+        "Omelet de champiñones con queso",
+        "Omelet de queso en salsa verde"
+      ],
+      "precioPlantilla": 95.0,
+      "cajas": [
+        {
+          "x": 99.35,
+          "y": 362.853,
+          "ancho": 22.322,
+          "alto": 14.953,
+          "base": 373.918,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 99.35,
+          "etiqueta": "",
+          "cursiva": false
+        },
+        {
+          "x": 402.207,
+          "y": 367.855,
+          "ancho": 22.322,
+          "alto": 14.953,
+          "base": 378.919,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 402.207,
+          "etiqueta": "",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-09",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Desayunos - grupo 105",
+      "productos": [
+        "Molletes con pechuga asada",
+        "Molletes con bistec",
+        "Chilaquiles con pechuga asada",
+        "Chilaquiles con pollo deshebrado",
+        "Chilaquiles con chorizo",
+        "Enchiladas con pechuga asada",
+        "Enchiladas con carne asada",
+        "Bistec encebollado con ensalada",
+        "Pechuga encebollada con ensalada",
+        "Pechuga a la mexicana con ensalada",
+        "Pechuga empanizada con ensalada",
+        "Milanesa de res con ensalada",
+        "Enchiladas de mole con pollo",
+        "Ensalada California",
+        "Hotcakes"
+      ],
+      "precioPlantilla": 105.0,
+      "cajas": [
+        {
+          "x": 242.17,
+          "y": 432.224,
+          "ancho": 29.595,
+          "alto": 14.953,
+          "base": 443.289,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 242.17,
+          "etiqueta": "",
+          "cursiva": false
+        },
+        {
+          "x": 545.027,
+          "y": 437.226,
+          "ancho": 29.595,
+          "alto": 14.953,
+          "base": 448.29,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 545.027,
+          "etiqueta": "",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-10",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Desayunos - grupo 110",
+      "productos": [
+        "Chilaquiles con carne asada",
+        "Carne asada con papas",
+        "Sopecitos con pollo deshebrado",
+        "Hamburguesa con papas",
+        "Alambre de res",
+        "Alambre de pollo",
+        "Sopecitos con pechuga asada",
+        "Sopecitos con bistec asado",
+        "Chilaquiles con pechuga empanizada",
+        "Chilaquiles con milanesa",
+        "Milanesa con papas",
+        "Pechuga empanizada con papas"
+      ],
+      "precioPlantilla": 110.0,
+      "cajas": [
+        {
+          "x": 95.67,
+          "y": 461.739,
+          "ancho": 29.595,
+          "alto": 14.953,
+          "base": 472.804,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 95.67,
+          "etiqueta": "",
+          "cursiva": false
+        },
+        {
+          "x": 398.527,
+          "y": 466.741,
+          "ancho": 29.595,
+          "alto": 14.953,
+          "base": 477.805,
+          "tamano": 14.353,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 398.527,
+          "etiqueta": "",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-11",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Arrachera gratinada",
+      "productos": [
+        "Arrachera gratinada con papas"
+      ],
+      "precioPlantilla": 160.0,
+      "cajas": [
+        {
+          "x": 226.622,
+          "y": 611.837,
+          "ancho": 50.879,
+          "alto": 8.598,
+          "base": 618.136,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 160.349,
+          "etiqueta": "Arrachera gratinada",
+          "cursiva": false
+        },
+        {
+          "x": 529.479,
+          "y": 616.839,
+          "ancho": 50.879,
+          "alto": 8.598,
+          "base": 623.137,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 463.206,
+          "etiqueta": "Arrachera gratinada",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-12",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Bisteck o pechuga a la Tampiqueña",
+      "productos": [
+        "Bistec a la Tampiqueña",
+        "Pechuga a la Tampiqueña"
+      ],
+      "precioPlantilla": 120.0,
+      "cajas": [
+        {
+          "x": 127.408,
+          "y": 618.016,
+          "ancho": 16.712,
+          "alto": 8.598,
+          "base": 624.315,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 11.365,
+          "etiqueta": "Bisteck o pechuga a la Tampiqueña",
+          "cursiva": false
+        },
+        {
+          "x": 430.265,
+          "y": 623.017,
+          "ancho": 16.712,
+          "alto": 8.598,
+          "base": 629.316,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 314.222,
+          "etiqueta": "Bisteck o pechuga a la Tampiqueña",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-13",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Enchiladas suizas",
+      "productos": [
+        "Enchiladas suizas"
+      ],
+      "precioPlantilla": 125.0,
+      "cajas": [
+        {
+          "x": 216.792,
+          "y": 620.841,
+          "ancho": 61.556,
+          "alto": 8.598,
+          "base": 627.139,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 160.349,
+          "etiqueta": "Enchiladas suizas",
+          "cursiva": false
+        },
+        {
+          "x": 519.649,
+          "y": 625.842,
+          "ancho": 61.556,
+          "alto": 8.598,
+          "base": 632.141,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 463.206,
+          "etiqueta": "Enchiladas suizas",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-14",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Enfrijoladas a la Veracruzana",
+      "productos": [
+        "Enfrijoladas a la Veracruzana"
+      ],
+      "precioPlantilla": 125.0,
+      "cajas": [
+        {
+          "x": 106.979,
+          "y": 627.678,
+          "ancho": 38.066,
+          "alto": 8.598,
+          "base": 633.977,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 11.365,
+          "etiqueta": "Enfrijoladas a la Veracruzana",
+          "cursiva": false
+        },
+        {
+          "x": 409.836,
+          "y": 632.68,
+          "ancho": 38.066,
+          "alto": 8.598,
+          "base": 638.978,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 314.222,
+          "etiqueta": "Enfrijoladas a la Veracruzana",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-15",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Chilaquiles c/ arrachera",
+      "productos": [
+        "Chilaquiles con arrachera"
+      ],
+      "precioPlantilla": 160.0,
+      "cajas": [
+        {
+          "x": 238.642,
+          "y": 629.844,
+          "ancho": 38.066,
+          "alto": 8.598,
+          "base": 636.143,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 160.349,
+          "etiqueta": "Chilaquiles c/ arrachera",
+          "cursiva": false
+        },
+        {
+          "x": 541.499,
+          "y": 634.845,
+          "ancho": 38.066,
+          "alto": 8.598,
+          "base": 641.144,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 463.206,
+          "etiqueta": "Chilaquiles c/ arrachera",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-16",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Filete de pescado c/ papas",
+      "productos": [
+        "Filete empanizado con papas"
+      ],
+      "precioPlantilla": 135.0,
+      "cajas": [
+        {
+          "x": 98.91,
+          "y": 636.682,
+          "ancho": 44.472,
+          "alto": 8.598,
+          "base": 642.98,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 11.365,
+          "etiqueta": "Filete de pescado c/ papas",
+          "cursiva": false
+        },
+        {
+          "x": 401.767,
+          "y": 641.683,
+          "ancho": 44.472,
+          "alto": 8.598,
+          "base": 647.982,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 314.222,
+          "etiqueta": "Filete de pescado c/ papas",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-17",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Cecina c/ guacamole",
+      "productos": [
+        "Cecina con guacamole"
+      ],
+      "precioPlantilla": 150.0,
+      "cajas": [
+        {
+          "x": 228.41,
+          "y": 638.847,
+          "ancho": 48.743,
+          "alto": 8.598,
+          "base": 645.146,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 160.349,
+          "etiqueta": "Cecina c/ guacamole",
+          "cursiva": false
+        },
+        {
+          "x": 531.267,
+          "y": 643.849,
+          "ancho": 48.743,
+          "alto": 8.598,
+          "base": 650.147,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 463.206,
+          "etiqueta": "Cecina c/ guacamole",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-18",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Pollo Esp. c/ mole Poblano",
+      "productos": [
+        "Pollo especial con mole Poblano"
+      ],
+      "precioPlantilla": 130.0,
+      "cajas": [
+        {
+          "x": 99.554,
+          "y": 645.685,
+          "ancho": 44.472,
+          "alto": 8.598,
+          "base": 651.984,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 11.365,
+          "etiqueta": "Pollo Esp. c/ mole Poblano",
+          "cursiva": false
+        },
+        {
+          "x": 402.411,
+          "y": 650.687,
+          "ancho": 44.472,
+          "alto": 8.598,
+          "base": 656.985,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 314.222,
+          "etiqueta": "Pollo Esp. c/ mole Poblano",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-19",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Arrachera a la Tampiqueña",
+      "productos": [
+        "Arrachera a la Tampiqueña"
+      ],
+      "precioPlantilla": 160.0,
+      "cajas": [
+        {
+          "x": 249.811,
+          "y": 647.851,
+          "ancho": 27.061,
+          "alto": 8.598,
+          "base": 654.149,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 160.349,
+          "etiqueta": "Arrachera a la Tampiqueña",
+          "cursiva": false
+        },
+        {
+          "x": 552.668,
+          "y": 652.852,
+          "ancho": 27.061,
+          "alto": 8.598,
+          "base": 659.151,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 463.206,
+          "etiqueta": "Arrachera a la Tampiqueña",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-20",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Pechuga a la Cordon Blue",
+      "productos": [
+        "Pechuga a la cordon blue con papas"
+      ],
+      "precioPlantilla": 130.0,
+      "cajas": [
+        {
+          "x": 95.158,
+          "y": 654.689,
+          "ancho": 48.743,
+          "alto": 8.598,
+          "base": 660.987,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 11.365,
+          "etiqueta": "Pechuga a la Cordon Blue",
+          "cursiva": false
+        },
+        {
+          "x": 398.015,
+          "y": 659.69,
+          "ancho": 48.743,
+          "alto": 8.598,
+          "base": 665.988,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 314.222,
+          "etiqueta": "Pechuga a la Cordon Blue",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-21",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Alambre de arrachera",
+      "productos": [
+        "Alambre de arrachera"
+      ],
+      "precioPlantilla": 165.0,
+      "cajas": [
+        {
+          "x": 232.474,
+          "y": 656.854,
+          "ancho": 44.472,
+          "alto": 8.598,
+          "base": 663.153,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 160.349,
+          "etiqueta": "Alambre de arrachera",
+          "cursiva": false
+        },
+        {
+          "x": 535.331,
+          "y": 661.856,
+          "ancho": 44.472,
+          "alto": 8.598,
+          "base": 668.154,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 463.206,
+          "etiqueta": "Alambre de arrachera",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-22",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Oreja de Elefante",
+      "productos": [
+        "Milanesa oreja de elefante"
+      ],
+      "precioPlantilla": 155.0,
+      "cajas": [
+        {
+          "x": 217.744,
+          "y": 665.858,
+          "ancho": 59.421,
+          "alto": 8.598,
+          "base": 672.156,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 160.349,
+          "etiqueta": "Oreja de Elefante",
+          "cursiva": false
+        },
+        {
+          "x": 520.601,
+          "y": 670.859,
+          "ancho": 59.42,
+          "alto": 8.598,
+          "base": 677.158,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 463.206,
+          "etiqueta": "Oreja de Elefante",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-23",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Chilaquiles con Cecina",
+      "productos": [
+        "Chilaquiles con Cecina"
+      ],
+      "precioPlantilla": 155.0,
+      "cajas": [
+        {
+          "x": 233.571,
+          "y": 674.861,
+          "ancho": 44.472,
+          "alto": 8.598,
+          "base": 681.16,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 160.349,
+          "etiqueta": "Chilaquiles con Cecina",
+          "cursiva": false
+        },
+        {
+          "x": 536.428,
+          "y": 679.862,
+          "ancho": 44.472,
+          "alto": 8.598,
+          "base": 686.161,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 463.206,
+          "etiqueta": "Chilaquiles con Cecina",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-24",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Té",
+      "productos": [
+        "Té"
+      ],
+      "precioPlantilla": 20.0,
+      "cajas": [
+        {
+          "x": 19.989,
+          "y": 690.466,
+          "ancho": 89.207,
+          "alto": 8.598,
+          "base": 696.764,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 12.256,
+          "etiqueta": "Té",
+          "cursiva": false
+        },
+        {
+          "x": 322.846,
+          "y": 695.467,
+          "ancho": 89.207,
+          "alto": 8.598,
+          "base": 701.766,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 315.112,
+          "etiqueta": "Té",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-25",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Coctel de fruta mixta",
+      "productos": [
+        "Coctel de fruta mixta"
+      ],
+      "precioPlantilla": 60.0,
+      "cajas": [
+        {
+          "x": 217.954,
+          "y": 692.805,
+          "ancho": 59.639,
+          "alto": 8.598,
+          "base": 699.104,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 148.589,
+          "etiqueta": "Coctel de fruta mixta",
+          "cursiva": false
+        },
+        {
+          "x": 520.811,
+          "y": 697.807,
+          "ancho": 59.639,
+          "alto": 8.598,
+          "base": 704.105,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 451.446,
+          "etiqueta": "Coctel de fruta mixta",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-26",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Café de olla",
+      "productos": [
+        "Café de olla"
+      ],
+      "precioPlantilla": 20.0,
+      "cajas": [
+        {
+          "x": 52.659,
+          "y": 699.469,
+          "ancho": 57.176,
+          "alto": 8.598,
+          "base": 705.768,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 14.073,
+          "etiqueta": "Café de olla",
+          "cursiva": false
+        },
+        {
+          "x": 355.516,
+          "y": 704.471,
+          "ancho": 57.176,
+          "alto": 8.598,
+          "base": 710.769,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 316.929,
+          "etiqueta": "Café de olla",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-27",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Coctel de fruta con miel y granola",
+      "productos": [
+        "Coctel de fruta con miel y granola"
+      ],
+      "precioPlantilla": 65.0,
+      "cajas": [
+        {
+          "x": 259.772,
+          "y": 701.809,
+          "ancho": 16.93,
+          "alto": 8.598,
+          "base": 708.107,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 148.589,
+          "etiqueta": "Coctel de fruta con miel y granola",
+          "cursiva": false
+        },
+        {
+          "x": 562.629,
+          "y": 706.81,
+          "ancho": 16.93,
+          "alto": 8.598,
+          "base": 713.108,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 451.446,
+          "etiqueta": "Coctel de fruta con miel y granola",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-28",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Pan c / mantequilla y azúcar",
+      "productos": [
+        "Pan con mantequilla y azúcar"
+      ],
+      "precioPlantilla": 25.0,
+      "cajas": [
+        {
+          "x": 105.609,
+          "y": 708.473,
+          "ancho": 14.467,
+          "alto": 8.598,
+          "base": 714.771,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 12.256,
+          "etiqueta": "Pan c / mantequilla y azúcar",
+          "cursiva": false
+        },
+        {
+          "x": 408.466,
+          "y": 713.474,
+          "ancho": 14.467,
+          "alto": 8.598,
+          "base": 719.772,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 315.112,
+          "etiqueta": "Pan c / mantequilla y azúcar",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-29",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Jugo de naranja",
+      "productos": [
+        "Jugo de naranja"
+      ],
+      "precioPlantilla": 45.0,
+      "cajas": [
+        {
+          "x": 200.601,
+          "y": 710.812,
+          "ancho": 76.395,
+          "alto": 8.598,
+          "base": 717.11,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 148.589,
+          "etiqueta": "Jugo de naranja",
+          "cursiva": false
+        },
+        {
+          "x": 503.458,
+          "y": 715.813,
+          "ancho": 76.395,
+          "alto": 8.598,
+          "base": 722.112,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 451.446,
+          "etiqueta": "Jugo de naranja",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-30",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Refresco",
+      "productos": [
+        "Refresco"
+      ],
+      "precioPlantilla": 35.0,
+      "cajas": [
+        {
+          "x": 40.762,
+          "y": 717.476,
+          "ancho": 68.181,
+          "alto": 8.598,
+          "base": 723.775,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 12.256,
+          "etiqueta": "Refresco",
+          "cursiva": false
+        },
+        {
+          "x": 343.619,
+          "y": 722.477,
+          "ancho": 68.181,
+          "alto": 8.598,
+          "base": 728.776,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 315.112,
+          "etiqueta": "Refresco",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-31",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Licuados (fresa,chocolate, platano)",
+      "productos": [
+        "Licuados (fresa, chocolate, plátano)"
+      ],
+      "precioPlantilla": 50.0,
+      "cajas": [
+        {
+          "x": 264.09,
+          "y": 719.815,
+          "ancho": 12.659,
+          "alto": 8.598,
+          "base": 726.114,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 148.589,
+          "etiqueta": "Licuados (fresa,chocolate, platano)",
+          "cursiva": false
+        },
+        {
+          "x": 566.947,
+          "y": 724.817,
+          "ancho": 12.659,
+          "alto": 8.598,
+          "base": 731.115,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 451.446,
+          "etiqueta": "Licuados (fresa,chocolate, platano)",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-32",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Nescafé",
+      "productos": [
+        "Nescafé"
+      ],
+      "precioPlantilla": 25.0,
+      "cajas": [
+        {
+          "x": 38.333,
+          "y": 726.479,
+          "ancho": 70.316,
+          "alto": 8.598,
+          "base": 732.778,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 12.256,
+          "etiqueta": "Nescafé",
+          "cursiva": false
+        },
+        {
+          "x": 341.19,
+          "y": 731.481,
+          "ancho": 70.316,
+          "alto": 8.598,
+          "base": 737.779,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 315.112,
+          "etiqueta": "Nescafé",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-33",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Orden de papas a la francesa",
+      "productos": [
+        "Orden de papas a la francesa"
+      ],
+      "precioPlantilla": 65.0,
+      "cajas": [
+        {
+          "x": 244.184,
+          "y": 728.819,
+          "ancho": 31.878,
+          "alto": 8.598,
+          "base": 735.117,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 148.589,
+          "etiqueta": "Orden de papas a la francesa",
+          "cursiva": false
+        },
+        {
+          "x": 547.041,
+          "y": 733.82,
+          "ancho": 31.878,
+          "alto": 8.598,
+          "base": 740.119,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 451.446,
+          "etiqueta": "Orden de papas a la francesa",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-34",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Jarra de agua",
+      "productos": [
+        "Jarra de agua del día"
+      ],
+      "precioPlantilla": 55.0,
+      "cajas": [
+        {
+          "x": 192.469,
+          "y": 737.822,
+          "ancho": 84.936,
+          "alto": 8.598,
+          "base": 744.121,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 148.589,
+          "etiqueta": "Jarra de agua",
+          "cursiva": false
+        },
+        {
+          "x": 495.326,
+          "y": 742.823,
+          "ancho": 84.936,
+          "alto": 8.598,
+          "base": 749.122,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 451.446,
+          "etiqueta": "Jarra de agua",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "desayuno-35",
+      "pagina": 1,
+      "campo": "DESAYUNO",
+      "nombre": "Desechable para llevar",
+      "productos": [
+        "Desechable para llevar"
+      ],
+      "precioPlantilla": 5.0,
+      "cajas": [
+        {
+          "x": 223.646,
+          "y": 746.826,
+          "ancho": 49.181,
+          "alto": 8.598,
+          "base": 753.124,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 148.589,
+          "etiqueta": "Desechable para llevar",
+          "cursiva": false
+        },
+        {
+          "x": 526.503,
+          "y": 751.827,
+          "ancho": 49.181,
+          "alto": 8.598,
+          "base": 758.125,
+          "tamano": 7.998,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 451.446,
+          "etiqueta": "Desechable para llevar",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-01",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "POZOLE DE POLLO O CERDO",
+      "productos": [
+        "Pozole de pollo",
+        "Pozole de cerdo"
+      ],
+      "precioPlantilla": 115.0,
+      "cajas": [
+        {
+          "x": 123.5,
+          "y": 153.703,
+          "ancho": 160.589,
+          "alto": 9.603,
+          "base": 160.755,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 19.974,
+          "etiqueta": "POZOLE DE POLLO O CERDO",
+          "cursiva": false
+        },
+        {
+          "x": 421.741,
+          "y": 153.703,
+          "ancho": 160.589,
+          "alto": 9.603,
+          "base": 160.755,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 318.215,
+          "etiqueta": "POZOLE DE POLLO O CERDO",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-02",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "PANCITA (CHICA)",
+      "productos": [
+        "Pancita chica"
+      ],
+      "precioPlantilla": 125.0,
+      "cajas": [
+        {
+          "x": 82.382,
+          "y": 168.709,
+          "ancho": 57.221,
+          "alto": 9.603,
+          "base": 175.761,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 19.974,
+          "etiqueta": "PANCITA (CHICA)",
+          "cursiva": false
+        },
+        {
+          "x": 380.623,
+          "y": 168.709,
+          "ancho": 57.221,
+          "alto": 9.603,
+          "base": 175.761,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 318.215,
+          "etiqueta": "PANCITA (CHICA)",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-03",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Pancita grande",
+      "productos": [
+        "Pancita grande"
+      ],
+      "precioPlantilla": 160.0,
+      "cajas": [
+        {
+          "x": 213.008,
+          "y": 168.709,
+          "ancho": 71.645,
+          "alto": 9.603,
+          "base": 175.761,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 143.442,
+          "etiqueta": "PANCITA(GRANDE)",
+          "cursiva": false
+        },
+        {
+          "x": 511.249,
+          "y": 168.709,
+          "ancho": 71.645,
+          "alto": 9.603,
+          "base": 175.761,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 441.683,
+          "etiqueta": "PANCITA(GRANDE)",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-04",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "FILETE EMPANIZADO CON PAPAS",
+      "productos": [
+        "Filete empanizado con papas"
+      ],
+      "precioPlantilla": 140.0,
+      "cajas": [
+        {
+          "x": 141.352,
+          "y": 183.714,
+          "ancho": 143.762,
+          "alto": 9.603,
+          "base": 190.767,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 19.974,
+          "etiqueta": "FILETE EMPANIZADO CON PAPAS",
+          "cursiva": false
+        },
+        {
+          "x": 439.593,
+          "y": 183.714,
+          "ancho": 143.762,
+          "alto": 9.603,
+          "base": 190.767,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 318.215,
+          "etiqueta": "FILETE EMPANIZADO CON PAPAS",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-05",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "CHILE EN NOGADA",
+      "productos": [
+        "Chile en nogada"
+      ],
+      "precioPlantilla": 170.0,
+      "cajas": [
+        {
+          "x": 89.294,
+          "y": 198.72,
+          "ancho": 196.279,
+          "alto": 9.603,
+          "base": 205.772,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 19.974,
+          "etiqueta": "CHILE EN NOGADA",
+          "cursiva": false
+        },
+        {
+          "x": 387.535,
+          "y": 198.72,
+          "ancho": 196.279,
+          "alto": 9.603,
+          "base": 205.772,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 318.215,
+          "etiqueta": "CHILE EN NOGADA",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-06",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "PLATO NORTEÑO",
+      "productos": [
+        "Plato norteño "
+      ],
+      "precioPlantilla": 170.0,
+      "cajas": [
+        {
+          "x": 83.152,
+          "y": 213.725,
+          "ancho": 201.456,
+          "alto": 9.603,
+          "base": 220.778,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 19.974,
+          "etiqueta": "PLATO NORTEÑO",
+          "cursiva": false
+        },
+        {
+          "x": 381.393,
+          "y": 213.725,
+          "ancho": 201.456,
+          "alto": 9.603,
+          "base": 220.778,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 318.215,
+          "etiqueta": "PLATO NORTEÑO",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-07",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "ARRACHERA GRATINADA CON PAPAS",
+      "productos": [
+        "Arrachera gratinada con papas"
+      ],
+      "precioPlantilla": 170.0,
+      "cajas": [
+        {
+          "x": 157.108,
+          "y": 228.731,
+          "ancho": 126.935,
+          "alto": 9.603,
+          "base": 235.784,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 19.974,
+          "etiqueta": "ARRACHERA GRATINADA CON PAPAS",
+          "cursiva": false
+        },
+        {
+          "x": 455.349,
+          "y": 228.731,
+          "ancho": 126.935,
+          "alto": 9.603,
+          "base": 235.784,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 318.215,
+          "etiqueta": "ARRACHERA GRATINADA CON PAPAS",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-08",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "MOJARRA FRITA CON ENSALADA",
+      "productos": [
+        "Mojarra frita con ensalada"
+      ],
+      "precioPlantilla": 180.0,
+      "cajas": [
+        {
+          "x": 141.23,
+          "y": 243.737,
+          "ancho": 143.762,
+          "alto": 9.603,
+          "base": 250.789,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 19.974,
+          "etiqueta": "MOJARRA FRITA CON ENSALADA",
+          "cursiva": false
+        },
+        {
+          "x": 439.471,
+          "y": 243.737,
+          "ancho": 143.762,
+          "alto": 9.603,
+          "base": 250.789,
+          "tamano": 9.003,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 318.215,
+          "etiqueta": "MOJARRA FRITA CON ENSALADA",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-09",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Comidas - grupo 80",
+      "productos": [
+        "Huevos divorciados",
+        "Enchiladas de mole sencillas",
+        "Huevos rancheros",
+        "Huevos a la mexicana",
+        "Huevos con jamón"
+      ],
+      "precioPlantilla": 80.0,
+      "cajas": [
+        {
+          "x": 159.38,
+          "y": 261.075,
+          "ancho": 18.123,
+          "alto": 14.547,
+          "base": 272.322,
+          "tamano": 10.241,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 159.38,
+          "etiqueta": "",
+          "cursiva": false
+        },
+        {
+          "x": 457.621,
+          "y": 261.622,
+          "ancho": 18.123,
+          "alto": 14.547,
+          "base": 272.868,
+          "tamano": 10.241,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 457.621,
+          "etiqueta": "",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-10",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Comidas - grupo 65",
+      "productos": [
+        "Chilaquiles sencillos",
+        "Sopes sencillos",
+        "Enchiladas sencillas",
+        "Enfrijoladas sencillas",
+        "Huevos en salsa verde"
+      ],
+      "precioPlantilla": 65.0,
+      "cajas": [
+        {
+          "x": 25.506,
+          "y": 262.005,
+          "ancho": 22.378,
+          "alto": 17.908,
+          "base": 275.89,
+          "tamano": 12.71,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 25.506,
+          "etiqueta": "",
+          "cursiva": false
+        },
+        {
+          "x": 323.747,
+          "y": 262.552,
+          "ancho": 22.378,
+          "alto": 17.908,
+          "base": 276.436,
+          "tamano": 12.71,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 323.747,
+          "etiqueta": "",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-11",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Comidas - grupo 105",
+      "productos": [
+        "Enchiladas verdes con pollo",
+        "Enfrijoladas de pollo",
+        "Pechuga asada con ensalada",
+        "Pechuga encebollada con ensalada",
+        "Pechuga a la mexicana con ensalada",
+        "Bistec asado con ensalada",
+        "Bistec encebollado con ensalada",
+        "Bistec a la mexicana con ensalada",
+        "Puntas de res en salsa verde",
+        "Puntas de pollo en salsa verde",
+        "Pollo frito con ensalada",
+        "Caldo tlalpeño",
+        "Alambre vegetariano",
+        "Chuleta ahumada con papas",
+        "Sopecitos con quesillo"
+      ],
+      "precioPlantilla": 105.0,
+      "cajas": [
+        {
+          "x": 158.291,
+          "y": 313.025,
+          "ancho": 25.226,
+          "alto": 12.792,
+          "base": 322.469,
+          "tamano": 12.192,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 158.291,
+          "etiqueta": "",
+          "cursiva": false
+        },
+        {
+          "x": 456.532,
+          "y": 313.572,
+          "ancho": 25.226,
+          "alto": 12.792,
+          "base": 323.016,
+          "tamano": 12.192,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 456.532,
+          "etiqueta": "",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-12",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Comidas - grupo 95",
+      "productos": [
+        "Tacos dorados de pollo",
+        "Omelet de queso en salsa verde",
+        "Omelet vegetariano",
+        "Sopecitos con chorizo",
+        "Tacos dorados de jamón con queso",
+        "Enfrijoladas de jamón",
+        "Enfrijoladas con jamón",
+        "Chilaquiles con huevo",
+        "Rollos de jamón con ensalada",
+        "Chuleta ahumada con ensalada",
+        "Sopecitos con huevo"
+      ],
+      "precioPlantilla": 95.0,
+      "cajas": [
+        {
+          "x": 24.28,
+          "y": 320.681,
+          "ancho": 19.044,
+          "alto": 12.792,
+          "base": 330.126,
+          "tamano": 12.192,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 24.28,
+          "etiqueta": "",
+          "cursiva": false
+        },
+        {
+          "x": 322.521,
+          "y": 321.228,
+          "ancho": 19.044,
+          "alto": 12.792,
+          "base": 330.672,
+          "tamano": 12.192,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 322.521,
+          "etiqueta": "",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-13",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Comidas - grupo 110",
+      "productos": [
+        "Sopecitos con pechuga asada",
+        "Sopecitos con bistec asado",
+        "Milanesa de res con ensalada",
+        "Pechuga empanizada con ensalada",
+        "Ensalada de atún",
+        "Ensalada California",
+        "Nugguets con papas",
+        "Enchiladas de mole con pollo",
+        "Enchiladas con pechuga asada",
+        "Enchiladas con carne asada",
+        "Chilaquiles con pechuga asada",
+        "Chilaquiles con carne asada",
+        "Chilaquiles con chuleta ahumada",
+        "Chilaquiles con pollo deshebrado",
+        "Carne asada con papas",
+        "Tacos dorados de chorizo ahogados"
+      ],
+      "precioPlantilla": 110.0,
+      "cajas": [
+        {
+          "x": 22.841,
+          "y": 419.096,
+          "ancho": 25.226,
+          "alto": 12.792,
+          "base": 428.54,
+          "tamano": 12.192,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 22.841,
+          "etiqueta": "",
+          "cursiva": false
+        },
+        {
+          "x": 321.082,
+          "y": 419.643,
+          "ancho": 25.226,
+          "alto": 12.792,
+          "base": 429.087,
+          "tamano": 12.192,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 321.082,
+          "etiqueta": "",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-14",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Comidas - grupo 115",
+      "productos": [
+        "Alambre de pollo",
+        "Alambre de res",
+        "Milanesa con papas",
+        "Pechuga empanizada con papas",
+        "Chilaquiles con milanesa",
+        "Chilaquiles con pechuga empanizada",
+        "Hamburguesa con papas",
+        "Enchiladas con pechuga empanizada",
+        "Enchiladas con milanesa de res",
+        "Enchiladas verdes gratinadas"
+      ],
+      "precioPlantilla": 115.0,
+      "cajas": [
+        {
+          "x": 159.38,
+          "y": 425.54,
+          "ancho": 25.226,
+          "alto": 12.792,
+          "base": 434.984,
+          "tamano": 12.192,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 159.38,
+          "etiqueta": "",
+          "cursiva": false
+        },
+        {
+          "x": 457.621,
+          "y": 426.087,
+          "ancho": 25.226,
+          "alto": 12.792,
+          "base": 435.531,
+          "tamano": 12.192,
+          "negrita": false,
+          "encabezado": true,
+          "xTexto": 457.621,
+          "etiqueta": "",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-15",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Pollo c/ mole especial",
+      "productos": [
+        "Pollo con mole especial"
+      ],
+      "precioPlantilla": 135.0,
+      "cajas": [
+        {
+          "x": 210.774,
+          "y": 570.731,
+          "ancho": 46.469,
+          "alto": 7.6,
+          "base": 576.282,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Pollo c/ mole especial",
+          "cursiva": false
+        },
+        {
+          "x": 509.014,
+          "y": 571.278,
+          "ancho": 46.469,
+          "alto": 7.6,
+          "base": 576.828,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Pollo c/ mole especial",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-16",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Enchiladas de mole gratinadas",
+      "productos": [
+        "Enchiladas de mole gratinadas"
+      ],
+      "precioPlantilla": 130.0,
+      "cajas": [
+        {
+          "x": 97.136,
+          "y": 578.564,
+          "ancho": 37.122,
+          "alto": 7.6,
+          "base": 584.114,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Enchiladas de mole gratinadas",
+          "cursiva": false
+        },
+        {
+          "x": 395.377,
+          "y": 579.11,
+          "ancho": 37.122,
+          "alto": 7.6,
+          "base": 584.66,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Enchiladas de mole gratinadas",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-17",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Chilaquiles c/ arrachera",
+      "productos": [
+        "Chilaquiles con arrachera"
+      ],
+      "precioPlantilla": 160.0,
+      "cajas": [
+        {
+          "x": 216.043,
+          "y": 578.985,
+          "ancho": 40.861,
+          "alto": 7.6,
+          "base": 584.535,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Chilaquiles c/ arrachera",
+          "cursiva": false
+        },
+        {
+          "x": 514.284,
+          "y": 579.531,
+          "ancho": 40.861,
+          "alto": 7.6,
+          "base": 585.081,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Chilaquiles c/ arrachera",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-18",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Enchiladas suizas",
+      "productos": [
+        "Enchiladas suizas"
+      ],
+      "precioPlantilla": 130.0,
+      "cajas": [
+        {
+          "x": 58.671,
+          "y": 586.817,
+          "ancho": 74.508,
+          "alto": 7.6,
+          "base": 592.367,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Enchiladas suizas",
+          "cursiva": false
+        },
+        {
+          "x": 356.912,
+          "y": 587.363,
+          "ancho": 74.508,
+          "alto": 7.6,
+          "base": 592.913,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Enchiladas suizas",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-19",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Pechuga especial",
+      "productos": [
+        "Pechuga especial"
+      ],
+      "precioPlantilla": 140.0,
+      "cajas": [
+        {
+          "x": 196.749,
+          "y": 587.238,
+          "ancho": 59.554,
+          "alto": 7.6,
+          "base": 592.788,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Pechuga especial",
+          "cursiva": false
+        },
+        {
+          "x": 494.99,
+          "y": 587.784,
+          "ancho": 59.554,
+          "alto": 7.6,
+          "base": 593.334,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Pechuga especial",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-20",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Pechuga a la cordon blue con papas",
+      "productos": [
+        "Pechuga a la cordon blue con papas"
+      ],
+      "precioPlantilla": 135.0,
+      "cajas": [
+        {
+          "x": 112.494,
+          "y": 595.07,
+          "ancho": 20.299,
+          "alto": 7.6,
+          "base": 600.62,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Pechuga a la cordon blue con papas",
+          "cursiva": false
+        },
+        {
+          "x": 410.735,
+          "y": 595.616,
+          "ancho": 20.299,
+          "alto": 7.6,
+          "base": 601.166,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Pechuga a la cordon blue con papas",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-21",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Cecina c/ guacamole",
+      "productos": [
+        "Cecina con guacamole"
+      ],
+      "precioPlantilla": 150.0,
+      "cajas": [
+        {
+          "x": 207.086,
+          "y": 595.491,
+          "ancho": 50.207,
+          "alto": 7.6,
+          "base": 601.041,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Cecina c/ guacamole",
+          "cursiva": false
+        },
+        {
+          "x": 505.327,
+          "y": 596.037,
+          "ancho": 50.207,
+          "alto": 7.6,
+          "base": 601.587,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Cecina c/ guacamole",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-22",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Bistec o pechuga a la tampiqueña",
+      "productos": [
+        "Bistec a la Tampiqueña",
+        "Pechuga a la Tampiqueña"
+      ],
+      "precioPlantilla": 130.0,
+      "cajas": [
+        {
+          "x": 106.445,
+          "y": 603.323,
+          "ancho": 25.906,
+          "alto": 7.6,
+          "base": 608.873,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Bistec o pechuga a la tampiqueña",
+          "cursiva": false
+        },
+        {
+          "x": 404.686,
+          "y": 603.869,
+          "ancho": 25.906,
+          "alto": 7.6,
+          "base": 609.42,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Bistec o pechuga a la tampiqueña",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-23",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Sopecitos c/ arrachera",
+      "productos": [
+        "Sopecitos con arrachera"
+      ],
+      "precioPlantilla": 160.0,
+      "cajas": [
+        {
+          "x": 212.404,
+          "y": 603.744,
+          "ancho": 44.599,
+          "alto": 7.6,
+          "base": 609.294,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Sopecitos c/ arrachera",
+          "cursiva": false
+        },
+        {
+          "x": 510.645,
+          "y": 604.29,
+          "ancho": 44.599,
+          "alto": 7.6,
+          "base": 609.84,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Sopecitos c/ arrachera",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-24",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Arrachera a la tampiqueña",
+      "productos": [
+        "Arrachera a la Tampiqueña"
+      ],
+      "precioPlantilla": 165.0,
+      "cajas": [
+        {
+          "x": 224.781,
+          "y": 611.997,
+          "ancho": 33.384,
+          "alto": 7.6,
+          "base": 617.547,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Arrachera a la tampiqueña",
+          "cursiva": false
+        },
+        {
+          "x": 523.022,
+          "y": 612.543,
+          "ancho": 33.384,
+          "alto": 7.6,
+          "base": 618.094,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Arrachera a la tampiqueña",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-25",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Chilaquiles de frijol con pechuga empanizada o milanesa de res",
+      "productos": [
+        "Chilaquiles de frijol con pechuga empanizada",
+        "Chilaquiles de frijol con milanesa de res"
+      ],
+      "precioPlantilla": 135.0,
+      "cajas": [
+        {
+          "x": 59.747,
+          "y": 619.829,
+          "ancho": 74.508,
+          "alto": 7.6,
+          "base": 625.379,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "o milanesa de res",
+          "cursiva": false
+        },
+        {
+          "x": 357.988,
+          "y": 620.376,
+          "ancho": 74.508,
+          "alto": 7.6,
+          "base": 625.926,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "o milanesa de res",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-26",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Chilaquiles de frijol c/ arrachera",
+      "productos": [
+        "Chilaquiles de frijol con arrachera"
+      ],
+      "precioPlantilla": 165.0,
+      "cajas": [
+        {
+          "x": 240.176,
+          "y": 620.25,
+          "ancho": 18.142,
+          "alto": 7.6,
+          "base": 625.8,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Chilaquiles de frijol c/ arrachera",
+          "cursiva": false
+        },
+        {
+          "x": 538.417,
+          "y": 620.796,
+          "ancho": 18.142,
+          "alto": 7.6,
+          "base": 626.347,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Chilaquiles de frijol c/ arrachera",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-27",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Milanesa oreja de elefante",
+      "productos": [
+        "Milanesa oreja de elefante"
+      ],
+      "precioPlantilla": 160.0,
+      "cajas": [
+        {
+          "x": 225.007,
+          "y": 628.503,
+          "ancho": 31.514,
+          "alto": 7.6,
+          "base": 634.053,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Milanesa oreja de elefante",
+          "cursiva": false
+        },
+        {
+          "x": 523.248,
+          "y": 629.05,
+          "ancho": 31.514,
+          "alto": 7.6,
+          "base": 634.6,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Milanesa oreja de elefante",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-28",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Enchiladas de mole con pechuga empanizada o milanesa de res",
+      "productos": [
+        "Enchiladas de mole con pechuga empanizada",
+        "Enchiladas de mole con milanesa de res"
+      ],
+      "precioPlantilla": 135.0,
+      "cajas": [
+        {
+          "x": 59.747,
+          "y": 636.336,
+          "ancho": 74.508,
+          "alto": 7.6,
+          "base": 641.886,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "o milanesa de res",
+          "cursiva": false
+        },
+        {
+          "x": 357.988,
+          "y": 636.882,
+          "ancho": 74.508,
+          "alto": 7.6,
+          "base": 642.432,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "o milanesa de res",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-29",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Alambre de arrachera",
+      "productos": [
+        "Alambre de arrachera"
+      ],
+      "precioPlantilla": 170.0,
+      "cajas": [
+        {
+          "x": 210.644,
+          "y": 636.756,
+          "ancho": 46.469,
+          "alto": 7.6,
+          "base": 642.307,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Alambre de arrachera",
+          "cursiva": false
+        },
+        {
+          "x": 508.885,
+          "y": 637.303,
+          "ancho": 46.469,
+          "alto": 7.6,
+          "base": 642.853,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Alambre de arrachera",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-30",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Sopecitos c/ cecina",
+      "productos": [
+        "Sopecitos con cecina"
+      ],
+      "precioPlantilla": 140.0,
+      "cajas": [
+        {
+          "x": 64.432,
+          "y": 644.589,
+          "ancho": 70.77,
+          "alto": 7.6,
+          "base": 650.139,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Sopecitos c/ cecina",
+          "cursiva": false
+        },
+        {
+          "x": 362.673,
+          "y": 645.135,
+          "ancho": 70.77,
+          "alto": 7.6,
+          "base": 650.685,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Sopecitos c/ cecina",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-07",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Arrachera gratinada c/ papas",
+      "productos": [
+        "Arrachera gratinada con papas"
+      ],
+      "precioPlantilla": 170.0,
+      "cajas": [
+        {
+          "x": 231.835,
+          "y": 645.01,
+          "ancho": 25.906,
+          "alto": 7.6,
+          "base": 650.56,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Arrachera gratinada c/ papas",
+          "cursiva": false
+        },
+        {
+          "x": 530.076,
+          "y": 645.556,
+          "ancho": 25.906,
+          "alto": 7.6,
+          "base": 651.106,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Arrachera gratinada c/ papas",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-32",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Camarones empanizados",
+      "productos": [
+        "Camarones empanizados"
+      ],
+      "precioPlantilla": 180.0,
+      "cajas": [
+        {
+          "x": 219.949,
+          "y": 676.602,
+          "ancho": 24.037,
+          "alto": 7.6,
+          "base": 682.152,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Camarones empanizados",
+          "cursiva": false
+        },
+        {
+          "x": 518.19,
+          "y": 677.148,
+          "ancho": 24.037,
+          "alto": 7.6,
+          "base": 682.698,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Camarones empanizados",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-33",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Filete empanizado c/ ensalada",
+      "productos": [
+        "Filete empanizado con ensalada"
+      ],
+      "precioPlantilla": 130.0,
+      "cajas": [
+        {
+          "x": 98.609,
+          "y": 679.967,
+          "ancho": 16.273,
+          "alto": 7.6,
+          "base": 685.518,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 10.487,
+          "etiqueta": "Filete empanizado c/ ensalada",
+          "cursiva": false
+        },
+        {
+          "x": 396.85,
+          "y": 680.514,
+          "ancho": 16.273,
+          "alto": 7.6,
+          "base": 686.064,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 308.728,
+          "etiqueta": "Filete empanizado c/ ensalada",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-34",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Camarones a la diabla",
+      "productos": [
+        "Camarones a la diabla"
+      ],
+      "precioPlantilla": 180.0,
+      "cajas": [
+        {
+          "x": 211.153,
+          "y": 684.855,
+          "ancho": 33.384,
+          "alto": 7.6,
+          "base": 690.405,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Camarones a la diabla",
+          "cursiva": false
+        },
+        {
+          "x": 509.394,
+          "y": 685.401,
+          "ancho": 33.384,
+          "alto": 7.6,
+          "base": 690.951,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Camarones a la diabla",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-35",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Filete empapelado",
+      "productos": [
+        "Filete empapelado"
+      ],
+      "precioPlantilla": 140.0,
+      "cajas": [
+        {
+          "x": 64.34,
+          "y": 688.221,
+          "ancho": 50.207,
+          "alto": 7.6,
+          "base": 693.771,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 10.487,
+          "etiqueta": "Filete empapelado",
+          "cursiva": false
+        },
+        {
+          "x": 362.581,
+          "y": 688.767,
+          "ancho": 50.207,
+          "alto": 7.6,
+          "base": 694.317,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 308.728,
+          "etiqueta": "Filete empapelado",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-36",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Camarones al coco",
+      "productos": [
+        "Camarones al coco"
+      ],
+      "precioPlantilla": 190.0,
+      "cajas": [
+        {
+          "x": 201.639,
+          "y": 693.108,
+          "ancho": 42.73,
+          "alto": 7.6,
+          "base": 698.658,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Camarones al coco",
+          "cursiva": false
+        },
+        {
+          "x": 499.88,
+          "y": 693.654,
+          "ancho": 42.73,
+          "alto": 7.6,
+          "base": 699.204,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Camarones al coco",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-04",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Filete empanizado c/papas",
+      "productos": [
+        "Filete empanizado con papas"
+      ],
+      "precioPlantilla": 140.0,
+      "cajas": [
+        {
+          "x": 88.33,
+          "y": 696.474,
+          "ancho": 25.906,
+          "alto": 7.6,
+          "base": 702.024,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 10.487,
+          "etiqueta": "Filete empanizado c/papas",
+          "cursiva": false
+        },
+        {
+          "x": 386.571,
+          "y": 697.02,
+          "ancho": 25.906,
+          "alto": 7.6,
+          "base": 702.57,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 308.728,
+          "etiqueta": "Filete empanizado c/papas",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-38",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Coctel camaron chico",
+      "productos": [
+        "Coctel camarón chico"
+      ],
+      "precioPlantilla": 110.0,
+      "cajas": [
+        {
+          "x": 209.15,
+          "y": 701.361,
+          "ancho": 35.253,
+          "alto": 7.6,
+          "base": 706.911,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Coctel camaron chico",
+          "cursiva": false
+        },
+        {
+          "x": 507.391,
+          "y": 701.907,
+          "ancho": 35.253,
+          "alto": 7.6,
+          "base": 707.457,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Coctel camaron chico",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-39",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Filete a la diabla",
+      "productos": [
+        "Filete a la diabla"
+      ],
+      "precioPlantilla": 140.0,
+      "cajas": [
+        {
+          "x": 57.594,
+          "y": 704.727,
+          "ancho": 57.684,
+          "alto": 7.6,
+          "base": 710.277,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 10.487,
+          "etiqueta": "Filete a la diabla",
+          "cursiva": false
+        },
+        {
+          "x": 355.835,
+          "y": 705.273,
+          "ancho": 57.684,
+          "alto": 7.6,
+          "base": 710.823,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 308.728,
+          "etiqueta": "Filete a la diabla",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-40",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Coctel de Camaron grande",
+      "productos": [
+        "Coctel de Camarón grande"
+      ],
+      "precioPlantilla": 190.0,
+      "cajas": [
+        {
+          "x": 223.988,
+          "y": 709.614,
+          "ancho": 20.299,
+          "alto": 7.6,
+          "base": 715.164,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Coctel de Camaron grande",
+          "cursiva": false
+        },
+        {
+          "x": 522.229,
+          "y": 710.16,
+          "ancho": 20.299,
+          "alto": 7.6,
+          "base": 715.711,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Coctel de Camaron grande",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-41",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Filete al mojo de ajo",
+      "productos": [
+        "Filete al mojo de ajo"
+      ],
+      "precioPlantilla": 140.0,
+      "cajas": [
+        {
+          "x": 69.152,
+          "y": 712.98,
+          "ancho": 46.469,
+          "alto": 7.6,
+          "base": 718.53,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 10.487,
+          "etiqueta": "Filete al mojo de ajo",
+          "cursiva": false
+        },
+        {
+          "x": 367.393,
+          "y": 713.526,
+          "ancho": 46.469,
+          "alto": 7.6,
+          "base": 719.076,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 308.728,
+          "etiqueta": "Filete al mojo de ajo",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-42",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Alambre de Camaron",
+      "productos": [
+        "Alambre de Camarón"
+      ],
+      "precioPlantilla": 200.0,
+      "cajas": [
+        {
+          "x": 208.921,
+          "y": 717.867,
+          "ancho": 35.253,
+          "alto": 7.6,
+          "base": 723.417,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 147.539,
+          "etiqueta": "Alambre de Camaron",
+          "cursiva": false
+        },
+        {
+          "x": 507.162,
+          "y": 718.414,
+          "ancho": 35.253,
+          "alto": 7.6,
+          "base": 723.964,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.78,
+          "etiqueta": "Alambre de Camaron",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-43",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Filete al ajillo",
+      "productos": [
+        "Filete al ajillo"
+      ],
+      "precioPlantilla": 140.0,
+      "cajas": [
+        {
+          "x": 48.86,
+          "y": 721.233,
+          "ancho": 67.031,
+          "alto": 7.6,
+          "base": 726.783,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 10.487,
+          "etiqueta": "Filete al ajillo",
+          "cursiva": false
+        },
+        {
+          "x": 347.101,
+          "y": 721.779,
+          "ancho": 67.031,
+          "alto": 7.6,
+          "base": 727.329,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 308.728,
+          "etiqueta": "Filete al ajillo",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-08",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Mojarra frita con ensalada",
+      "productos": [
+        "Mojarra frita con ensalada"
+      ],
+      "precioPlantilla": 180.0,
+      "cajas": [
+        {
+          "x": 223.615,
+          "y": 739.466,
+          "ancho": 22.168,
+          "alto": 7.6,
+          "base": 745.016,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 146.906,
+          "etiqueta": "Mojarra frita con ensalada",
+          "cursiva": false
+        },
+        {
+          "x": 521.856,
+          "y": 740.013,
+          "ancho": 22.168,
+          "alto": 7.6,
+          "base": 745.563,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.147,
+          "etiqueta": "Mojarra frita con ensalada",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-45",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Mojarra a la diabla",
+      "productos": [
+        "Mojarra a la diabla"
+      ],
+      "precioPlantilla": 195.0,
+      "cajas": [
+        {
+          "x": 201.443,
+          "y": 747.719,
+          "ancho": 44.599,
+          "alto": 7.6,
+          "base": 753.27,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 146.906,
+          "etiqueta": "Mojarra a la diabla",
+          "cursiva": false
+        },
+        {
+          "x": 499.684,
+          "y": 748.266,
+          "ancho": 44.599,
+          "alto": 7.6,
+          "base": 753.816,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.147,
+          "etiqueta": "Mojarra a la diabla",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-46",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Desechable para llevar",
+      "productos": [
+        "Desechable para llevar"
+      ],
+      "precioPlantilla": 5.0,
+      "cajas": [
+        {
+          "x": 65.579,
+          "y": 754.288,
+          "ancho": 12.997,
+          "alto": 6.602,
+          "base": 759.09,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Desechable para llevar",
+          "cursiva": false
+        },
+        {
+          "x": 363.82,
+          "y": 754.835,
+          "ancho": 12.997,
+          "alto": 6.602,
+          "base": 759.636,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Desechable para llevar",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-47",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Mojarra al mojo de ajo",
+      "productos": [
+        "Mojarra al mojo de ajo"
+      ],
+      "precioPlantilla": 190.0,
+      "cajas": [
+        {
+          "x": 213.0,
+          "y": 755.973,
+          "ancho": 33.384,
+          "alto": 7.6,
+          "base": 761.523,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 146.906,
+          "etiqueta": "Mojarra al mojo de ajo",
+          "cursiva": false
+        },
+        {
+          "x": 511.241,
+          "y": 756.519,
+          "ancho": 33.384,
+          "alto": 7.6,
+          "base": 762.069,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.147,
+          "etiqueta": "Mojarra al mojo de ajo",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-48",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Huevo estrellado",
+      "productos": [
+        "Huevo estrellado"
+      ],
+      "precioPlantilla": 10.0,
+      "cajas": [
+        {
+          "x": 51.516,
+          "y": 761.291,
+          "ancho": 25.41,
+          "alto": 6.602,
+          "base": 766.093,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Huevo estrellado",
+          "cursiva": false
+        },
+        {
+          "x": 349.757,
+          "y": 761.837,
+          "ancho": 25.41,
+          "alto": 6.602,
+          "base": 766.639,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Huevo estrellado",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-49",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Mojarra al ajillo",
+      "productos": [
+        "Mojarra al ajillo"
+      ],
+      "precioPlantilla": 190.0,
+      "cajas": [
+        {
+          "x": 192.708,
+          "y": 764.226,
+          "ancho": 53.659,
+          "alto": 7.6,
+          "base": 769.776,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 146.906,
+          "etiqueta": "Mojarra al ajillo",
+          "cursiva": false
+        },
+        {
+          "x": 490.949,
+          "y": 764.772,
+          "ancho": 53.659,
+          "alto": 7.6,
+          "base": 770.322,
+          "tamano": 7.0,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 445.147,
+          "etiqueta": "Mojarra al ajillo",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-50",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Platano tabasco",
+      "productos": [
+        "Plátano tabasco"
+      ],
+      "precioPlantilla": 10.0,
+      "cajas": [
+        {
+          "x": 48.905,
+          "y": 768.294,
+          "ancho": 28.615,
+          "alto": 6.602,
+          "base": 773.095,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Platano tabasco",
+          "cursiva": false
+        },
+        {
+          "x": 347.146,
+          "y": 768.84,
+          "ancho": 28.615,
+          "alto": 6.602,
+          "base": 773.642,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Platano tabasco",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-51",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Sopa o consome",
+      "productos": [
+        "Sopa o consomé"
+      ],
+      "precioPlantilla": 20.0,
+      "cajas": [
+        {
+          "x": 49.727,
+          "y": 775.296,
+          "ancho": 27.012,
+          "alto": 6.602,
+          "base": 780.098,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Sopa o consome",
+          "cursiva": false
+        },
+        {
+          "x": 347.968,
+          "y": 775.843,
+          "ancho": 27.012,
+          "alto": 6.602,
+          "base": 780.644,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Sopa o consome",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-52",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Arroz o Espagueti",
+      "productos": [
+        "Arroz o Espagueti"
+      ],
+      "precioPlantilla": 20.0,
+      "cajas": [
+        {
+          "x": 52.656,
+          "y": 782.299,
+          "ancho": 24.053,
+          "alto": 6.602,
+          "base": 787.101,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Arroz o Espagueti",
+          "cursiva": false
+        },
+        {
+          "x": 350.897,
+          "y": 782.845,
+          "ancho": 24.053,
+          "alto": 6.602,
+          "base": 787.647,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Arroz o Espagueti",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-53",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Crema del día",
+      "productos": [
+        "Crema del día"
+      ],
+      "precioPlantilla": 25.0,
+      "cajas": [
+        {
+          "x": 43.311,
+          "y": 789.302,
+          "ancho": 32.066,
+          "alto": 6.602,
+          "base": 794.103,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Crema del día",
+          "cursiva": false
+        },
+        {
+          "x": 341.552,
+          "y": 789.848,
+          "ancho": 32.066,
+          "alto": 6.602,
+          "base": 794.65,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Crema del día",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-54",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Refesco",
+      "productos": [
+        "Refresco"
+      ],
+      "precioPlantilla": 35.0,
+      "cajas": [
+        {
+          "x": 28.491,
+          "y": 799.069,
+          "ancho": 17.642,
+          "alto": 6.602,
+          "base": 803.87,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Refesco",
+          "cursiva": false
+        },
+        {
+          "x": 326.732,
+          "y": 799.615,
+          "ancho": 17.642,
+          "alto": 6.602,
+          "base": 804.417,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Refesco",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-55",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Orden de Guacamole",
+      "productos": [
+        "Orden de Guacamole"
+      ],
+      "precioPlantilla": 45.0,
+      "cajas": [
+        {
+          "x": 61.744,
+          "y": 805.821,
+          "ancho": 16.04,
+          "alto": 6.602,
+          "base": 810.623,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Orden de Guacamole",
+          "cursiva": false
+        },
+        {
+          "x": 359.985,
+          "y": 806.368,
+          "ancho": 16.04,
+          "alto": 6.602,
+          "base": 811.169,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Orden de Guacamole",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-56",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Orden de papas",
+      "productos": [
+        "Orden de papas a la francesa"
+      ],
+      "precioPlantilla": 65.0,
+      "cajas": [
+        {
+          "x": 48.425,
+          "y": 812.574,
+          "ancho": 17.642,
+          "alto": 6.602,
+          "base": 817.376,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Orden de papas",
+          "cursiva": false
+        },
+        {
+          "x": 346.666,
+          "y": 813.12,
+          "ancho": 17.642,
+          "alto": 6.602,
+          "base": 817.922,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Orden de papas",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-57",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Jarra de agua del día",
+      "productos": [
+        "Jarra de agua del día"
+      ],
+      "precioPlantilla": 55.0,
+      "cajas": [
+        {
+          "x": 60.273,
+          "y": 819.326,
+          "ancho": 18.999,
+          "alto": 6.602,
+          "base": 824.128,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Jarra de agua del día",
+          "cursiva": false
+        },
+        {
+          "x": 358.514,
+          "y": 819.873,
+          "ancho": 18.999,
+          "alto": 6.602,
+          "base": 824.675,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Jarra de agua del día",
+          "cursiva": false
+        }
+      ]
+    },
+    {
+      "clave": "comida-58",
+      "pagina": 2,
+      "campo": "COMIDA",
+      "nombre": "Jarra de agua de fruta natural 2lts",
+      "productos": [
+        "Jarra de agua de fruta natural 2lts"
+      ],
+      "precioPlantilla": 65.0,
+      "cajas": [
+        {
+          "x": 93.207,
+          "y": 826.079,
+          "ancho": 17.396,
+          "alto": 6.602,
+          "base": 830.881,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 9.294,
+          "etiqueta": "Jarra de agua de fruta natural 2lts",
+          "cursiva": false
+        },
+        {
+          "x": 391.448,
+          "y": 826.625,
+          "ancho": 17.396,
+          "alto": 6.602,
+          "base": 831.427,
+          "tamano": 6.002,
+          "negrita": true,
+          "encabezado": false,
+          "xTexto": 307.535,
+          "etiqueta": "Jarra de agua de fruta natural 2lts",
+          "cursiva": false
+        }
+      ]
+    }
+  ]
+}

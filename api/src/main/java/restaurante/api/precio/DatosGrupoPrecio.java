@@ -4,7 +4,12 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record DatosGrupoPrecio(String clave, String nombre, CampoPrecio campo,
-                               BigDecimal precio, boolean mixto, List<ProductoPrecio> productos) {
+                               BigDecimal precio, boolean mixto, List<ProductoPrecio> productos,
+                               List<String> faltantes) {
+    public DatosGrupoPrecio(String clave, String nombre, CampoPrecio campo, BigDecimal precio,
+                            boolean mixto, List<ProductoPrecio> productos) {
+        this(clave, nombre, campo, precio, mixto, productos, List.of());
+    }
     public record ProductoPrecio(Long id, String nombre, BigDecimal precio) {}
     public static DatosGrupoPrecio de(GrupoPrecio grupo) {
         var productos = grupo.getProductos().stream().map(p ->

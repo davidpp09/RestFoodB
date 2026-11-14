@@ -149,7 +149,11 @@ class LecturasSinSesionAbiertaTest {
                 new String[]{"admin", "/inventario/recetas"},
                 new String[]{"admin", "/inventario/insumos/" + insumo + "/receta"},
                 new String[]{"admin", "/menu-dia/pdf"},
-                new String[]{"admin", "/menu-dia/imagen"}
+                new String[]{"admin", "/menu-dia/imagen"},
+                new String[]{"admin", "/menu-dia/imagen?pagina=1"},
+                new String[]{"admin", "/menu-dia/mapa-precios"},
+                new String[]{"admin", "/menu-dia/editor/imagen?pagina=1"},
+                new String[]{"admin", "/menu-dia/editor/imagen?pagina=2"}
         );
 
         List<String> fallas = new ArrayList<>();

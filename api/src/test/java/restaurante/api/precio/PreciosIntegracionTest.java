@@ -90,6 +90,8 @@ class PreciosIntegracionTest {
         for (String rol : List.of("MESERO", "COCINA", "REPARTIDOR")) {
             cambiar(rol, "115").andExpect(status().isForbidden());
             mvc.perform(get("/grupos-precio").header("Authorization", token(rol))).andExpect(status().isForbidden());
+            mvc.perform(get("/menu-dia/mapa-precios").header("Authorization", token(rol))).andExpect(status().isForbidden());
+            mvc.perform(get("/menu-dia/editor/imagen").header("Authorization", token(rol))).andExpect(status().isForbidden());
             mvc.perform(get("/productos/" + primero + "/historial-precios").header("Authorization", token(rol))).andExpect(status().isForbidden());
         }
         assertEquals(0, conteoHistorial());
@@ -103,6 +105,17 @@ class PreciosIntegracionTest {
                 .andExpect(status().isBadRequest());
         assertEquals(0, conteoHistorial());
         assertEquals(95, jdbc.queryForObject("SELECT precio_comida FROM productos WHERE id_productos = ?", Integer.class, primero));
+    }
+
+    @Test void editorEntregaLasDosPaginasPngYElMapa() throws Exception {
+        mvc.perform(get("/menu-dia/mapa-precios").header("Authorization", token("ADMIN")))
+                .andExpect(status().isOk()).andExpect(jsonPath("entradas.length()").value(93));
+        for (int pagina : List.of(1, 2)) {
+            mvc.perform(get("/menu-dia/editor/imagen?pagina=" + pagina).header("Authorization", token("DEV")))
+                    .andExpect(status().isOk()).andExpect(content().contentType("image/png"));
+        }
+        mvc.perform(get("/menu-dia/editor/imagen?pagina=3").header("Authorization", token("ADMIN")))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("mensaje").isNotEmpty());
     }
 
     @Test void precioInvalidoNoEscribe() throws Exception {

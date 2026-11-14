@@ -41,13 +41,26 @@ public class MenuDiaController {
     @Autowired
     private MenuDiaService menuDiaService;
 
+    @Autowired private restaurante.api.menu.MapaPrecios mapaPrecios;
+
+    @GetMapping("/mapa-precios")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public restaurante.api.menu.MapaPrecios.Datos mapaPrecios() { return mapaPrecios.datos(); }
+
+    @GetMapping("/editor/imagen")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public ResponseEntity<byte[]> imagenEditor(@RequestParam(defaultValue = "1") int pagina) throws IOException {
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG)
+                .body(menuDiaService.imagenCarta(productoRepository.findActivosDelDia(), pagina, true));
+    }
+
     @Autowired
     private EnlacesDeDescarga enlacesDeDescarga;
 
     @GetMapping("/pdf")
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'REPARTIDOR')")
     public ResponseEntity<byte[]> pdf() throws IOException {
-        byte[] pdf = menuDiaService.generar(platillosDelDia());
+        byte[] pdf = menuDiaService.generarCarta(platillosDelDia());
 
         // inline para que el front pueda mostrar la vista previa antes de descargar.
         var disposicion = ContentDisposition.inline()
@@ -66,8 +79,8 @@ public class MenuDiaController {
      */
     @GetMapping("/imagen")
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'REPARTIDOR')")
-    public ResponseEntity<byte[]> imagen() throws IOException {
-        byte[] png = menuDiaService.generarImagen(platillosDelDia());
+    public ResponseEntity<byte[]> imagen(@RequestParam(defaultValue = "2") int pagina) throws IOException {
+        byte[] png = menuDiaService.imagenCarta(platillosDelDia(), pagina, false);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -105,7 +118,7 @@ public class MenuDiaController {
             throw new ValidacionException("El enlace de descarga venció; vuelve a generar el menú");
         }
 
-        byte[] pdf = menuDiaService.generar(platillosDelDia());
+        byte[] pdf = menuDiaService.generarCarta(platillosDelDia());
 
         // attachment (y no inline) es lo que hace que el navegador lo GUARDE en
         // vez de intentar mostrarlo. En la tablet del repartidor eso es todo el

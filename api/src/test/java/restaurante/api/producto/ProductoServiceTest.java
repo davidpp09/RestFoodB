@@ -37,6 +37,7 @@ class ProductoServiceTest {
     @Mock private restaurante.api.precio.HistorialPrecioService historial;
     @Mock private restaurante.api.precio.HistorialPrecioRepository historialRepository;
     @Mock private restaurante.api.precio.GrupoPrecioRepository grupos;
+    @Mock private restaurante.api.precio.VinculosMenuService vinculos;
 
     @InjectMocks
     private ProductoService service;

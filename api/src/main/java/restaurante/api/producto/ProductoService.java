@@ -21,6 +21,7 @@ public class ProductoService {
     @Autowired private HistorialPrecioService historial;
     @Autowired private HistorialPrecioRepository historialRepository;
     @Autowired private GrupoPrecioRepository grupos;
+    @Autowired private VinculosMenuService vinculos;
 
     public record ResultadoAltaDia(DatosRespuestaProducto producto, boolean creado) {}
 
@@ -189,6 +190,7 @@ public class ProductoService {
     }
 
     private void auditar(Producto producto, BigDecimal[] antes, Usuario usuario, String origen) {
+        vinculos.vincular(producto);
         historial.registrar(producto, CampoPrecio.DESAYUNO, antes[0], usuario, origen);
         historial.registrar(producto, CampoPrecio.COMIDA, antes[1], usuario, origen);
     }
