@@ -73,6 +73,28 @@ class PreciosIntegracionTest {
                 .andExpect(jsonPath("$[0].fecha").isNotEmpty());
     }
 
+    /**
+     * Regresión: la fecha se guardaba con LocalDateTime.now(UTC) y el conector la
+     * volvía a convertir, así que en la base quedaba 6 horas adelantada. La base
+     * guarda UTC, así que lo crudo debe coincidir con UTC_TIMESTAMP() de MySQL.
+     * Solo truena en una máquina fuera de UTC (la de David); en el CI, que corre
+     * en UTC, las dos versiones coinciden.
+     */
+    @Test void laFechaDelHistorialSeGuardaEnUtcComoElRestoDeLaBase() throws Exception {
+        cambiar("DEV", "120").andExpect(status().isOk());
+        Long minutos = jdbc.queryForObject(
+                "SELECT MAX(ABS(TIMESTAMPDIFF(MINUTE, fecha, UTC_TIMESTAMP()))) FROM historial_precios "
+                        + "WHERE id_producto IN (?, ?)", Long.class, primero, segundo);
+        assertTrue(minutos <= 2, "La fecha cruda debe estar en UTC; se desvió " + minutos + " minutos");
+
+        String cuerpo = mvc.perform(get("/productos/" + primero + "/historial-precios")
+                        .header("Authorization", token("DEV")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        var fecha = java.time.OffsetDateTime.parse(json.readTree(cuerpo).get(0).get("fecha").asText());
+        long desvio = Math.abs(java.time.Duration.between(fecha.toInstant(), java.time.Instant.now()).toMinutes());
+        assertTrue(desvio <= 2, "El API debe entregar el instante real; se desvió " + desvio + " minutos");
+    }
+
     @Test void grupoEsTodoONadaSiFallaElHistorial() {
         AtomicInteger llamadas = new AtomicInteger();
         doAnswer(inv -> {

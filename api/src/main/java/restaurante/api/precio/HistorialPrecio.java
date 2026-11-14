@@ -7,7 +7,6 @@ import restaurante.api.producto.Producto;
 import restaurante.api.usuario.Usuario;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 @Entity
 @Table(name = "historial_precios")
@@ -32,6 +31,9 @@ public class HistorialPrecio {
         this.precioNuevo = nuevo;
         this.usuario = usuario;
         this.origen = origen;
-        this.fecha = LocalDateTime.now(ZoneOffset.UTC);
+        // Hora LOCAL, como el resto del sistema (órdenes, kardex): el conector, con
+        // serverTimezone=UTC, la convierte a UTC al guardar. Pasarle ya la hora UTC
+        // la convertía dos veces y quedaba 6 horas adelantada en la base.
+        this.fecha = LocalDateTime.now();
     }
 }
