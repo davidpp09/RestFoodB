@@ -8,16 +8,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
 import restaurante.api.infra.errores.RecursoNoEncontradoException;
-import restaurante.api.infra.errores.ValidacionException;
 import restaurante.api.infra.security.DatosLoginRespuesta;
 import restaurante.api.infra.security.RoutingService;
-import restaurante.api.mesa.MesaService;
 import restaurante.api.usuario.*;
 
 import java.net.URI;
@@ -33,13 +29,10 @@ public class UsuariosController {
     private UsuarioRepository repository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // 1. Inyectamos la herramienta de cifrado
+    private UsuarioService usuarioService;
 
     @Autowired
     private RoutingService routingService;
-
-    @Autowired
-    private MesaService mesaService;
 
     @Autowired
     private VentasEmpleadoService ventasEmpleadoService;
@@ -60,30 +53,11 @@ public class UsuariosController {
     }
 
     @PostMapping
-    @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
     public ResponseEntity<DatosRespuestaUsuario> registrar(@RequestBody @Valid DatosRegistroUsuario datosRegistroUsuario, UriComponentsBuilder uriComponentsBuilder) {
-
-        // 2. Creamos la instancia de Usuario
-        Usuario usuario = new Usuario(datosRegistroUsuario);
-
-        // 3. Encriptamos la contraseña que viene en el DTO y se la asignamos al usuario
-        String passwordEncriptada = passwordEncoder.encode(datosRegistroUsuario.contrasena());
-        usuario.setContrasena(passwordEncriptada);
-
-        // 4. Guardamos al usuario ya protegido
-        repository.save(usuario);
-
-        DatosRespuestaUsuario datosRespuesta = new DatosRespuestaUsuario(
-                usuario.getId_usuarios(),
-                usuario.getNombre(),
-                usuario.getRol().toString(),
-                usuario.getEmail(),
-                usuario.getEstatus()
-        );
-
+        Usuario usuario = usuarioService.registrar(datosRegistroUsuario);
         URI url = uriComponentsBuilder.path("/usuarios/{id}").buildAndExpand(usuario.getId_usuarios()).toUri();
-        return ResponseEntity.created(url).body(datosRespuesta);
+        return ResponseEntity.created(url).body(respuesta(usuario));
     }
 
     @GetMapping
@@ -102,60 +76,26 @@ public class UsuariosController {
     }
 
     @PutMapping
-    @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
     public ResponseEntity<DatosRespuestaUsuario> actualizar(@RequestBody @Valid DatosActualizacionUsuario datos,
                                                             @AuthenticationPrincipal Usuario solicitante) {
-        var usuario = repository.findById(datos.id_usuarios())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
-        // Solo un DEV puede tocar cuentas DEV o asignar el rol DEV
-        if (solicitante.getRol() != Roles.DEV) {
-            if (usuario.getRol() == Roles.DEV) {
-                throw new ValidacionException("Solo un usuario DEV puede modificar una cuenta DEV.");
-            }
-            if (datos.rol() == Roles.DEV) {
-                throw new ValidacionException("Solo un usuario DEV puede asignar el rol DEV.");
-            }
-        }
-        usuario.actualizarInformacion(datos);
-        // Si deja de ser mesera, sus mesas quedan libres para repartirse
-        if (usuario.getRol() != Roles.MESERO) {
-            mesaService.quitarAsignaciones(usuario.getId_usuarios());
-        }
-        return ResponseEntity.ok(new DatosRespuestaUsuario(
-                usuario.getId_usuarios(),
-                usuario.getNombre(),
-                usuario.getRol().toString(),
-                usuario.getEmail(),
-                usuario.getEstatus()
-        ));
+        return ResponseEntity.ok(respuesta(usuarioService.actualizar(datos, solicitante)));
     }
 
     // Reset de contraseña por un administrador (el empleado no necesita la anterior)
     @PutMapping("/{id}/contrasena")
-    @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
     public ResponseEntity<Void> cambiarContrasena(@PathVariable Long id,
                                                   @RequestBody @Valid DatosCambioContrasena datos,
                                                   @AuthenticationPrincipal Usuario solicitante) {
-        var usuario = repository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
-        if (usuario.getRol() == Roles.DEV && solicitante.getRol() != Roles.DEV) {
-            throw new ValidacionException("Solo un usuario DEV puede cambiar la contraseña de una cuenta DEV.");
-        }
-        usuario.setContrasena(passwordEncoder.encode(datos.contrasena()));
+        usuarioService.cambiarContrasena(id, datos.contrasena(), solicitante);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
     public ResponseEntity eliminarLogico(@PathVariable Long id) {
-        var usuario = repository.getReferenceById(id);
-        usuario.eliminarUsuario(id);
-        // Una mesera dada de baja no puede atender: sus mesas quedan sin asignar
-        // y la pantalla de Personal las marca para repartirlas.
-        mesaService.quitarAsignaciones(id);
+        usuarioService.darDeBaja(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -170,20 +110,27 @@ public class UsuariosController {
     }
 
     @PutMapping("/activar/{id}")
-    @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
     public ResponseEntity activar(@PathVariable Long id) {
-        var usuario = repository.getReferenceById(id);
-        usuario.activarUsuario(id);
+        usuarioService.activar(id);
         return ResponseEntity.noContent().build();
     }
 
     // Borrado físico: sólo DEV (riesgoso; puede romper FK e historial de órdenes)
     @DeleteMapping("/eliminar/{id}")
-    @Transactional
     @PreAuthorize("hasRole('DEV')")
     public ResponseEntity eliminar(@PathVariable Long id) {
-        repository.deleteById(id);
+        usuarioService.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private static DatosRespuestaUsuario respuesta(Usuario usuario) {
+        return new DatosRespuestaUsuario(
+                usuario.getId_usuarios(),
+                usuario.getNombre(),
+                usuario.getRol().toString(),
+                usuario.getEmail(),
+                usuario.getEstatus()
+        );
     }
 }
