@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -419,6 +420,15 @@ public class OrdenService {
     public DatosRespuestaCuenta reimprimirTicket(Long idOrden) {
         var orden = ordenRepository.findById(idOrden)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Orden no encontrada"));
+
+        // Menor privilegio: el repartidor reimprime sus entregas, no las de otro.
+        // Sin esto, cambiando el id en la petición podría sacar el ticket (con
+        // el total) de cualquier orden del restaurante.
+        var autenticado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (autenticado.getRol() == Roles.REPARTIDOR
+                && !orden.getUsuario().getId_usuarios().equals(autenticado.getId_usuarios())) {
+            throw new AccessDeniedException("Solo puedes reimprimir tus propias órdenes");
+        }
 
         var platillos = ordenDetalleRepository.findAllByOrdenId(idOrden);
         List<DatosDetalleRespuesta> platillosMapeados = platillos.stream()
