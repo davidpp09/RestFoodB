@@ -42,7 +42,10 @@ public class PreciosMenuPdf {
         }
         // Validar todo antes de modificar el documento evita entregar una carta parcial.
         if (!vistaEditor && !problemas.isEmpty()) {
-            throw new ValidacionException("Revisa Menú y precios antes de imprimir: " + String.join("; ", problemas));
+            // Quien imprime a diario es el repartidor, y él no puede entrar a
+            // "Menú y precios": el mensaje dice a quién acudir, no qué pantalla abrir.
+            throw new ValidacionException("El menú no se puede imprimir: un administrador tiene que corregir "
+                    + "\"Menú y precios\". Problemas: " + String.join("; ", problemas));
         }
         var renglones = escrituras.stream().filter(Escritura::renglon).map(Escritura::caja).collect(Collectors.toSet());
         new BorradorPreciosPdf(mapa.datos().entradas(), renglones).aplicar(documento);

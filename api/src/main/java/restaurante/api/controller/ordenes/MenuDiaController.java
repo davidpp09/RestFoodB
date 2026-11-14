@@ -99,9 +99,13 @@ public class MenuDiaController {
      */
     @PostMapping("/enlace-descarga")
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'REPARTIDOR')")
-    public ResponseEntity<Map<String, String>> enlaceDescarga() {
-        // Que truene aquí si no hay platillos, antes de dar un enlace inservible.
-        platillosDelDia();
+    public ResponseEntity<Map<String, String>> enlaceDescarga() throws IOException {
+        // Que truene aquí, antes de dar un enlace inservible: sin platillos, o con
+        // la carta bloqueada por un grupo de precios con problemas. Se arma el PDF
+        // completo y se descarta porque es la única validación que coincide al
+        // 100 % con la de /descargar; si no, en la tablet se bajaría un JSON de
+        // error en vez del menú.
+        menuDiaService.generarCarta(platillosDelDia());
 
         String token = enlacesDeDescarga.emitir();
         return ResponseEntity.ok(Map.of("url", "/menu-dia/descargar?t=" + token));
