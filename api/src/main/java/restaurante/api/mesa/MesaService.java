@@ -5,12 +5,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import restaurante.api.infra.errores.RecursoNoEncontradoException;
 import restaurante.api.infra.errores.ValidacionException;
+import restaurante.api.orden.Orden;
 import restaurante.api.orden.OrdenRepository;
+import restaurante.api.orden.OrdenService;
 import restaurante.api.usuario.Roles;
 import restaurante.api.usuario.Usuario;
 import restaurante.api.usuario.UsuarioRepository;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +35,8 @@ public class MesaService {
     private UsuarioRepository usuarioRepository;
     @Autowired
     private OrdenRepository ordenRepository;
+    @Autowired
+    private OrdenService ordenService;
 
     private static boolean esSuperUsuario(Usuario usuario) {
         return usuario.getRol() == Roles.ADMIN || usuario.getRol() == Roles.DEV;
@@ -55,6 +60,44 @@ public class MesaService {
         return porId.values().stream()
                 .sorted(Comparator.comparing(Mesa::getId_mesas))
                 .toList();
+    }
+
+    /**
+     * Las mesas tal como las pinta la sala: cada una con su cuenta abierta
+     * (si tiene), quién la atiende y sus platillos.
+     *
+     * Antes esto vivía en MesasController y consultaba la base dos veces POR
+     * MESA (la orden abierta y luego sus platillos): con 50 mesas eran más de
+     * 100 consultas en cada recarga de la sala. Ahora son tres fijas: las
+     * órdenes abiertas de todas las mesas, y los platillos de todas esas órdenes.
+     */
+    public List<DatosRespuestaMesa> conOrdenActiva(List<Mesa> mesas) {
+        if (mesas.isEmpty()) {
+            return List.of();
+        }
+        // Si una mesa tuviera dos órdenes abiertas (no debería: el lock de
+        // abrirCuenta lo impide), se muestra la más antigua. Antes ese caso
+        // tiraba un error 500 y dejaba la sala completa en blanco.
+        Map<Long, Orden> ordenPorMesa = new HashMap<>();
+        ordenRepository.findActivasDeMesas(mesas.stream().map(Mesa::getId_mesas).toList()).stream()
+                .sorted(Comparator.comparing(Orden::getId_ordenes))
+                .forEach(o -> ordenPorMesa.putIfAbsent(o.getMesa().getId_mesas(), o));
+
+        var detalles = ordenService.detallesPorOrden(
+                ordenPorMesa.values().stream().map(Orden::getId_ordenes).toList());
+
+        return mesas.stream().map(m -> {
+            Orden orden = ordenPorMesa.get(m.getId_mesas());
+            return new DatosRespuestaMesa(
+                    m.getId_mesas(),
+                    m.getNumero(),
+                    m.getEstado().toString(),
+                    orden != null ? orden.getId_ordenes() : null,
+                    orden != null ? orden.getUsuario().getNombre() : null,
+                    orden != null ? detalles.getOrDefault(orden.getId_ordenes(), List.of()) : List.of(),
+                    orden != null ? orden.getFecha_apertura() : null
+            );
+        }).toList();
     }
 
     @Transactional
