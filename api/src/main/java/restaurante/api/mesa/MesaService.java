@@ -48,6 +48,7 @@ public class MesaService {
      * encargado reasigna en pleno servicio: la mesera debe poder cobrar la cuenta
      * que ya abrió, aunque la mesa ya sea de otra.
      */
+    @Transactional(readOnly = true)
     public List<Mesa> mesasDe(Usuario usuario) {
         if (esSuperUsuario(usuario)) {
             return mesaRepository.findActivas();
@@ -196,7 +197,7 @@ public class MesaService {
     }
 
     private Mesa buscar(Long idMesa) {
-        return mesaRepository.findById(idMesa)
+        return mesaRepository.findByIdConAsignacion(idMesa)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Mesa no encontrada"));
     }
 

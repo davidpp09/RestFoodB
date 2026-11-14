@@ -1,8 +1,8 @@
 package restaurante.api.inventario;
 
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import restaurante.api.infra.errores.RecursoNoEncontradoException;
 import restaurante.api.infra.errores.ValidacionException;
 import restaurante.api.producto.ProductoRepository;
@@ -22,10 +22,12 @@ public class RecetaService {
     private ProductoInsumoRepository recetaRepository;
 
     /** El panorama completo: todas las relaciones, para ver repetidos y huecos. */
+    @Transactional(readOnly = true)
     public List<DatosRelacionProducto> todas() {
         return recetaRepository.todas().stream().map(DatosRelacionProducto::new).toList();
     }
 
+    @Transactional(readOnly = true)
     public DatosRespuestaReceta obtener(Long idInsumo) {
         Insumo insumo = insumoRepository.findById(idInsumo)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No existe el insumo " + idInsumo));

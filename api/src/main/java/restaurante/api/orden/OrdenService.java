@@ -127,6 +127,7 @@ public class OrdenService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Page<DatosListaOrden> listar(Pageable pagina) {
         return ordenRepository.findAllByTipo(pagina, Tipo.LOZA).map(DatosListaOrden::new);
     }
@@ -599,7 +600,8 @@ public class OrdenService {
         messagingTemplate.convertAndSend("/topic/cocina", Map.of("mensaje", "Orden " + idOrden + " está lista", "id_orden", idOrden));
     }
 
-    @Transactional
+    // Solo lee: antes era una transacción de escritura sin motivo.
+    @Transactional(readOnly = true)
     public DatosCorteDia master(LocalDate fecha) {
         var inicio = fecha.atStartOfDay();
         var fin    = fecha.atTime(LocalTime.MAX);
@@ -649,6 +651,7 @@ public class OrdenService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<DatosCancelacionMesero> cancelacionesPorMesero(LocalDate desde, LocalDate hasta) {
         RangoFechas.validar(desde, hasta);
         LocalDateTime inicio = desde.atStartOfDay();
