@@ -9,9 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import restaurante.api.mesa.*;
-import restaurante.api.orden.OrdenRepository;
-import restaurante.api.ordenDetalle.DatosDetalleRespuesta;
-import restaurante.api.ordenDetalle.OrdenDetalleRepository;
 import restaurante.api.usuario.Usuario;
 
 import java.net.URI;
@@ -29,26 +26,20 @@ public class MesasController {
     @Autowired
     private MesaService mesaService;
 
-    @Autowired
-    private OrdenRepository ordenRepository;
-
-    @Autowired
-    private OrdenDetalleRepository ordenDetalleRepository;
-
     // ---------- Lo que ven las tablets ----------
 
     // Vista de sala del ADMIN: todas las mesas activas con su cuenta abierta.
     @GetMapping
     @Transactional(readOnly = true)
     public ResponseEntity<List<DatosRespuestaMesa>> listar() {
-        return ResponseEntity.ok(repository.findActivas().stream().map(this::conOrdenActiva).toList());
+        return ResponseEntity.ok(mesaService.conOrdenActiva(repository.findActivas()));
     }
 
     // Tablet de la mesera: solo sus mesas (ver MesaService.mesasDe).
     @GetMapping("/mias")
     @Transactional(readOnly = true)
     public ResponseEntity<List<DatosRespuestaMesa>> mias(@AuthenticationPrincipal Usuario usuario) {
-        return ResponseEntity.ok(mesaService.mesasDe(usuario).stream().map(this::conOrdenActiva).toList());
+        return ResponseEntity.ok(mesaService.conOrdenActiva(mesaService.mesasDe(usuario)));
     }
 
     // Lo usa el frontend anterior a /mias. Se puede borrar cuando todas las tablets
@@ -56,7 +47,7 @@ public class MesasController {
     @GetMapping("/rango/{inicio}/{fin}")
     @Transactional(readOnly = true)
     public ResponseEntity<List<DatosRespuestaMesa>> mesasRango(@PathVariable long inicio, @PathVariable long fin) {
-        return ResponseEntity.ok(repository.buscarPorRango(inicio, fin).stream().map(this::conOrdenActiva).toList());
+        return ResponseEntity.ok(mesaService.conOrdenActiva(repository.buscarPorRango(inicio, fin)));
     }
 
     // ---------- Gestión (pantalla de Personal) ----------
@@ -112,25 +103,5 @@ public class MesasController {
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
     public ResponseEntity<Map<String, Integer>> cubrirTurno(@RequestBody @Valid DatosCubrirTurno datos) {
         return ResponseEntity.ok(Map.of("mesas_movidas", mesaService.cubrirTurno(datos)));
-    }
-
-    private DatosRespuestaMesa conOrdenActiva(Mesa m) {
-        var orden = ordenRepository.findActivaByMesa(m.getId_mesas()).orElse(null);
-        List<DatosDetalleRespuesta> platillos = List.of();
-        String nombreMesero = null;
-        if (orden != null) {
-            platillos = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes())
-                    .stream().map(DatosDetalleRespuesta::new).toList();
-            nombreMesero = orden.getUsuario().getNombre();
-        }
-        return new DatosRespuestaMesa(
-                m.getId_mesas(),
-                m.getNumero(),
-                m.getEstado().toString(),
-                orden != null ? orden.getId_ordenes() : null,
-                nombreMesero,
-                platillos,
-                orden != null ? orden.getFecha_apertura() : null
-        );
     }
 }
