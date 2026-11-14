@@ -74,7 +74,11 @@ public class Producto {
     }
 
     public void actualizarDia(DatosActualizacionDia datos) {
-        if (datos.precio_comida() != null)  this.precio_comida  = datos.precio_comida();
+        if (datos.precio_comida() != null) {
+            // Un platillo del día tiene un solo precio, también durante el desayuno.
+            this.precio_comida = datos.precio_comida();
+            this.precio_desayuno = datos.precio_comida();
+        }
         if (datos.disponibilidad() != null) this.disponibilidad = datos.disponibilidad();
     }
 }
