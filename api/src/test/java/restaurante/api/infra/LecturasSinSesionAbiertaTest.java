@@ -50,7 +50,7 @@ class LecturasSinSesionAbiertaTest {
     @Autowired private UsuarioRepository usuarioRepository;
 
     private long admin, mesera, repartidor, categoria, producto, mesa, mesaLibre, insumo;
-    private long ordenMesa, ordenLlevar, ordenPagada;
+    private long ordenMesa, ordenLlevar, ordenPagada, grupoPrecio;
 
     @BeforeAll
     void datos() {
@@ -68,6 +68,9 @@ class LecturasSinSesionAbiertaTest {
         producto = insertar("""
                 INSERT INTO productos (nombre, precio_comida, precio_desayuno, disponibilidad, id_categoria, eliminado)
                 VALUES (?, 100, 90, 1, ?, 0)""", "Platillo humo " + s, categoria);
+        grupoPrecio = insertar("INSERT INTO grupos_precio(clave,nombre,campo) VALUES (?, 'Grupo humo', 'COMIDA')", "humo-" + s);
+        jdbc.update("INSERT INTO grupos_precio_productos VALUES (?,?)", grupoPrecio, producto);
+        jdbc.update("INSERT INTO historial_precios(id_producto,campo,precio_anterior,precio_nuevo,id_usuario,fecha,origen) VALUES (?, 'COMIDA', 90, 100, ?, UTC_TIMESTAMP(), 'CARTA')", producto, admin);
         mesa = insertar("INSERT INTO mesas (numero, estado, id_usuario_asignado, activa) VALUES (?, 'OCUPADA', ?, 1)",
                 "H" + s, mesera);
         // Sin cuentas abiertas, para poder darla de baja y reactivarla.
@@ -101,6 +104,9 @@ class LecturasSinSesionAbiertaTest {
         jdbc.update("DELETE FROM orden_detalle WHERE id_orden IN (?, ?, ?)", ordenMesa, ordenLlevar, ordenPagada);
         jdbc.update("DELETE FROM ordenes WHERE id_ordenes IN (?, ?, ?)", ordenMesa, ordenLlevar, ordenPagada);
         jdbc.update("DELETE FROM mesas WHERE id_mesas IN (?, ?)", mesa, mesaLibre);
+        jdbc.update("DELETE FROM historial_precios WHERE id_producto = ?", producto);
+        jdbc.update("DELETE FROM grupos_precio_productos WHERE id_grupo_precio = ?", grupoPrecio);
+        jdbc.update("DELETE FROM grupos_precio WHERE id_grupo_precio = ?", grupoPrecio);
         jdbc.update("DELETE FROM productos WHERE id_productos = ?", producto);
         jdbc.update("DELETE FROM categorias WHERE id_categorias = ?", categoria);
         jdbc.update("DELETE FROM insumos WHERE id_insumos = ?", insumo);
@@ -127,6 +133,8 @@ class LecturasSinSesionAbiertaTest {
                 new String[]{"admin", "/admin/comandas-dia?fecha=" + hoy},
                 new String[]{"admin", "/admin/cancelaciones?desde=" + hoy + "&hasta=" + hoy},
                 new String[]{"admin", "/productos"},
+                new String[]{"admin", "/grupos-precio"},
+                new String[]{"admin", "/productos/" + producto + "/historial-precios"},
                 new String[]{"admin", "/categorias"},
                 new String[]{"admin", "/usuarios"},
                 new String[]{"admin", "/usuarios/todos"},

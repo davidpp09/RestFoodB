@@ -10,9 +10,17 @@ import restaurante.api.infra.errores.ValidacionException;
 import restaurante.api.ordenDetalle.OrdenDetalleRepository;
 
 import java.util.List;
+import java.math.BigDecimal;
+import restaurante.api.precio.*;
+import restaurante.api.usuario.Usuario;
+import restaurante.api.usuario.Roles;
 
 @Service
 public class ProductoService {
+
+    @Autowired private HistorialPrecioService historial;
+    @Autowired private HistorialPrecioRepository historialRepository;
+    @Autowired private GrupoPrecioRepository grupos;
 
     public record ResultadoAltaDia(DatosRespuestaProducto producto, boolean creado) {}
 
@@ -26,16 +34,19 @@ public class ProductoService {
     private OrdenDetalleRepository ordenDetalleRepository;
 
     @Transactional
-    public DatosRespuestaProducto registrar(DatosRegistroProducto datos) {
+    public DatosRespuestaProducto registrar(DatosRegistroProducto datos, Usuario usuario) {
         Categoria categoria = categoriaRepository.findById(datos.id_categoria()).orElseThrow();
         // El nombre es único: si existe un producto con borrado suave se reutiliza ese registro
-        var existente = repository.findByNombre(datos.nombre());
+        var existente = repository.buscarPorNombreParaEditar(datos.nombre());
         if (existente.isPresent() && Boolean.TRUE.equals(existente.get().getEliminado())) {
-            Producto revivido = existente.get();
+            Producto revivido = repository.buscarParaEditar(existente.get().getId_productos()).orElseThrow();
+            var antes = precios(revivido);
             revivido.restaurar(datos, categoria);
+            auditar(revivido, antes, usuario, "CARTA");
             return new DatosRespuestaProducto(revivido);
         }
         Producto producto = repository.save(new Producto(datos, categoria));
+        auditar(producto, new BigDecimal[]{null, null}, usuario, "CARTA");
         return new DatosRespuestaProducto(producto);
     }
 
@@ -47,19 +58,21 @@ public class ProductoService {
 
     @Transactional
     public DatosRespuestaProducto actualizar(Long id,
-                                              DatosActualizacionProducto datos) {
-        Producto producto = repository.findById(id).orElseThrow();
+                                              DatosActualizacionProducto datos, Usuario usuario) {
+        Producto producto = repository.buscarParaEditar(id).orElseThrow();
         Categoria categoria = datos.id_categoria() != null
                 ? categoriaRepository.findById(datos.id_categoria()).orElseThrow()
                 : null;
+        var antes = precios(producto);
         producto.actualizar(datos, categoria);
+        auditar(producto, antes, usuario, "CARTA");
         return new DatosRespuestaProducto(producto);
     }
 
     @Transactional
     public void eliminar(Long id) {
-        Producto producto = repository.findById(id).orElseThrow();
-        if (ordenDetalleRepository.existePorProducto(id)) {
+        Producto producto = repository.buscarParaEditar(id).orElseThrow();
+        if (ordenDetalleRepository.existePorProducto(id) || historialRepository.contieneProducto(id) || grupos.contieneProducto(id)) {
             // Con ventas registradas no se puede borrar físicamente (FK protege el historial)
             producto.marcarEliminado();
         } else {
@@ -81,7 +94,7 @@ public class ProductoService {
      */
     @Transactional
     public ResultadoAltaDia registrarDelDia(
-            DatosNuevoPlatilloDia datos) {
+            DatosNuevoPlatilloDia datos, Usuario usuario) {
 
         Categoria categoriaDia = categoriaRepository.findCategoriaDelDia()
                 .orElseThrow(() -> new ValidacionException(
@@ -89,23 +102,27 @@ public class ProductoService {
 
         String nombre = datos.nombre().trim();
 
-        var existente = repository.findByNombre(nombre);
+        var existente = repository.buscarPorNombreParaEditar(nombre);
         if (existente.isPresent()) {
-            Producto producto = existente.get();
+            Producto producto = repository.buscarParaEditar(existente.get().getId_productos()).orElseThrow();
             if (!Boolean.TRUE.equals(producto.getEliminado())) {
                 throw new ValidacionException("Ya existe un platillo con ese nombre: " + producto.getNombre());
             }
+            if (usuario != null && usuario.getRol() == Roles.REPARTIDOR) exigirCategoriaDelDia(producto.getCategoria());
             // Estaba archivado: se revive en vez de duplicarlo, para no llenar el
             // catálogo de repetidos y no perder su historial de ventas.
+            var antes = precios(producto);
             producto.restaurar(
                     new DatosRegistroProducto(nombre, datos.precio(), datos.precio(), false, categoriaDia.getId_categorias()),
                     categoriaDia);
+            auditar(producto, antes, usuario, "DIA");
             return new ResultadoAltaDia(new DatosRespuestaProducto(producto), false);
         }
 
         var nuevo = new DatosRegistroProducto(
                 nombre, datos.precio(), datos.precio(), false, categoriaDia.getId_categorias());
         Producto producto = repository.save(new Producto(nuevo, categoriaDia));
+        auditar(producto, new BigDecimal[]{null, null}, usuario, "DIA");
 
         return new ResultadoAltaDia(new DatosRespuestaProducto(producto), true);
     }
@@ -119,7 +136,7 @@ public class ProductoService {
      */
     @Transactional
     public void archivarDelDia(Long id) {
-        Producto producto = repository.findById(id)
+        Producto producto = repository.buscarParaEditar(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No existe el platillo " + id));
 
         Categoria categoriaDia = categoriaRepository.findCategoriaDelDia()
@@ -135,9 +152,10 @@ public class ProductoService {
 
     @Transactional
     public DatosRespuestaProducto actualizarDia(Long id,
-                                                 DatosActualizacionDia datos) {
-        Producto producto = repository.findById(id)
+                                                 DatosActualizacionDia datos, Usuario usuario) {
+        Producto producto = repository.buscarParaEditar(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No existe el platillo " + id));
+        if (usuario != null && usuario.getRol() == Roles.REPARTIDOR) exigirCategoriaDelDia(producto.getCategoria());
         if (Boolean.TRUE.equals(datos.disponibilidad()) && !producto.getDisponibilidad()) {
             Categoria categoria = producto.getCategoria();
             // El tope vive en la base (columna max_activos), no clavado aquí: el menú
@@ -152,12 +170,35 @@ public class ProductoService {
                 throw new ValidacionException("Máximo " + tope + " platillos activos en " + categoria.getNombre());
             }
         }
+        var antes = precios(producto);
         producto.actualizarDia(datos);
+        auditar(producto, antes, usuario, "DIA");
         return new DatosRespuestaProducto(producto);
     }
 
+    private void exigirCategoriaDelDia(Categoria categoria) {
+        var dia = categoriaRepository.findCategoriaDelDia()
+                .orElseThrow(() -> new ValidacionException("No existe la categoría Comida del día"));
+        if (!dia.getId_categorias().equals(categoria.getId_categorias())) {
+            throw new ValidacionException("Desde aquí solo se modifican platillos del día");
+        }
+    }
+
+    private BigDecimal[] precios(Producto producto) {
+        return new BigDecimal[]{producto.getPrecio_desayuno(), producto.getPrecio_comida()};
+    }
+
+    private void auditar(Producto producto, BigDecimal[] antes, Usuario usuario, String origen) {
+        historial.registrar(producto, CampoPrecio.DESAYUNO, antes[0], usuario, origen);
+        historial.registrar(producto, CampoPrecio.COMIDA, antes[1], usuario, origen);
+    }
+
     @Transactional
-    public void desactivarDia(Long categoriaId) {
+    public void desactivarDia(Long categoriaId, Usuario usuario) {
+        if (usuario != null && usuario.getRol() == Roles.REPARTIDOR) {
+            exigirCategoriaDelDia(categoriaRepository.findById(categoriaId)
+                    .orElseThrow(() -> new RecursoNoEncontradoException("No existe la categoría")));
+        }
         repository.desactivarPorCategoria(categoriaId);
     }
 }
