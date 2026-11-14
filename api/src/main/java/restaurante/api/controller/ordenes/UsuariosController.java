@@ -54,8 +54,10 @@ public class UsuariosController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
-    public ResponseEntity<DatosRespuestaUsuario> registrar(@RequestBody @Valid DatosRegistroUsuario datosRegistroUsuario, UriComponentsBuilder uriComponentsBuilder) {
-        Usuario usuario = usuarioService.registrar(datosRegistroUsuario);
+    public ResponseEntity<DatosRespuestaUsuario> registrar(@RequestBody @Valid DatosRegistroUsuario datosRegistroUsuario,
+                                                           @AuthenticationPrincipal Usuario solicitante,
+                                                           UriComponentsBuilder uriComponentsBuilder) {
+        Usuario usuario = usuarioService.registrar(datosRegistroUsuario, solicitante);
         URI url = uriComponentsBuilder.path("/usuarios/{id}").buildAndExpand(usuario.getId_usuarios()).toUri();
         return ResponseEntity.created(url).body(respuesta(usuario));
     }
@@ -94,8 +96,8 @@ public class UsuariosController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
-    public ResponseEntity eliminarLogico(@PathVariable Long id) {
-        usuarioService.darDeBaja(id);
+    public ResponseEntity eliminarLogico(@PathVariable Long id, @AuthenticationPrincipal Usuario solicitante) {
+        usuarioService.darDeBaja(id, solicitante);
         return ResponseEntity.noContent().build();
     }
 
@@ -111,8 +113,8 @@ public class UsuariosController {
 
     @PutMapping("/activar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
-    public ResponseEntity activar(@PathVariable Long id) {
-        usuarioService.activar(id);
+    public ResponseEntity activar(@PathVariable Long id, @AuthenticationPrincipal Usuario solicitante) {
+        usuarioService.activar(id, solicitante);
         return ResponseEntity.noContent().build();
     }
 

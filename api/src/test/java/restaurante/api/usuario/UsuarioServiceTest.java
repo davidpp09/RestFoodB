@@ -113,8 +113,63 @@ class UsuarioServiceTest {
         when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Usuario nuevo = servicio.registrar(
-                new DatosRegistroUsuario("Ana", Roles.MESERO, "Clave#123", "ana@prueba.test", 1));
+                new DatosRegistroUsuario("Ana", Roles.MESERO, "Clave#123", "ana@prueba.test", 1), ADMIN);
 
         assertEquals("$2a$hash", nuevo.getContrasena());
+    }
+
+    // ---------- regresión: la regla DEV solo se aplicaba al actualizar ----------
+
+    @Test
+    @DisplayName("Un ADMIN no puede CREAR un usuario con rol DEV (antes sí podía)")
+    void adminNoCreaUsuarioDev() {
+        var datos = new DatosRegistroUsuario("Intruso", Roles.DEV, "Clave#123", "intruso@prueba.test", null);
+
+        assertThrows(ValidacionException.class, () -> servicio.registrar(datos, ADMIN));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Un DEV sí puede crear otro DEV")
+    void devCreaUsuarioDev() {
+        when(passwordEncoder.encode(any())).thenReturn("$2a$hash");
+        when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        Usuario nuevo = servicio.registrar(
+                new DatosRegistroUsuario("Otro dev", Roles.DEV, "Clave#123", "dev2@prueba.test", null), DEV);
+
+        assertEquals(Roles.DEV, nuevo.getRol());
+    }
+
+    @Test
+    @DisplayName("Un ADMIN no puede dar de baja una cuenta DEV (antes sí podía)")
+    void adminNoDaDeBajaDev() {
+        var dev = usuario(10, Roles.DEV);
+        when(repository.findById(10L)).thenReturn(Optional.of(dev));
+
+        assertThrows(ValidacionException.class, () -> servicio.darDeBaja(10L, ADMIN));
+        assertTrue(dev.getEstatus(), "La cuenta DEV debe seguir activa");
+    }
+
+    @Test
+    @DisplayName("Un ADMIN no puede reactivar una cuenta DEV (antes sí podía)")
+    void adminNoReactivaDev() {
+        var dev = new Usuario(10L, "DEV BAJA", Roles.DEV, "hash", false, "d@prueba.test", null);
+        when(repository.findById(10L)).thenReturn(Optional.of(dev));
+
+        assertThrows(ValidacionException.class, () -> servicio.activar(10L, ADMIN));
+        assertFalse(dev.getEstatus());
+    }
+
+    @Test
+    @DisplayName("Un ADMIN sí puede dar de baja a una mesera, y se liberan sus mesas")
+    void adminDaDeBajaMesera() {
+        var mesera = usuario(10, Roles.MESERO);
+        when(repository.findById(10L)).thenReturn(Optional.of(mesera));
+
+        servicio.darDeBaja(10L, ADMIN);
+
+        assertFalse(mesera.getEstatus());
+        verify(mesaService).quitarAsignaciones(10L);
     }
 }

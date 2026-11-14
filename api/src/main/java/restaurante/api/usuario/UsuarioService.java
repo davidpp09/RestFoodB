@@ -29,7 +29,10 @@ public class UsuarioService {
     private MesaService mesaService;
 
     @Transactional
-    public Usuario registrar(DatosRegistroUsuario datos) {
+    public Usuario registrar(DatosRegistroUsuario datos, Usuario solicitante) {
+        if (datos.rol() == Roles.DEV) {
+            exigirDev(solicitante, "Solo un usuario DEV puede crear una cuenta DEV.");
+        }
         Usuario usuario = new Usuario(datos);
         // La contraseña nunca se guarda tal cual: se guarda su hash.
         usuario.setContrasena(passwordEncoder.encode(datos.contrasena()));
@@ -39,14 +42,11 @@ public class UsuarioService {
     @Transactional
     public Usuario actualizar(DatosActualizacionUsuario datos, Usuario solicitante) {
         Usuario usuario = buscar(datos.id_usuarios());
-        // Solo un DEV puede tocar cuentas DEV o asignar el rol DEV
-        if (solicitante.getRol() != Roles.DEV) {
-            if (usuario.getRol() == Roles.DEV) {
-                throw new ValidacionException("Solo un usuario DEV puede modificar una cuenta DEV.");
-            }
-            if (datos.rol() == Roles.DEV) {
-                throw new ValidacionException("Solo un usuario DEV puede asignar el rol DEV.");
-            }
+        if (usuario.getRol() == Roles.DEV) {
+            exigirDev(solicitante, "Solo un usuario DEV puede modificar una cuenta DEV.");
+        }
+        if (datos.rol() == Roles.DEV) {
+            exigirDev(solicitante, "Solo un usuario DEV puede asignar el rol DEV.");
         }
         usuario.actualizarInformacion(datos);
         // Si deja de ser mesera, sus mesas quedan libres para repartirse
@@ -60,15 +60,18 @@ public class UsuarioService {
     @Transactional
     public void cambiarContrasena(Long id, String contrasena, Usuario solicitante) {
         Usuario usuario = buscar(id);
-        if (usuario.getRol() == Roles.DEV && solicitante.getRol() != Roles.DEV) {
-            throw new ValidacionException("Solo un usuario DEV puede cambiar la contraseña de una cuenta DEV.");
+        if (usuario.getRol() == Roles.DEV) {
+            exigirDev(solicitante, "Solo un usuario DEV puede cambiar la contraseña de una cuenta DEV.");
         }
         usuario.setContrasena(passwordEncoder.encode(contrasena));
     }
 
     @Transactional
-    public void darDeBaja(Long id) {
-        Usuario usuario = repository.getReferenceById(id);
+    public void darDeBaja(Long id, Usuario solicitante) {
+        Usuario usuario = buscar(id);
+        if (usuario.getRol() == Roles.DEV) {
+            exigirDev(solicitante, "Solo un usuario DEV puede dar de baja una cuenta DEV.");
+        }
         usuario.eliminarUsuario(id);
         // Una mesera dada de baja no puede atender: sus mesas quedan sin asignar
         // y la pantalla de Personal las marca para repartirlas.
@@ -76,14 +79,30 @@ public class UsuarioService {
     }
 
     @Transactional
-    public void activar(Long id) {
-        repository.getReferenceById(id).activarUsuario(id);
+    public void activar(Long id, Usuario solicitante) {
+        Usuario usuario = buscar(id);
+        if (usuario.getRol() == Roles.DEV) {
+            exigirDev(solicitante, "Solo un usuario DEV puede reactivar una cuenta DEV.");
+        }
+        usuario.activarUsuario(id);
     }
 
     /** Borrado físico: riesgoso, puede romper FK e historial de órdenes. El permiso (solo DEV) está en el controller. */
     @Transactional
     public void eliminar(Long id) {
         repository.deleteById(id);
+    }
+
+    /**
+     * Regla de la casa: las cuentas DEV y el rol DEV solo los maneja otro DEV.
+     * Va en un solo método y se llama en TODAS las operaciones sobre cuentas:
+     * cuando vivía repetida en el controller, solo `actualizar` la aplicaba, y
+     * un ADMIN podía crear un DEV nuevo o dar de baja al que ya existía.
+     */
+    private static void exigirDev(Usuario solicitante, String mensaje) {
+        if (solicitante == null || solicitante.getRol() != Roles.DEV) {
+            throw new ValidacionException(mensaje);
+        }
     }
 
     private Usuario buscar(Long id) {
