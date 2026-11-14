@@ -25,6 +25,13 @@ public interface MesaRepository extends JpaRepository<Mesa, Long> {
     @Query("SELECT m FROM mesa m WHERE m.activa = true ORDER BY m.id_mesas")
     List<Mesa> findActivas();
 
+    // Una mesa con su mesera ya cargada. MesaService la usa en las operaciones
+    // que devuelven la mesa al controller: DatosMesaGestion muestra el nombre de
+    // la mesera, y con open-in-view apagado esa relación LAZY ya no se puede
+    // cargar fuera del servicio.
+    @Query("SELECT m FROM mesa m LEFT JOIN FETCH m.usuarioAsignado WHERE m.id_mesas = :id")
+    Optional<Mesa> findByIdConAsignacion(@Param("id") Long id);
+
     // Para la pantalla de Personal: también las dadas de baja, para poder reactivarlas.
     @Query("SELECT m FROM mesa m LEFT JOIN FETCH m.usuarioAsignado ORDER BY m.id_mesas")
     List<Mesa> findTodasConAsignacion();

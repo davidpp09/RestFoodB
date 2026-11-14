@@ -3,11 +3,14 @@ package restaurante.api.controller.ordenes;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+import restaurante.api.infra.paginacion.Pagina;
 import restaurante.api.inventario.*;
 import restaurante.api.usuario.Usuario;
 
@@ -107,6 +110,26 @@ public class InventarioController {
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
     public ResponseEntity<List<DatosRespuestaMovimiento>> kardex(@PathVariable Long id) {
         return ResponseEntity.ok(service.kardex(id));
+    }
+
+    /**
+     * El kardex por páginas: `?page=0&size=20&sort=fecha,desc`.
+     *
+     * Ruta NUEVA a propósito, en vez de cambiar la de arriba: el frontend y el
+     * backend se despliegan por separado, y si /kardex pasara de lista a página
+     * la pantalla que hoy está en producción se rompería. Las dos conviven
+     * (expand), el front se pasa a esta (migrate) y en una versión posterior se
+     * borra /kardex (contract).
+     *
+     * Tamaño: 20 por defecto; el máximo (100) lo pone
+     * spring.data.web.pageable.max-page-size para todo el API.
+     */
+    @GetMapping("/insumos/{id}/movimientos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV')")
+    public ResponseEntity<Pagina<DatosRespuestaMovimiento>> kardexPaginado(
+            @PathVariable Long id,
+            @PageableDefault(size = 20) Pageable pagina) {
+        return ResponseEntity.ok(service.kardexPaginado(id, pagina));
     }
 
     // ---------- Existencias ----------

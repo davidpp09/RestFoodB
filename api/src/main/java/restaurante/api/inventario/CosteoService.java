@@ -2,6 +2,7 @@ package restaurante.api.inventario;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -25,6 +26,9 @@ import java.util.Map;
  * con un test y el volumen lo permite de sobra.
  */
 @Service
+// Este servicio solo lee: todas sus consultas corren en una transacción de solo
+// lectura (Hibernate no revisa cambios al cerrar y MySQL puede optimizarla).
+@Transactional(readOnly = true)
 public class CosteoService {
 
     @Autowired
