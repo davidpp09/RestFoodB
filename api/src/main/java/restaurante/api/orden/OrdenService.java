@@ -16,6 +16,7 @@ import restaurante.api.admin.DatosProductoCancelado;
 import restaurante.api.admin.DatosVentaEmpleado;
 import restaurante.api.infra.errores.ValidacionException;
 import restaurante.api.infra.errores.RecursoNoEncontradoException;
+import restaurante.api.infra.validacion.RangoFechas;
 import restaurante.api.mesa.Estado;
 import restaurante.api.mesa.MesaRepository;
 import restaurante.api.ordenDetalle.*;
@@ -645,6 +646,7 @@ public class OrdenService {
     }
 
     public List<DatosCancelacionMesero> cancelacionesPorMesero(LocalDate desde, LocalDate hasta) {
+        RangoFechas.validar(desde, hasta);
         LocalDateTime inicio = desde.atStartOfDay();
         LocalDateTime fin    = hasta.atTime(LocalTime.MAX);
 
