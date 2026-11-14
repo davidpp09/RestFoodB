@@ -134,6 +134,7 @@ class LecturasSinSesionAbiertaTest {
                 new String[]{"admin", "/usuarios/" + mesera + "/ventas"},
                 new String[]{"admin", "/inventario/insumos"},
                 new String[]{"admin", "/inventario/insumos/" + insumo + "/kardex"},
+                new String[]{"admin", "/inventario/insumos/" + insumo + "/movimientos?size=5"},
                 new String[]{"admin", "/inventario/existencias"},
                 new String[]{"admin", "/inventario/reportes/teorico-real?desde=" + hoy + "&hasta=" + hoy},
                 new String[]{"admin", "/inventario/reportes/food-cost"},
