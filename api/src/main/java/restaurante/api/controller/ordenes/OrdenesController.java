@@ -73,8 +73,9 @@ public class OrdenesController {
         return ResponseEntity.noContent().build();
     }
 
+    // El REPARTIDOR solo puede reimprimir SUS órdenes: lo revisa el servicio.
     @PostMapping("/{id}/reimprimir-ticket")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'CAJERO', 'MESERO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'CAJERO', 'MESERO', 'REPARTIDOR')")
     public ResponseEntity<DatosRespuestaCuenta> reimprimirTicket(@PathVariable Long id) {
         return ResponseEntity.ok(service.reimprimirTicket(id));
     }
