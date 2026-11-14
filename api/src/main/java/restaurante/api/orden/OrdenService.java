@@ -1,5 +1,7 @@
 package restaurante.api.orden;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +43,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class OrdenService {
+
+    private static final Logger log = LoggerFactory.getLogger(OrdenService.class);
 
     @Autowired
     OrdenRepository ordenRepository;
@@ -113,12 +117,12 @@ public class OrdenService {
                     ordenGuardada.getFecha_apertura()
             );
             messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
-            System.out.println("✅ [WS /topic/mesas] Mesa abierta: " + avisoMesa);
+            log.info("[WS /topic/mesas] Mesa abierta: {}", avisoMesa);
             return new DatosApertura(ordenGuardada.getId_ordenes(), numeroComanda);
         } else {
             // REPARTIDOR u otros roles sin mesa
             Orden ordenGuardada = ordenRepository.save(new Orden(null, usuario, datos.tipo(), datos.servicio(), numeroComanda));
-            System.out.println("✅ Orden sin mesa creada, id: " + ordenGuardada.getId_ordenes() + " comanda #" + numeroComanda);
+            log.info("Orden sin mesa creada: id {}, comanda #{}", ordenGuardada.getId_ordenes(), numeroComanda);
             return new DatosApertura(ordenGuardada.getId_ordenes(), numeroComanda);
         }
     }
@@ -260,7 +264,7 @@ public class OrdenService {
         updateAdmin.put("platillos", platillosMapeados);
         messagingTemplate.convertAndSend("/topic/mesas", updateAdmin);
         
-        System.out.println("✅ [WS /topic/cocina] Ticket enviado orden #" + orden.getId_ordenes() + " con " + ticketCocina.size() + " platillos");
+        log.info("[WS /topic/cocina] Ticket enviado: orden #{} con {} platillo(s)", orden.getId_ordenes(), ticketCocina.size());
 
         // Enviar impresión física
         impresoraService.imprimirComandaCocina(ticketFinal);
@@ -331,12 +335,12 @@ public class OrdenService {
         if (orden.getMesa() != null) {
             DatosMesaAbierta avisoMesa = new DatosMesaAbierta(orden.getMesa().getId_mesas(), orden.getMesa().getEstado(), "", null, null, null);
             messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
-            System.out.println("✅ [WS /topic/mesas] Mesa liberada: " + orden.getMesa().getId_mesas());
+            log.info("[WS /topic/mesas] Mesa liberada: {}", orden.getMesa().getId_mesas());
         }
         messagingTemplate.convertAndSend("/topic/tickets", ticket);
-        System.out.println("🖨️ [WS /topic/tickets] Ticket enviado para impresión: Orden #" + orden.getId_ordenes());
+        log.info("[WS /topic/tickets] Ticket enviado para impresión: orden #{}", orden.getId_ordenes());
         messagingTemplate.convertAndSend("/topic/cocina", Map.of("accion", "CERRADA", "id_orden", orden.getId_ordenes()));
-        System.out.println("🍳 [WS /topic/cocina] Orden cerrada: #" + orden.getId_ordenes());
+        log.info("[WS /topic/cocina] Orden cerrada: #{}", orden.getId_ordenes());
 
         // --- Efecto secundario (impresora, fuera del camino crítico) ---
         impresoraService.imprimirTicketCliente(ticket);
@@ -367,7 +371,7 @@ public class OrdenService {
         if (orden.getMesa() != null) {
             DatosMesaAbierta avisoMesa = new DatosMesaAbierta(orden.getMesa().getId_mesas(), orden.getMesa().getEstado(), "", null, null, null);
             messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
-            System.out.println("✅ [WS /topic/mesas] Mesa cancelada y liberada: " + orden.getMesa().getId_mesas());
+            log.info("[WS /topic/mesas] Mesa cancelada y liberada: {}", orden.getMesa().getId_mesas());
         }
     }
 
@@ -405,7 +409,7 @@ public class OrdenService {
         );
 
         messagingTemplate.convertAndSend("/topic/cocina", ticketFinal);
-        System.out.println("🔄 [WS /topic/cocina] Reenvío a cocina Orden #" + idOrden);
+        log.info("[WS /topic/cocina] Reenvío a cocina: orden #{}", idOrden);
 
         impresoraService.imprimirComandaCocina(ticketFinal);
     }
@@ -436,7 +440,7 @@ public class OrdenService {
 
         // Re-enviar por WebSocket al frontend que esté escuchando /topic/tickets
         messagingTemplate.convertAndSend("/topic/tickets", ticket);
-        System.out.println("🖨️ [WS /topic/tickets] Reimpresión ticket Orden #" + idOrden);
+        log.info("[WS /topic/tickets] Reimpresión de ticket: orden #{}", idOrden);
 
         // Imprimir físicamente
         impresoraService.imprimirTicketCliente(ticket);
