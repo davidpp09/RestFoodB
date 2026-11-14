@@ -20,7 +20,7 @@ public class HistorialPrecioService {
     public void registrar(Producto producto, CampoPrecio campo, BigDecimal anterior, Usuario usuario, String origen) {
         BigDecimal nuevo = campo.leer(producto);
         if (nuevo == null && anterior == null) return;
-        if (anterior == null || anterior.compareTo(nuevo) != 0) {
+        if (anterior == null || nuevo == null || anterior.compareTo(nuevo) != 0) {
             repository.save(new HistorialPrecio(producto, campo, anterior, nuevo, usuario, origen));
         }
     }

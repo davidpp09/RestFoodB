@@ -24,10 +24,10 @@ public class Producto {
     @Column(unique = true, nullable = false)
     private String nombre;
 
-    @Column(name = "precio_comida", nullable = false)
+    @Column(name = "precio_comida")
     private BigDecimal precio_comida;
 
-    @Column(name = "precio_desayuno", nullable = false)
+    @Column(name = "precio_desayuno")
     private BigDecimal precio_desayuno;
 
     @Column(nullable = false)

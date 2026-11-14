@@ -1,6 +1,7 @@
 package restaurante.api.producto;
 
 import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -26,6 +27,7 @@ public record DatosNuevoPlatilloDia(
 
         @NotNull
         @Positive
+        @Digits(integer = 4, fraction = 2, message = "El precio admite hasta 2 decimales")
         @DecimalMax(value = "9999.99", message = "El precio no puede pasar de 9999.99")
         BigDecimal precio
 ) {
