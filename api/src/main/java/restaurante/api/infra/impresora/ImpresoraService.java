@@ -5,6 +5,8 @@ import com.github.anastaciocintra.escpos.EscPosConst;
 import com.github.anastaciocintra.escpos.Style;
 import com.github.anastaciocintra.output.PrinterOutputStream;
 import com.github.anastaciocintra.output.TcpIpOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class ImpresoraService {
+
+    private static final Logger log = LoggerFactory.getLogger(ImpresoraService.class);
 
     // Valores homologados de categorias.impresora (2026-07-06). El ruteo es por
     // coincidencia EXACTA: cualquier otro valor cae a COCINA_1 con aviso en el log.
@@ -80,7 +84,7 @@ public class ImpresoraService {
                 .collect(Collectors.groupingBy(DatosPlatilloTicket::impresora));
 
         if (grupos.isEmpty()) {
-            System.out.println("🖨️ No hay platillos imprimibles en esta orden (todos son SIN_IMPRESION).");
+            log.info("No hay platillos imprimibles en esta orden (todos son SIN_IMPRESION)");
             return;
         }
 
@@ -89,8 +93,8 @@ public class ImpresoraService {
             if (!esCocina2 && !COCINA_1.equals(tipoImpresora)) {
                 // Valor no homologado: se imprime en COCINA_1 para no perder la comanda,
                 // pero como grupo separado — corrige categorias.impresora cuanto antes.
-                System.err.println("🖨️⚠️ Valor de impresora desconocido: '" + tipoImpresora
-                        + "' — homologa categorias.impresora a COCINA_1 / COCINA_2 / SIN_IMPRESION. Imprimiendo en COCINA_1.");
+                log.warn("Valor de impresora desconocido: '{}'. Homologa categorias.impresora a "
+                        + "COCINA_1 / COCINA_2 / SIN_IMPRESION. Imprimiendo en COCINA_1.", tipoImpresora);
             }
             String nombreImpresora = esCocina2 ? nombreCocina2 : nombreCocina1;
             String ip = esCocina2 ? ipCocina2 : ipCocina1;
@@ -119,7 +123,7 @@ public class ImpresoraService {
         try {
             OutputStream salida = abrirConexion(nombreImpresora, ip, puerto);
             if (salida == null) {
-                System.err.println("🖨️❌ No se encontró la impresora [" + tipoImpresora + "]: " + nombreImpresora);
+                log.error("Comanda SIN IMPRIMIR: no se encontró la impresora [{}] {}", tipoImpresora, nombreImpresora);
                 return;
             }
 
@@ -131,12 +135,11 @@ public class ImpresoraService {
             escpos.cut(EscPos.CutMode.FULL);
             escpos.close();
 
-            System.out.println("🖨️✅ Ticket [" + tipoImpresora + "] impreso en: " + nombreImpresora
-                    + " (" + platillos.size() + " platillo(s))");
+            log.info("Ticket [{}] impreso en {} ({} platillo(s))", tipoImpresora, nombreImpresora, platillos.size());
 
         } catch (Exception e) {
-            System.err.println("🖨️❌ Error al imprimir en [" + tipoImpresora + "] " + nombreImpresora + ": " + e.getMessage());
-            e.printStackTrace();
+            // La excepción va como último argumento: así el log guarda la traza completa.
+            log.error("Comanda SIN IMPRIMIR en [{}] {}", tipoImpresora, nombreImpresora, e);
         }
     }
 
@@ -217,7 +220,7 @@ public class ImpresoraService {
         try {
             OutputStream salida = abrirConexion(impNombre, impIp, impPuerto);
             if (salida == null) {
-                System.err.println("🖨️❌ No se encontró la impresora del talón: " + impNombre);
+                log.error("Talón SIN IMPRIMIR: no se encontró la impresora {}", impNombre);
                 return;
             }
 
@@ -253,10 +256,9 @@ public class ImpresoraService {
             escpos.cut(EscPos.CutMode.FULL);
             escpos.close();
 
-            System.out.println("🖨️✅ Talón impreso en: " + impNombre + " (Comanda #" + numeroComanda + ")");
+            log.info("Talón impreso en {} (comanda #{})", impNombre, numeroComanda);
         } catch (Exception e) {
-            System.err.println("🖨️❌ Error al imprimir talón: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Talón SIN IMPRIMIR en {} (comanda #{})", impNombre, numeroComanda, e);
         }
     }
 
@@ -283,7 +285,7 @@ public class ImpresoraService {
         try {
             OutputStream salida = abrirConexion(nombre, ip, puerto);
             if (salida == null) {
-                System.err.println("🖨️❌ No se encontró la impresora de cliente: " + nombre);
+                log.error("Ticket de cliente SIN IMPRIMIR: no se encontró la impresora {}", nombre);
                 return;
             }
 
@@ -296,11 +298,10 @@ public class ImpresoraService {
             escpos.cut(EscPos.CutMode.FULL);
             escpos.close();
 
-            System.out.println("🖨️✅ Ticket de cliente impreso en: " + nombre + " (Orden #" + ticket.id_orden() + ")");
+            log.info("Ticket de cliente impreso en {} (orden #{})", nombre, ticket.id_orden());
 
         } catch (Exception e) {
-            System.err.println("🖨️❌ Error al imprimir ticket de cliente: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Ticket de cliente SIN IMPRIMIR en {} (orden #{})", nombre, ticket.id_orden(), e);
         }
     }
 
