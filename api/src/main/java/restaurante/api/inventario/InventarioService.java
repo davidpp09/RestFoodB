@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import restaurante.api.infra.errores.RecursoNoEncontradoException;
 import restaurante.api.infra.errores.ValidacionException;
+import restaurante.api.infra.validacion.RangoFechas;
 import restaurante.api.usuario.Usuario;
 
 import java.time.Clock;
@@ -136,6 +137,7 @@ public class InventarioService {
      * de puros ceros no dice nada y estorba para leer los que sí importan.
      */
     public List<DatosTeoricoReal> teoricoContraReal(LocalDate desde, LocalDate hasta) {
+        RangoFechas.validar(desde, hasta);
         var movimientos = movimientoRepository.entre(desde.atStartOfDay(), hasta.atTime(LocalTime.MAX));
 
         Map<Long, List<MovimientoInventario>> porInsumo = movimientos.stream()
