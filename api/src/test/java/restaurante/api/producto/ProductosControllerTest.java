@@ -77,11 +77,13 @@ class ProductosControllerTest {
         when(repository.findById(1L)).thenReturn(Optional.of(producto));
         when(repository.countActivosPorCategoria(7L)).thenReturn(5L);
 
-        var respuesta = controller.actualizarDia(1L, new DatosActualizacionDia(null, true));
+        // Lanza ValidacionException, que TratadorDeErrores convierte en 400 con
+        // {"mensaje": ...}. El 400 por HTTP lo cubre ErroresUniformesTest.topeDeActivos.
+        var error = org.junit.jupiter.api.Assertions.assertThrows(ValidacionException.class,
+                () -> controller.actualizarDia(1L, new DatosActualizacionDia(null, true)));
 
-        assertEquals(400, respuesta.getStatusCode().value());
         assertFalse(producto.getDisponibilidad(), "No debió activarse con el cupo lleno");
-        assertTrue(respuesta.getBody().toString().contains("5"),
+        assertTrue(error.getMessage().contains("5"),
                 "El mensaje debe decir cuál es el tope");
     }
 

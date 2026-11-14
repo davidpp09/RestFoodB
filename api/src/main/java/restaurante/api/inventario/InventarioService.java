@@ -2,9 +2,14 @@ package restaurante.api.inventario;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import restaurante.api.infra.errores.RecursoNoEncontradoException;
 import restaurante.api.infra.errores.ValidacionException;
+import restaurante.api.infra.paginacion.Pagina;
+import restaurante.api.infra.validacion.RangoFechas;
 import restaurante.api.usuario.Usuario;
 
 import java.time.Clock;
@@ -125,6 +130,39 @@ public class InventarioService {
     }
 
     /**
+     * Campos por los que se permite ordenar el kardex paginado (lista blanca).
+     *
+     * Sin esto el cliente podría pedir `sort=usuario.contrasena` o cualquier
+     * columna sin índice, y la base tendría que ordenar el historial completo.
+     * Solo se aceptan los que atiende el índice (id_insumo, fecha).
+     */
+    static final java.util.Set<String> ORDEN_PERMITIDO = java.util.Set.of("fecha", "id_movimiento");
+
+    /** Lo más nuevo primero; el id desempata dos movimientos del mismo instante. */
+    static final Sort ORDEN_POR_DEFECTO = Sort.by(Sort.Order.desc("fecha"), Sort.Order.desc("id_movimiento"));
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public Pagina<DatosRespuestaMovimiento> kardexPaginado(Long idInsumo, Pageable pagina) {
+        if (!insumoRepository.existsById(idInsumo)) {
+            throw new RecursoNoEncontradoException("No existe el insumo " + idInsumo);
+        }
+        for (Sort.Order orden : pagina.getSort()) {
+            if (!ORDEN_PERMITIDO.contains(orden.getProperty())) {
+                throw new ValidacionException("No se puede ordenar el kardex por '" + orden.getProperty()
+                        + "'. Campos permitidos: fecha, id_movimiento");
+            }
+        }
+        // Siempre se agrega el id como último criterio: sin un desempate único,
+        // dos movimientos con la misma fecha podrían salir en las dos páginas o
+        // en ninguna al pasar de una a otra.
+        Sort orden = pagina.getSort().isSorted()
+                ? pagina.getSort().and(Sort.by(Sort.Order.desc("id_movimiento")))
+                : ORDEN_POR_DEFECTO;
+        Pageable conOrden = PageRequest.of(pagina.getPageNumber(), pagina.getPageSize(), orden);
+        return Pagina.de(movimientoRepository.kardexPaginado(idInsumo, conOrden), DatosRespuestaMovimiento::new);
+    }
+
+    /**
      * Teórico contra real (Fase 2). Agrupa los movimientos del periodo por
      * insumo y tipo, y saca de ahí la varianza que dejaron los conteos físicos.
      *
@@ -136,6 +174,7 @@ public class InventarioService {
      * de puros ceros no dice nada y estorba para leer los que sí importan.
      */
     public List<DatosTeoricoReal> teoricoContraReal(LocalDate desde, LocalDate hasta) {
+        RangoFechas.validar(desde, hasta);
         var movimientos = movimientoRepository.entre(desde.atStartOfDay(), hasta.atTime(LocalTime.MAX));
 
         Map<Long, List<MovimientoInventario>> porInsumo = movimientos.stream()
