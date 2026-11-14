@@ -65,6 +65,23 @@ class ProductosControllerTest {
         return new Producto(datos, categoria);
     }
 
+    @Test
+    void actualizarDia_AlCambiarPrecio_ActualizaComidaYDesayuno() {
+        var producto = productoApagadoEn(categoriaDelDia());
+        when(repository.findById(1L)).thenReturn(Optional.of(producto));
+        var precioNuevo = new BigDecimal("115.50");
+
+        var respuesta = controller.actualizarDia(1L, new DatosActualizacionDia(precioNuevo, null));
+
+        assertEquals(200, respuesta.getStatusCode().value());
+        assertEquals(precioNuevo, producto.getPrecio_comida());
+        assertEquals(precioNuevo, producto.getPrecio_desayuno(),
+                "El platillo del día debe cobrar el precio nuevo también en DESAYUNO");
+        assertFalse(producto.getDisponibilidad(), "Cambiar el precio no debe activar el platillo");
+        assertEquals(precioNuevo, respuesta.getBody().precioComida());
+        assertEquals(precioNuevo, respuesta.getBody().precioDesayuno());
+    }
+
     // 🧪 TEST 3: el menú del día tope en 5 (su recuadro del PDF tiene 5 renglones)
     @Test
     void actualizarDia_ConElCupoLleno_RechazaYNoActiva() {
