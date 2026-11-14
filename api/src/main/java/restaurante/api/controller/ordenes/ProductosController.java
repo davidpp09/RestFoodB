@@ -165,8 +165,10 @@ public class ProductosController {
     @PatchMapping("/{id}/dia")
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'DEV', 'REPARTIDOR')")
-    public ResponseEntity<?> actualizarDia(@PathVariable Long id, @RequestBody DatosActualizacionDia datos) {
-        Producto producto = repository.findById(id).orElseThrow();
+    public ResponseEntity<DatosRespuestaProducto> actualizarDia(@PathVariable Long id,
+                                                                @RequestBody @Valid DatosActualizacionDia datos) {
+        Producto producto = repository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("No existe el platillo " + id));
         if (Boolean.TRUE.equals(datos.disponibilidad()) && !producto.getDisponibilidad()) {
             Categoria categoria = producto.getCategoria();
             // El tope vive en la base (columna max_activos), no clavado aquí: el menú
@@ -176,8 +178,9 @@ public class ProductosController {
                     : Categoria.TOPE_POR_DEFECTO;
             long activos = repository.countActivosPorCategoria(categoria.getId_categorias());
             if (activos >= tope) {
-                return ResponseEntity.badRequest()
-                        .body("Máximo " + tope + " platillos activos en " + categoria.getNombre());
+                // Excepción y no un String suelto en el cuerpo: así llega como
+                // {"mensaje": ...}, la forma que el frontend sabe leer.
+                throw new ValidacionException("Máximo " + tope + " platillos activos en " + categoria.getNombre());
             }
         }
         producto.actualizarDia(datos);

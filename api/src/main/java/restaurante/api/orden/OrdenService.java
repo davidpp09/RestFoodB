@@ -1,5 +1,7 @@
 package restaurante.api.orden;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,7 @@ import restaurante.api.admin.DatosProductoCancelado;
 import restaurante.api.admin.DatosVentaEmpleado;
 import restaurante.api.infra.errores.ValidacionException;
 import restaurante.api.infra.errores.RecursoNoEncontradoException;
+import restaurante.api.infra.validacion.RangoFechas;
 import restaurante.api.mesa.Estado;
 import restaurante.api.mesa.MesaRepository;
 import restaurante.api.ordenDetalle.*;
@@ -30,7 +33,9 @@ import java.util.Comparator;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,6 +43,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class OrdenService {
+
+    private static final Logger log = LoggerFactory.getLogger(OrdenService.class);
 
     @Autowired
     OrdenRepository ordenRepository;
@@ -110,12 +117,12 @@ public class OrdenService {
                     ordenGuardada.getFecha_apertura()
             );
             messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
-            System.out.println("✅ [WS /topic/mesas] Mesa abierta: " + avisoMesa);
+            log.info("[WS /topic/mesas] Mesa abierta: {}", avisoMesa);
             return new DatosApertura(ordenGuardada.getId_ordenes(), numeroComanda);
         } else {
             // REPARTIDOR u otros roles sin mesa
             Orden ordenGuardada = ordenRepository.save(new Orden(null, usuario, datos.tipo(), datos.servicio(), numeroComanda));
-            System.out.println("✅ Orden sin mesa creada, id: " + ordenGuardada.getId_ordenes() + " comanda #" + numeroComanda);
+            log.info("Orden sin mesa creada: id {}, comanda #{}", ordenGuardada.getId_ordenes(), numeroComanda);
             return new DatosApertura(ordenGuardada.getId_ordenes(), numeroComanda);
         }
     }
@@ -258,7 +265,7 @@ public class OrdenService {
         updateAdmin.put("platillos", platillosMapeados);
         messagingTemplate.convertAndSend("/topic/mesas", updateAdmin);
         
-        System.out.println("✅ [WS /topic/cocina] Ticket enviado orden #" + orden.getId_ordenes() + " con " + ticketCocina.size() + " platillos");
+        log.info("[WS /topic/cocina] Ticket enviado: orden #{} con {} platillo(s)", orden.getId_ordenes(), ticketCocina.size());
 
         // Enviar impresión física
         impresoraService.imprimirComandaCocina(ticketFinal);
@@ -329,12 +336,12 @@ public class OrdenService {
         if (orden.getMesa() != null) {
             DatosMesaAbierta avisoMesa = new DatosMesaAbierta(orden.getMesa().getId_mesas(), orden.getMesa().getEstado(), "", null, null, null);
             messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
-            System.out.println("✅ [WS /topic/mesas] Mesa liberada: " + orden.getMesa().getId_mesas());
+            log.info("[WS /topic/mesas] Mesa liberada: {}", orden.getMesa().getId_mesas());
         }
         messagingTemplate.convertAndSend("/topic/tickets", ticket);
-        System.out.println("🖨️ [WS /topic/tickets] Ticket enviado para impresión: Orden #" + orden.getId_ordenes());
+        log.info("[WS /topic/tickets] Ticket enviado para impresión: orden #{}", orden.getId_ordenes());
         messagingTemplate.convertAndSend("/topic/cocina", Map.of("accion", "CERRADA", "id_orden", orden.getId_ordenes()));
-        System.out.println("🍳 [WS /topic/cocina] Orden cerrada: #" + orden.getId_ordenes());
+        log.info("[WS /topic/cocina] Orden cerrada: #{}", orden.getId_ordenes());
 
         // --- Efecto secundario (impresora, fuera del camino crítico) ---
         impresoraService.imprimirTicketCliente(ticket);
@@ -365,7 +372,7 @@ public class OrdenService {
         if (orden.getMesa() != null) {
             DatosMesaAbierta avisoMesa = new DatosMesaAbierta(orden.getMesa().getId_mesas(), orden.getMesa().getEstado(), "", null, null, null);
             messagingTemplate.convertAndSend("/topic/mesas", avisoMesa);
-            System.out.println("✅ [WS /topic/mesas] Mesa cancelada y liberada: " + orden.getMesa().getId_mesas());
+            log.info("[WS /topic/mesas] Mesa cancelada y liberada: {}", orden.getMesa().getId_mesas());
         }
     }
 
@@ -403,7 +410,7 @@ public class OrdenService {
         );
 
         messagingTemplate.convertAndSend("/topic/cocina", ticketFinal);
-        System.out.println("🔄 [WS /topic/cocina] Reenvío a cocina Orden #" + idOrden);
+        log.info("[WS /topic/cocina] Reenvío a cocina: orden #{}", idOrden);
 
         impresoraService.imprimirComandaCocina(ticketFinal);
     }
@@ -434,7 +441,7 @@ public class OrdenService {
 
         // Re-enviar por WebSocket al frontend que esté escuchando /topic/tickets
         messagingTemplate.convertAndSend("/topic/tickets", ticket);
-        System.out.println("🖨️ [WS /topic/tickets] Reimpresión ticket Orden #" + idOrden);
+        log.info("[WS /topic/tickets] Reimpresión de ticket: orden #{}", idOrden);
 
         // Imprimir físicamente
         impresoraService.imprimirTicketCliente(ticket);
@@ -467,10 +474,10 @@ public class OrdenService {
                 ? ordenRepository.findEntregasDelDia(Tipo.LLEVAR, inicio, fin)
                 : ordenRepository.findEntregasDelDiaByUsuario(Tipo.LLEVAR, autenticado.getId_usuarios(), inicio, fin);
 
+        var detalles = detallesPorOrden(entregas.stream().map(Orden::getId_ordenes).toList());
         return entregas.stream()
                 .map(orden -> {
-                    var platillos = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes())
-                            .stream().map(DatosDetalleRespuesta::new).toList();
+                    var platillos = detalles.getOrDefault(orden.getId_ordenes(), List.of());
                     return new DatosEntregaHoy(
                             orden.getId_ordenes(),
                             orden.getNumero_comanda(),
@@ -491,9 +498,7 @@ public class OrdenService {
         LocalDateTime fin    = fecha.atTime(LocalTime.MAX);
 
         var canceladosPorOrden = cancelacionesDelDia(inicio, fin);
-        return ordenRepository.findOrdenesDelDia(inicio, fin).stream()
-                .map(orden -> aComandaEmpleado(orden, canceladosPorOrden))
-                .toList();
+        return aComandasEmpleado(ordenRepository.findOrdenesDelDia(inicio, fin), canceladosPorOrden);
     }
 
     // Mis comandas del día: las del empleado autenticado (mesero/repartidor ve solo
@@ -505,9 +510,8 @@ public class OrdenService {
         LocalDateTime fin    = LocalDate.now().atTime(LocalTime.MAX);
 
         var canceladosPorOrden = cancelacionesDelDia(inicio, fin);
-        return ordenRepository.findMisOrdenesDelDia(autenticado.getId_usuarios(), inicio, fin).stream()
-                .map(orden -> aComandaEmpleado(orden, canceladosPorOrden))
-                .toList();
+        return aComandasEmpleado(
+                ordenRepository.findMisOrdenesDelDia(autenticado.getId_usuarios(), inicio, fin), canceladosPorOrden);
     }
 
     // Cancelaciones de platillo del día, agrupadas por orden, para mostrar dentro de
@@ -527,10 +531,18 @@ public class OrdenService {
                         ), Collectors.toList())));
     }
 
+    private List<DatosComandaEmpleado> aComandasEmpleado(List<Orden> ordenes,
+                                                         Map<Long, List<DatosPlatilloCancelado>> canceladosPorOrden) {
+        var detalles = detallesPorOrden(ordenes.stream().map(Orden::getId_ordenes).toList());
+        return ordenes.stream()
+                .map(orden -> aComandaEmpleado(orden,
+                        detalles.getOrDefault(orden.getId_ordenes(), List.of()), canceladosPorOrden))
+                .toList();
+    }
+
     private DatosComandaEmpleado aComandaEmpleado(Orden orden,
+                                                  List<DatosDetalleRespuesta> platillos,
                                                   Map<Long, List<DatosPlatilloCancelado>> canceladosPorOrden) {
-        var platillos = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes())
-                .stream().map(DatosDetalleRespuesta::new).toList();
         return new DatosComandaEmpleado(
                 orden.getId_ordenes(),
                 orden.getNumero_comanda(),
@@ -549,13 +561,32 @@ public class OrdenService {
         );
     }
 
+    /**
+     * Los platillos de varias órdenes, agrupados por id de orden, en UNA consulta.
+     *
+     * Es la pieza que quita el N+1 de las pantallas que listan órdenes: en vez
+     * de ir a la base una vez por orden dentro del ciclo, se piden todos los
+     * platillos juntos y luego cada orden toma los suyos del mapa. Las consultas
+     * quedan fijas sin importar si hay 5 órdenes o 500.
+     *
+     * Una orden sin platillos no aparece en el mapa: usar getOrDefault(id, List.of()).
+     */
+    public Map<Long, List<DatosDetalleRespuesta>> detallesPorOrden(Collection<Long> idsOrden) {
+        if (idsOrden.isEmpty()) {
+            return Map.of();
+        }
+        return ordenDetalleRepository.findAllByOrdenIdIn(idsOrden).stream()
+                .map(DatosDetalleRespuesta::new)
+                .collect(Collectors.groupingBy(DatosDetalleRespuesta::id_orden,
+                        LinkedHashMap::new, Collectors.toList()));
+    }
+
     @Transactional(readOnly = true)
     public List<DatosRespuestaOrden> listarOrdenesCocina() {
-        return ordenRepository.findByEstatus(Estatus.PREPARANDO).stream().map(orden -> {
-            var platillos = ordenDetalleRepository.findAllByOrdenId(orden.getId_ordenes());
-            List<DatosDetalleRespuesta> platillosMapeados = platillos.stream()
-                    .map(DatosDetalleRespuesta::new)
-                    .toList();
+        var pendientes = ordenRepository.findByEstatus(Estatus.PREPARANDO);
+        var detalles = detallesPorOrden(pendientes.stream().map(Orden::getId_ordenes).toList());
+        return pendientes.stream().map(orden -> {
+            var platillosMapeados = detalles.getOrDefault(orden.getId_ordenes(), List.of());
             return new DatosRespuestaOrden(orden.getId_ordenes(), orden.getNumero_comanda(), orden.getTotal(), platillosMapeados, orden.getTipo().toString(), orden.getMesa() != null ? orden.getMesa().getId_mesas() : null, orden.getServicio().toString());
         }).toList();
     }
@@ -622,6 +653,7 @@ public class OrdenService {
 
     @Transactional(readOnly = true)
     public List<DatosCancelacionMesero> cancelacionesPorMesero(LocalDate desde, LocalDate hasta) {
+        RangoFechas.validar(desde, hasta);
         LocalDateTime inicio = desde.atStartOfDay();
         LocalDateTime fin    = hasta.atTime(LocalTime.MAX);
 

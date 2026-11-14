@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import restaurante.api.mesa.Mesa;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,12 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
     @Query("SELECT o FROM orden o WHERE o.mesa.id_mesas = :id_mesa AND o.estatus = 'PREPARANDO'")
     Optional<Orden> findActivaByMesa(Long id_mesa);
 
+    // La cuenta abierta de varias mesas a la vez, para la sala y la tablet de la
+    // mesera. Mismo criterio que findActivaByMesa, pero una consulta en vez de
+    // una por mesa. Trae al usuario porque la pantalla muestra su nombre.
+    @Query("SELECT o FROM orden o JOIN FETCH o.usuario WHERE o.mesa.id_mesas IN :idsMesa AND o.estatus = restaurante.api.orden.Estatus.PREPARANDO")
+    List<Orden> findActivasDeMesas(@Param("idsMesa") Collection<Long> idsMesa);
+
     List<Orden> findByEstatus(Estatus estatus);
 
     // Mesas donde este empleado tiene una cuenta abierta (aunque la mesa ya se
@@ -45,15 +52,18 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
                                    @Param("inicio") LocalDateTime inicio,
                                    @Param("fin") LocalDateTime fin);
 
-    // Las CANCELADAS no cuentan como entregas del día
-    @Query("SELECT o FROM orden o WHERE o.tipo = :tipo AND o.fecha_apertura BETWEEN :inicio AND :fin AND o.estatus <> restaurante.api.orden.Estatus.CANCELADA")
+    // Las CANCELADAS no cuentan como entregas del día.
+    // JOIN FETCH del usuario en esta y las siguientes consultas del día: las
+    // pantallas muestran el nombre de quien atendió, y sin el fetch Hibernate lo
+    // iría a buscar aparte (otra forma del N+1).
+    @Query("SELECT o FROM orden o JOIN FETCH o.usuario WHERE o.tipo = :tipo AND o.fecha_apertura BETWEEN :inicio AND :fin AND o.estatus <> restaurante.api.orden.Estatus.CANCELADA")
     List<Orden> findEntregasDelDia(@Param("tipo") Tipo tipo,
                                    @Param("inicio") LocalDateTime inicio,
                                    @Param("fin") LocalDateTime fin);
 
     // Entregas del día de UN repartidor: su historial no debe incluir las de otros
     // (además el numero_comanda es por usuario, así que mezclarlos duplica números).
-    @Query("SELECT o FROM orden o WHERE o.tipo = :tipo AND o.usuario.id_usuarios = :idUsuario AND o.fecha_apertura BETWEEN :inicio AND :fin AND o.estatus <> restaurante.api.orden.Estatus.CANCELADA")
+    @Query("SELECT o FROM orden o JOIN FETCH o.usuario WHERE o.tipo = :tipo AND o.usuario.id_usuarios = :idUsuario AND o.fecha_apertura BETWEEN :inicio AND :fin AND o.estatus <> restaurante.api.orden.Estatus.CANCELADA")
     List<Orden> findEntregasDelDiaByUsuario(@Param("tipo") Tipo tipo,
                                             @Param("idUsuario") Long idUsuario,
                                             @Param("inicio") LocalDateTime inicio,
@@ -62,13 +72,15 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
     // Todas las órdenes del día (loza y para llevar) ordenadas por empleado y luego
     // por número de comanda, para el panel de admin "Comandas por empleado".
     // Las CANCELADAS no se listan (ya tienen su propio reporte de cancelaciones).
-    @Query("SELECT o FROM orden o WHERE o.fecha_apertura BETWEEN :inicio AND :fin AND o.estatus <> restaurante.api.orden.Estatus.CANCELADA ORDER BY o.usuario.nombre ASC, o.numero_comanda ASC")
+    // LEFT JOIN FETCH de la mesa: las de llevar no tienen, y un JOIN normal las
+    // dejaría fuera.
+    @Query("SELECT o FROM orden o JOIN FETCH o.usuario u LEFT JOIN FETCH o.mesa WHERE o.fecha_apertura BETWEEN :inicio AND :fin AND o.estatus <> restaurante.api.orden.Estatus.CANCELADA ORDER BY u.nombre ASC, o.numero_comanda ASC")
     List<Orden> findOrdenesDelDia(@Param("inicio") LocalDateTime inicio,
                                   @Param("fin") LocalDateTime fin);
 
     // Mis comandas del día: las órdenes (loza y llevar) de UN empleado, para que el
     // mesero/repartidor vea y reimprima solo las suyas. Excluye canceladas.
-    @Query("SELECT o FROM orden o WHERE o.usuario.id_usuarios = :idUsuario AND o.fecha_apertura BETWEEN :inicio AND :fin AND o.estatus <> restaurante.api.orden.Estatus.CANCELADA ORDER BY o.numero_comanda ASC")
+    @Query("SELECT o FROM orden o JOIN FETCH o.usuario LEFT JOIN FETCH o.mesa WHERE o.usuario.id_usuarios = :idUsuario AND o.fecha_apertura BETWEEN :inicio AND :fin AND o.estatus <> restaurante.api.orden.Estatus.CANCELADA ORDER BY o.numero_comanda ASC")
     List<Orden> findMisOrdenesDelDia(@Param("idUsuario") Long idUsuario,
                                      @Param("inicio") LocalDateTime inicio,
                                      @Param("fin") LocalDateTime fin);
