@@ -10,6 +10,11 @@ import java.util.Optional;
 
 public interface ProductoRepository extends JpaRepository<Producto,Long> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from producto p where p.id_productos = :id")
+    Optional<Producto> buscarParaEditar(Long id);
+
+
     @Query("SELECT p FROM producto p JOIN FETCH p.categoria WHERE p.eliminado = false")
     List<Producto> findAllWithCategoria();
 
@@ -17,6 +22,10 @@ public interface ProductoRepository extends JpaRepository<Producto,Long> {
     long countActivosPorCategoria(@Param("categoriaId") Long categoriaId);
 
     Optional<Producto> findByNombre(String nombre);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from producto p where p.nombre = :nombre")
+    Optional<Producto> buscarPorNombreParaEditar(String nombre);
 
     /**
      * Los platillos que hoy forman el menú del día, ya ordenados como salen en el

@@ -7,10 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.util.UriComponentsBuilder;
 import restaurante.api.categoria.Categoria;
 import restaurante.api.categoria.CategoriaRepository;
-import restaurante.api.controller.ordenes.ProductosController;
 import restaurante.api.infra.errores.ValidacionException;
 import restaurante.api.ordenDetalle.OrdenDetalleRepository;
 
@@ -27,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ProductosControllerTest {
+class ProductoServiceTest {
 
     @Mock
     private ProductoRepository repository;
@@ -36,8 +34,13 @@ class ProductosControllerTest {
     @Mock
     private OrdenDetalleRepository ordenDetalleRepository;
 
+    @Mock private restaurante.api.precio.HistorialPrecioService historial;
+    @Mock private restaurante.api.precio.HistorialPrecioRepository historialRepository;
+    @Mock private restaurante.api.precio.GrupoPrecioRepository grupos;
+    @Mock private restaurante.api.precio.VinculosMenuService vinculos;
+
     @InjectMocks
-    private ProductosController controller;
+    private ProductoService service;
 
     private Producto productoDePrueba() {
         var datos = new DatosRegistroProducto("Enchiladas", new BigDecimal("80"), new BigDecimal("70"), true, 1L);
@@ -48,12 +51,11 @@ class ProductosControllerTest {
     @Test
     void eliminar_ProductoSinVentas_BorraFisicamente() {
         var producto = productoDePrueba();
-        when(repository.findById(1L)).thenReturn(Optional.of(producto));
+        when(repository.buscarParaEditar(1L)).thenReturn(Optional.of(producto));
         when(ordenDetalleRepository.existePorProducto(1L)).thenReturn(false);
 
-        var respuesta = controller.eliminar(1L);
+        service.eliminar(1L);
 
-        assertEquals(204, respuesta.getStatusCode().value());
         verify(repository).delete(producto);
     }
 
@@ -68,18 +70,17 @@ class ProductosControllerTest {
     @Test
     void actualizarDia_AlCambiarPrecio_ActualizaComidaYDesayuno() {
         var producto = productoApagadoEn(categoriaDelDia());
-        when(repository.findById(1L)).thenReturn(Optional.of(producto));
+        when(repository.buscarParaEditar(1L)).thenReturn(Optional.of(producto));
         var precioNuevo = new BigDecimal("115.50");
 
-        var respuesta = controller.actualizarDia(1L, new DatosActualizacionDia(precioNuevo, null));
+        var respuesta = service.actualizarDia(1L, new DatosActualizacionDia(precioNuevo, null), null);
 
-        assertEquals(200, respuesta.getStatusCode().value());
         assertEquals(precioNuevo, producto.getPrecio_comida());
         assertEquals(precioNuevo, producto.getPrecio_desayuno(),
                 "El platillo del día debe cobrar el precio nuevo también en DESAYUNO");
         assertFalse(producto.getDisponibilidad(), "Cambiar el precio no debe activar el platillo");
-        assertEquals(precioNuevo, respuesta.getBody().precioComida());
-        assertEquals(precioNuevo, respuesta.getBody().precioDesayuno());
+        assertEquals(precioNuevo, respuesta.precioComida());
+        assertEquals(precioNuevo, respuesta.precioDesayuno());
     }
 
     // 🧪 TEST 3: el menú del día tope en 5 (su recuadro del PDF tiene 5 renglones)
@@ -91,13 +92,13 @@ class ProductosControllerTest {
         when(categoria.getNombre()).thenReturn("Comida del dia");
 
         var producto = productoApagadoEn(categoria);
-        when(repository.findById(1L)).thenReturn(Optional.of(producto));
+        when(repository.buscarParaEditar(1L)).thenReturn(Optional.of(producto));
         when(repository.countActivosPorCategoria(7L)).thenReturn(5L);
 
         // Lanza ValidacionException, que TratadorDeErrores convierte en 400 con
         // {"mensaje": ...}. El 400 por HTTP lo cubre ErroresUniformesTest.topeDeActivos.
         var error = org.junit.jupiter.api.Assertions.assertThrows(ValidacionException.class,
-                () -> controller.actualizarDia(1L, new DatosActualizacionDia(null, true)));
+                () -> service.actualizarDia(1L, new DatosActualizacionDia(null, true), null));
 
         assertFalse(producto.getDisponibilidad(), "No debió activarse con el cupo lleno");
         assertTrue(error.getMessage().contains("5"),
@@ -112,12 +113,11 @@ class ProductosControllerTest {
         when(categoria.getId_categorias()).thenReturn(7L);
 
         var producto = productoApagadoEn(categoria);
-        when(repository.findById(1L)).thenReturn(Optional.of(producto));
+        when(repository.buscarParaEditar(1L)).thenReturn(Optional.of(producto));
         when(repository.countActivosPorCategoria(7L)).thenReturn(4L);
 
-        var respuesta = controller.actualizarDia(1L, new DatosActualizacionDia(null, true));
+        service.actualizarDia(1L, new DatosActualizacionDia(null, true), null);
 
-        assertEquals(200, respuesta.getStatusCode().value());
         assertTrue(producto.getDisponibilidad());
     }
 
@@ -129,13 +129,11 @@ class ProductosControllerTest {
         when(categoria.getId_categorias()).thenReturn(1L);
 
         var producto = productoApagadoEn(categoria);
-        when(repository.findById(1L)).thenReturn(Optional.of(producto));
+        when(repository.buscarParaEditar(1L)).thenReturn(Optional.of(producto));
         when(repository.countActivosPorCategoria(1L)).thenReturn(6L);
 
-        var respuesta = controller.actualizarDia(1L, new DatosActualizacionDia(null, true));
+        service.actualizarDia(1L, new DatosActualizacionDia(null, true), null);
 
-        assertEquals(200, respuesta.getStatusCode().value(),
-                "Con 6 activos y tope 7 todavía cabe uno más");
         assertTrue(producto.getDisponibilidad());
     }
 
@@ -153,13 +151,13 @@ class ProductosControllerTest {
     void registrarDelDia_CreaEnLaCategoriaDelDiaYApagado() {
         var categoria = categoriaDelDia();
         when(categoriaRepository.findCategoriaDelDia()).thenReturn(Optional.of(categoria));
-        when(repository.findByNombre("Pollo en pipián")).thenReturn(Optional.empty());
+        when(repository.buscarPorNombreParaEditar("Pollo en pipián")).thenReturn(Optional.empty());
         when(repository.save(any(Producto.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var datos = new DatosNuevoPlatilloDia("Pollo en pipián", new BigDecimal("105"));
-        var respuesta = controller.registrarDelDia(datos, UriComponentsBuilder.newInstance());
+        var respuesta = service.registrarDelDia(datos, null);
 
-        assertEquals(201, respuesta.getStatusCode().value());
+        assertTrue(respuesta.creado());
 
         var guardado = ArgumentCaptor.forClass(Producto.class);
         verify(repository).save(guardado.capture());
@@ -178,12 +176,13 @@ class ProductosControllerTest {
         var yaExiste = new Producto(
                 new DatosRegistroProducto("Pollo en pipián", new BigDecimal("105"),
                         new BigDecimal("105"), true, 7L), categoria);
-        when(repository.findByNombre("Pollo en pipián")).thenReturn(Optional.of(yaExiste));
+        when(repository.buscarPorNombreParaEditar("Pollo en pipián")).thenReturn(Optional.of(yaExiste));
+        when(repository.buscarParaEditar(null)).thenReturn(Optional.of(yaExiste));
 
         var datos = new DatosNuevoPlatilloDia("Pollo en pipián", new BigDecimal("110"));
 
         assertThrows(ValidacionException.class,
-                () -> controller.registrarDelDia(datos, UriComponentsBuilder.newInstance()));
+                () -> service.registrarDelDia(datos, null));
         verify(repository, never()).save(any(Producto.class));
     }
 
@@ -196,12 +195,13 @@ class ProductosControllerTest {
                 new DatosRegistroProducto("Pollo en pipián", new BigDecimal("105"),
                         new BigDecimal("105"), true, 7L), categoria);
         archivado.marcarEliminado();
-        when(repository.findByNombre("Pollo en pipián")).thenReturn(Optional.of(archivado));
+        when(repository.buscarPorNombreParaEditar("Pollo en pipián")).thenReturn(Optional.of(archivado));
+        when(repository.buscarParaEditar(null)).thenReturn(Optional.of(archivado));
 
         var datos = new DatosNuevoPlatilloDia("Pollo en pipián", new BigDecimal("120"));
-        var respuesta = controller.registrarDelDia(datos, UriComponentsBuilder.newInstance());
+        var respuesta = service.registrarDelDia(datos, null);
 
-        assertEquals(200, respuesta.getStatusCode().value());
+        assertFalse(respuesta.creado());
         assertFalse(archivado.getEliminado(), "Debió revivir el registro archivado");
         assertEquals(new BigDecimal("120"), archivado.getPrecio_comida());
         verify(repository, never()).save(any(Producto.class));
@@ -213,12 +213,11 @@ class ProductosControllerTest {
     void registrarDelDia_RecortaEspaciosDelNombre() {
         var categoria = categoriaDelDia();
         when(categoriaRepository.findCategoriaDelDia()).thenReturn(Optional.of(categoria));
-        when(repository.findByNombre("Pollo en pipián")).thenReturn(Optional.empty());
+        when(repository.buscarPorNombreParaEditar("Pollo en pipián")).thenReturn(Optional.empty());
         when(repository.save(any(Producto.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        controller.registrarDelDia(
-                new DatosNuevoPlatilloDia("  Pollo en pipián  ", new BigDecimal("105")),
-                UriComponentsBuilder.newInstance());
+        service.registrarDelDia(
+                new DatosNuevoPlatilloDia("  Pollo en pipián  ", new BigDecimal("105")), null);
 
         var guardado = ArgumentCaptor.forClass(Producto.class);
         verify(repository).save(guardado.capture());
@@ -239,10 +238,10 @@ class ProductosControllerTest {
         // significa stubbear un mock mientras se stubbea otro, y Mockito lo
         // rechaza con un error que no se parece en nada a la causa.
         var categoriaDia = categoriaDelDia();
-        when(repository.findById(1L)).thenReturn(Optional.of(producto));
+        when(repository.buscarParaEditar(1L)).thenReturn(Optional.of(producto));
         when(categoriaRepository.findCategoriaDelDia()).thenReturn(Optional.of(categoriaDia));
 
-        assertThrows(ValidacionException.class, () -> controller.archivarDelDia(1L));
+        assertThrows(ValidacionException.class, () -> service.archivarDelDia(1L));
         assertFalse(producto.getEliminado(), "No debió tocar un platillo de la carta");
     }
 
@@ -253,12 +252,11 @@ class ProductosControllerTest {
         var producto = new Producto(
                 new DatosRegistroProducto("Pollo en pipián", new BigDecimal("105"),
                         new BigDecimal("105"), true, 7L), categoria);
-        when(repository.findById(1L)).thenReturn(Optional.of(producto));
+        when(repository.buscarParaEditar(1L)).thenReturn(Optional.of(producto));
         when(categoriaRepository.findCategoriaDelDia()).thenReturn(Optional.of(categoria));
 
-        var respuesta = controller.archivarDelDia(1L);
+        service.archivarDelDia(1L);
 
-        assertEquals(204, respuesta.getStatusCode().value());
         assertTrue(producto.getEliminado());
         assertFalse(producto.getDisponibilidad());
         verify(repository, never()).delete(any(Producto.class));
@@ -268,12 +266,11 @@ class ProductosControllerTest {
     @Test
     void eliminar_ProductoConVentas_MarcaEliminado() {
         var producto = productoDePrueba();
-        when(repository.findById(1L)).thenReturn(Optional.of(producto));
+        when(repository.buscarParaEditar(1L)).thenReturn(Optional.of(producto));
         when(ordenDetalleRepository.existePorProducto(1L)).thenReturn(true);
 
-        var respuesta = controller.eliminar(1L);
+        service.eliminar(1L);
 
-        assertEquals(204, respuesta.getStatusCode().value());
         assertTrue(producto.getEliminado());
         assertFalse(producto.getDisponibilidad());
         verify(repository, never()).delete(producto);

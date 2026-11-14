@@ -14,6 +14,11 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import restaurante.api.precio.GrupoPrecioService;
+import restaurante.api.precio.DatosGrupoPrecio;
+import restaurante.api.infra.errores.ValidacionException;
 import restaurante.api.producto.Producto;
 
 import javax.imageio.ImageIO;
@@ -53,6 +58,33 @@ import java.util.Locale;
  */
 @Service
 public class MenuDiaService {
+    @Autowired private GrupoPrecioService gruposPrecio;
+    @Autowired private PreciosMenuPdf preciosPdf;
+
+    @Transactional(readOnly = true)
+    public byte[] generarCarta(List<Producto> platillos) throws IOException {
+        return generarCompleto(platillos, gruposPrecio.listar(), false);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] imagenCarta(List<Producto> platillos, int pagina, boolean editor) throws IOException {
+        if (pagina < 1 || pagina > 2) throw new ValidacionException("La página debe ser 1 o 2");
+        try (var documento = Loader.loadPDF(generarCompleto(platillos, gruposPrecio.listar(), editor))) {
+            var salida = new ByteArrayOutputStream();
+            ImageIO.write(new PDFRenderer(documento).renderImageWithDPI(pagina - 1, DPI_VISTA_PREVIA), "png", salida);
+            return salida.toByteArray();
+        }
+    }
+
+    private byte[] generarCompleto(List<Producto> platillos, List<DatosGrupoPrecio> grupos, boolean editor) throws IOException {
+        try (var documento = Loader.loadPDF(generar(platillos))) {
+            preciosPdf.aplicar(documento, grupos, editor);
+            var salida = new ByteArrayOutputStream();
+            documento.save(salida);
+            return salida.toByteArray();
+        }
+    }
+
 
     private static final String RUTA_PLANTILLA = "/menu/plantilla-menu.pdf";
 
